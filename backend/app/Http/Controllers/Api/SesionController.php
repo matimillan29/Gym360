@@ -9,6 +9,7 @@ use App\Models\SesionEjercicio;
 use App\Models\Ejercicio;
 use App\Models\RegistroSesion;
 use App\Models\RegistroEjercicio;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -89,6 +90,10 @@ class SesionController extends Controller
      */
     public function update(Request $request, Sesion $sesion)
     {
+        if (!$this->verificarOwnershipEntrenador($sesion)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $request->validate([
             'numero' => 'sometimes|required|integer|min:1',
             'fecha_programada' => 'nullable|date',
@@ -128,6 +133,10 @@ class SesionController extends Controller
      */
     public function destroy(Sesion $sesion)
     {
+        if (!$this->verificarOwnershipEntrenador($sesion)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $sesion->delete();
 
         return response()->json([
@@ -140,6 +149,10 @@ class SesionController extends Controller
      */
     public function agregarEjercicio(Request $request, Sesion $sesion)
     {
+        if (!$this->verificarOwnershipEntrenador($sesion)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $request->validate([
             'ejercicio_id' => 'required|exists:ejercicios,id',
             'orden' => 'required|integer|min:1',
@@ -182,6 +195,10 @@ class SesionController extends Controller
      */
     public function actualizarEjercicio(Request $request, Sesion $sesion, SesionEjercicio $ejercicio)
     {
+        if (!$this->verificarOwnershipEntrenador($sesion)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         if ($ejercicio->sesion_id !== $sesion->id) {
             return response()->json([
                 'message' => 'El ejercicio no pertenece a esta sesión.',
@@ -229,6 +246,10 @@ class SesionController extends Controller
      */
     public function eliminarEjercicio(Sesion $sesion, SesionEjercicio $ejercicio)
     {
+        if (!$this->verificarOwnershipEntrenador($sesion)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         if ($ejercicio->sesion_id !== $sesion->id) {
             return response()->json([
                 'message' => 'El ejercicio no pertenece a esta sesión.',
@@ -274,6 +295,39 @@ class SesionController extends Controller
     // ===========================================
     // Métodos para entrenados
     // ===========================================
+
+    /**
+     * Ver una sesión específica para el entrenado autenticado
+     */
+    public function showForEntrenado(Request $request, Sesion $sesion)
+    {
+        $user = $request->user();
+
+        if (!$this->sesionPerteneceAUsuario($sesion, $user)) {
+            return response()->json([
+                'message' => 'Esta sesión no te pertenece.',
+            ], 403);
+        }
+
+        $sesion->load([
+            'ejercicios' => function ($q) {
+                $q->orderBy('orden');
+            },
+            'ejercicios.ejercicio',
+        ]);
+
+        // Cargar registros del entrenado para esta sesión
+        $registroSesion = RegistroSesion::where('entrenado_id', $user->id)
+            ->where('sesion_id', $sesion->id)
+            ->with('registrosEjercicio')
+            ->latest('fecha')
+            ->first();
+
+        return response()->json([
+            'data' => $sesion,
+            'registro' => $registroSesion,
+        ]);
+    }
 
     /**
      * Ver sesión de hoy para el entrenado
@@ -397,7 +451,7 @@ class SesionController extends Controller
 
         if ($sesionExistente) {
             return response()->json([
-                'data' => $sesionExistente->load('registrosEjercicios'),
+                'data' => $sesionExistente->load('registrosEjercicio'),
                 'message' => 'Ya tenés esta sesión iniciada.',
             ]);
         }
@@ -459,6 +513,13 @@ class SesionController extends Controller
     public function registrarEjercicio(Request $request, Sesion $sesion, SesionEjercicio $ejercicio)
     {
         $user = $request->user();
+
+        // Verificar que el ejercicio pertenece a la sesión
+        if ($ejercicio->sesion_id !== $sesion->id) {
+            return response()->json([
+                'message' => 'El ejercicio no pertenece a esta sesión.',
+            ], 400);
+        }
 
         $request->validate([
             'series_realizadas' => 'required|array|min:1',
@@ -528,6 +589,20 @@ class SesionController extends Controller
             'feedback_general' => 'nullable|string',
         ]);
 
+        // Validar que todos los sesion_ejercicio_id pertenecen a la sesión
+        $sesionEjercicioIds = collect($request->ejercicios)->pluck('sesion_ejercicio_id');
+        $validIds = SesionEjercicio::where('sesion_id', $sesion->id)
+            ->whereIn('id', $sesionEjercicioIds)
+            ->pluck('id');
+
+        $invalidIds = $sesionEjercicioIds->diff($validIds);
+        if ($invalidIds->isNotEmpty()) {
+            return response()->json([
+                'message' => 'Algunos ejercicios no pertenecen a esta sesión.',
+                'invalid_ids' => $invalidIds->values(),
+            ], 400);
+        }
+
         return DB::transaction(function () use ($request, $sesion, $user) {
             // Crear o actualizar registro de sesión
             $registroSesion = RegistroSesion::updateOrCreate(
@@ -574,9 +649,58 @@ class SesionController extends Controller
      */
     private function sesionPerteneceAUsuario(Sesion $sesion, $user): bool
     {
-        return $sesion->microciclo
-            ->mesociclo
-            ->macrociclo
-            ->entrenado_id === $user->id;
+        $sesion->load('microciclo.mesociclo.macrociclo');
+
+        $microciclo = $sesion->microciclo;
+        if (!$microciclo) {
+            return false;
+        }
+
+        $mesociclo = $microciclo->mesociclo;
+        if (!$mesociclo) {
+            return false;
+        }
+
+        $macrociclo = $mesociclo->macrociclo;
+        if (!$macrociclo) {
+            return false;
+        }
+
+        return $macrociclo->entrenado_id === $user->id;
+    }
+
+    /**
+     * Verificar que el entrenador es dueño del entrenado vinculado a la sesión
+     */
+    private function verificarOwnershipEntrenador(Sesion $sesion): bool
+    {
+        $user = auth()->user();
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        $sesion->load('microciclo.mesociclo.macrociclo');
+
+        $microciclo = $sesion->microciclo;
+        if (!$microciclo) {
+            return false;
+        }
+
+        $mesociclo = $microciclo->mesociclo;
+        if (!$mesociclo) {
+            return false;
+        }
+
+        $macrociclo = $mesociclo->macrociclo;
+        if (!$macrociclo) {
+            return false;
+        }
+
+        $entrenado = User::find($macrociclo->entrenado_id);
+        if (!$entrenado) {
+            return false;
+        }
+
+        return $entrenado->entrenador_asignado_id === $user->id;
     }
 }

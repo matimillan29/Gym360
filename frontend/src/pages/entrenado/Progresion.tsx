@@ -47,7 +47,16 @@ export default function Progresion() {
     queryFn: async () => {
       try {
         const response = await api.get('/mi/estadisticas');
-        return response.data.data || response.data;
+        const stats = response.data?.data || response.data || {};
+        return {
+          porcentaje_asistencia: stats.porcentaje_asistencia || stats.entrenamientos?.porcentaje_asistencia || 0,
+          sesiones_completadas: stats.sesiones_completadas || stats.entrenamientos?.total || 0,
+          sesiones_totales: stats.sesiones_totales || 0,
+          mejor_racha: stats.mejor_racha || stats.racha?.mejor || 0,
+          racha_actual: stats.racha_actual || stats.racha?.actual || 0,
+          dias_entrenando: stats.dias_entrenando || stats.entrenamientos?.total || 0,
+          tonelaje_total: stats.tonelaje_total || 0,
+        };
       } catch {
         // Datos de fallback para desarrollo
         return {

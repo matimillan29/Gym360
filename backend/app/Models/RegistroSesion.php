@@ -16,12 +16,20 @@ class RegistroSesion extends Model
         'fecha',
         'estado',
         'feedback_general',
+        'hora_inicio',
+        'hora_fin',
+        'completada',
+        'sensacion',
+        'observaciones',
     ];
 
     protected function casts(): array
     {
         return [
             'fecha' => 'datetime',
+            'hora_inicio' => 'datetime',
+            'hora_fin' => 'datetime',
+            'completada' => 'boolean',
         ];
     }
 

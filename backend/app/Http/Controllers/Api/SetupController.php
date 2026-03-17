@@ -68,11 +68,12 @@ class SetupController extends Controller
             $admin = User::create([
                 'email' => $request->admin_email,
                 'password' => $request->admin_password,
-                'role' => 'admin',
                 'nombre' => $request->admin_nombre,
                 'apellido' => $request->admin_apellido,
                 'estado' => 'activo',
             ]);
+            $admin->role = 'admin';
+            $admin->save();
 
             DB::commit();
 

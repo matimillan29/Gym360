@@ -22,7 +22,7 @@ interface Cuota {
   monto: number;
   estado: 'pendiente' | 'pagado' | 'vencido' | 'mora';
   pagos: Pago[];
-  monto_pagado: number;
+  total_pagado: number;
 }
 
 const estadoConfig: Record<string, { label: string; bg: string; text: string }> = {
@@ -130,13 +130,13 @@ export default function MisCuotas() {
               <div className="p-4 bg-gray-50 rounded-xl">
                 <p className="text-xs text-gray-500 mb-1">Pagado</p>
                 <p className={`text-xl font-bold ${
-                  cuotaActual.monto_pagado >= cuotaActual.monto ? 'text-green-600' : 'text-gray-900'
+                  cuotaActual.total_pagado >= cuotaActual.monto ? 'text-green-600' : 'text-gray-900'
                 }`}>
-                  ${cuotaActual.monto_pagado?.toLocaleString() || 0}
+                  ${cuotaActual.total_pagado?.toLocaleString() || 0}
                 </p>
-                {cuotaActual.monto_pagado < cuotaActual.monto && (
+                {cuotaActual.total_pagado < cuotaActual.monto && (
                   <p className="text-xs text-gray-500 mt-1">
-                    Resta: ${(cuotaActual.monto - (cuotaActual.monto_pagado || 0)).toLocaleString()}
+                    Resta: ${(cuotaActual.monto - (cuotaActual.total_pagado || 0)).toLocaleString()}
                   </p>
                 )}
               </div>
@@ -261,7 +261,7 @@ export default function MisCuotas() {
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-500">Total pagado históricamente</span>
             <span className="font-semibold text-gray-900">
-              ${cuotas.reduce((acc, c) => acc + (c.monto_pagado || 0), 0).toLocaleString()}
+              ${cuotas.reduce((acc, c) => acc + (c.total_pagado || 0), 0).toLocaleString()}
             </span>
           </div>
         </div>

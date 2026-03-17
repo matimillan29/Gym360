@@ -13,6 +13,7 @@ class Sesion extends Model
     protected $fillable = [
         'microciclo_id',
         'numero',
+        'nombre',
         'fecha_programada',
         'logica_entrenamiento',
         'observaciones',

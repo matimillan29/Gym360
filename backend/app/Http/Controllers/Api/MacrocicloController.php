@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Macrociclo;
+use App\Models\RegistroSesion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -104,13 +105,13 @@ class MacrocicloController extends Controller
      */
     private function guardarEstructura(Macrociclo $macrociclo, array $mesociclos)
     {
-        foreach ($mesociclos as $mesoData) {
+        foreach ($mesociclos as $index => $mesoData) {
             $mesociclo = $macrociclo->mesociclos()->create([
                 'numero' => $mesoData['numero'] ?? 1,
                 'nombre' => $mesoData['nombre'] ?? 'Mesociclo',
                 'objetivo' => $mesoData['objetivo'] ?? null,
                 'tipo' => $mesoData['tipo'] ?? 'desarrollador',
-                'desbloqueado' => $mesoData['desbloqueado'] ?? false,
+                'desbloqueado' => $index === 0 ? true : ($mesoData['desbloqueado'] ?? false),
             ]);
 
             foreach ($mesoData['microciclos'] ?? [] as $microData) {
@@ -188,6 +189,19 @@ class MacrocicloController extends Controller
             'activo' => 'boolean',
             'mesociclos' => 'array',
         ]);
+
+        // Si vienen mesociclos, verificar que no haya registros antes de reestructurar
+        if ($request->has('mesociclos')) {
+            $tieneRegistros = RegistroSesion::whereHas('sesion.microciclo.mesociclo', function ($q) use ($macrociclo) {
+                $q->where('macrociclo_id', $macrociclo->id);
+            })->exists();
+
+            if ($tieneRegistros) {
+                return response()->json([
+                    'message' => 'No se puede reestructurar un plan que tiene registros de entrenamiento.',
+                ], 409);
+            }
+        }
 
         DB::transaction(function () use ($request, $macrociclo) {
             // Actualizar datos del macrociclo
@@ -287,7 +301,7 @@ class MacrocicloController extends Controller
             // Duplicar macrociclo
             $nuevo = $macrociclo->replicate();
             $nuevo->entrenado_id = $targetUserId;
-            $nuevo->objetivo_general = $request->nombre . ' (copia)';
+            $nuevo->nombre = $request->nombre . ' (copia)';
             $nuevo->activo = false;
             $nuevo->save();
 

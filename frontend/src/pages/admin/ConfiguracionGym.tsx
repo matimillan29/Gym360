@@ -101,6 +101,9 @@ export default function ConfiguracionGym() {
       queryClient.invalidateQueries({ queryKey: ['gym-config-admin'] });
       refreshConfig(); // Actualizar el contexto global para reflejar cambios en header/sidebar
     },
+    onError: (error: any) => {
+      alert(error?.response?.data?.message || 'Error al guardar la configuración');
+    },
   });
 
   // Mutation para subir logo
@@ -528,7 +531,7 @@ export default function ConfiguracionGym() {
                       max="30"
                       value={config.dias_aviso_vencimiento}
                       onChange={(e) =>
-                        setConfig({ ...config, dias_aviso_vencimiento: parseInt(e.target.value) })
+                        setConfig({ ...config, dias_aviso_vencimiento: parseInt(e.target.value) || 0 })
                       }
                       className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
@@ -710,7 +713,7 @@ export default function ConfiguracionGym() {
                     <input
                       type="number"
                       value={smtpConfig.smtp_port}
-                      onChange={(e) => setSmtpConfig({ ...smtpConfig, smtp_port: parseInt(e.target.value) })}
+                      onChange={(e) => setSmtpConfig({ ...smtpConfig, smtp_port: parseInt(e.target.value) || 587 })}
                       placeholder="587"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     />

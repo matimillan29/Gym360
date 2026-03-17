@@ -20,6 +20,14 @@ class LinkAdjuntoController extends Controller
             ], 404);
         }
 
+        // Si es entrenado, solo puede ver sus propios links
+        $currentUser = auth()->user();
+        if ($currentUser->isEntrenado() && $currentUser->id !== $entrenado->id) {
+            return response()->json([
+                'message' => 'No autorizado.',
+            ], 403);
+        }
+
         $links = $entrenado->linksAdjuntos()
             ->orderBy('categoria')
             ->orderByDesc('created_at')

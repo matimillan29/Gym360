@@ -14,6 +14,7 @@ class Ejercicio extends Model
         'descripcion',
         'instrucciones',
         'video_url',
+        'imagen_url',
         'etapas',
         'categorias_zona',
         'patrones_movimiento',

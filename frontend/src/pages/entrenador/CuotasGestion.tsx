@@ -32,7 +32,7 @@ interface Cuota {
   monto: number;
   estado: 'pendiente' | 'pagado' | 'vencido' | 'mora';
   pagos: Pago[];
-  monto_pagado: number;
+  total_pagado: number;
 }
 
 interface PagoForm {
@@ -91,7 +91,7 @@ export default function CuotasGestion() {
 
   const openPagoModal = (cuota: Cuota) => {
     setSelectedCuota(cuota);
-    const montoPendiente = cuota.monto - (cuota.monto_pagado || 0);
+    const montoPendiente = cuota.monto - (cuota.total_pagado || 0);
     setPagoForm({
       monto: montoPendiente.toString(),
       metodo: 'efectivo',
@@ -151,7 +151,7 @@ export default function CuotasGestion() {
       acc[cuota.estado] = (acc[cuota.estado] || 0) + 1;
       acc.total++;
       if (cuota.estado !== 'pagado') {
-        acc.montoTotal += cuota.monto - (cuota.monto_pagado || 0);
+        acc.montoTotal += cuota.monto - (cuota.total_pagado || 0);
       }
       return acc;
     },
@@ -249,7 +249,7 @@ export default function CuotasGestion() {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {cuotas.map((cuota) => {
-                  const montoPendiente = cuota.monto - (cuota.monto_pagado || 0);
+                  const montoPendiente = cuota.monto - (cuota.total_pagado || 0);
                   return (
                     <tr key={cuota.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -274,9 +274,9 @@ export default function CuotasGestion() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <p className="font-medium text-gray-900">{formatMoney(cuota.monto)}</p>
-                          {cuota.monto_pagado > 0 && cuota.monto_pagado < cuota.monto && (
+                          {cuota.total_pagado > 0 && cuota.total_pagado < cuota.monto && (
                             <p className="text-xs text-gray-500">
-                              Pagado: {formatMoney(cuota.monto_pagado)} | Resta: {formatMoney(montoPendiente)}
+                              Pagado: {formatMoney(cuota.total_pagado)} | Resta: {formatMoney(montoPendiente)}
                             </p>
                           )}
                         </div>
@@ -337,16 +337,16 @@ export default function CuotasGestion() {
                     <span className="text-gray-500">Monto total:</span>
                     <span className="font-medium">{formatMoney(selectedCuota.monto)}</span>
                   </div>
-                  {selectedCuota.monto_pagado > 0 && (
+                  {selectedCuota.total_pagado > 0 && (
                     <>
                       <div className="flex justify-between text-sm mt-1">
                         <span className="text-gray-500">Ya pagado:</span>
-                        <span className="font-medium text-green-600">{formatMoney(selectedCuota.monto_pagado)}</span>
+                        <span className="font-medium text-green-600">{formatMoney(selectedCuota.total_pagado)}</span>
                       </div>
                       <div className="flex justify-between text-sm mt-1 pt-1 border-t">
                         <span className="text-gray-500">Pendiente:</span>
                         <span className="font-medium text-orange-600">
-                          {formatMoney(selectedCuota.monto - selectedCuota.monto_pagado)}
+                          {formatMoney(selectedCuota.monto - selectedCuota.total_pagado)}
                         </span>
                       </div>
                     </>

@@ -166,6 +166,39 @@ class CuotaController extends Controller
         ], 201);
     }
 
+    /**
+     * Listar todas las cuotas (con filtros opcionales)
+     */
+    public function indexAll(Request $request)
+    {
+        $query = Cuota::with(['entrenado:id,nombre,apellido,email', 'plan', 'pagos'])
+            ->orderByDesc('fecha_vencimiento');
+
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        if ($request->filled('entrenado_id')) {
+            $query->where('entrenado_id', $request->entrenado_id);
+        }
+
+        $cuotas = $query->paginate($request->get('per_page', 20));
+
+        return response()->json($cuotas);
+    }
+
+    /**
+     * Listar pagos de una cuota
+     */
+    public function pagos(Cuota $cuota)
+    {
+        $pagos = $cuota->pagos()->orderByDesc('fecha')->get();
+
+        return response()->json([
+            'data' => $pagos,
+        ]);
+    }
+
     // ===========================================
     // Planes de cuota
     // ===========================================

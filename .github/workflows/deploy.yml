@@ -1,0 +1,80 @@
+name: Deploy to Cloudron
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: zip, pdo_mysql, intl, bcmath, gd
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Prepare deployment
+        run: |
+          mkdir deploy
+
+          # Copy backend (sin archivos innecesarios)
+          rsync -a backend/ deploy/ \
+            --exclude='node_modules' \
+            --exclude='.env' \
+            --exclude='.env.local' \
+            --exclude='storage/logs/*' \
+            --exclude='storage/framework/cache/data/*' \
+            --exclude='storage/framework/sessions/*' \
+            --exclude='storage/framework/views/*' \
+            --exclude='bootstrap/cache/*.php' \
+            --exclude='tests' \
+            --exclude='phpunit.xml'
+
+          # Instalar dependencias PHP (produccion)
+          cd deploy
+          composer install --no-dev --optimize-autoloader --no-interaction
+          cd ..
+
+          # Copiar frontend build al public
+          cp -r frontend/dist/* deploy/public/
+          mv deploy/public/index.html deploy/public/app.html
+
+          # Copiar start script
+          cp start.sh deploy/
+
+          # Crear estructura de storage
+          mkdir -p deploy/storage/app/public
+          mkdir -p deploy/storage/framework/cache/data
+          mkdir -p deploy/storage/framework/sessions
+          mkdir -p deploy/storage/framework/views
+          mkdir -p deploy/storage/logs
+          mkdir -p deploy/bootstrap/cache
+
+      - name: Install Cloudron CLI
+        run: npm install -g cloudron
+
+      - name: Deploy to Cloudron
+        env:
+          CLOUDRON_SERVER: ${{ secrets.CLOUDRON_FQDN }}
+          CLOUDRON_TOKEN: ${{ secrets.CLOUDRON_TOKEN }}
+          APP_ID: ${{ secrets.CLOUDRON_APP_ID }}
+        run: |
+          cloudron login --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN"
+          cloudron push --app "$APP_ID" --directory deploy/

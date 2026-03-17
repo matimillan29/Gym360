@@ -21,6 +21,7 @@ class RegistroEjercicio extends Model
         'descanso_real',
         'completado',
         'observaciones',
+        'series_realizadas',
     ];
 
     protected function casts(): array
@@ -28,6 +29,7 @@ class RegistroEjercicio extends Model
         return [
             'peso' => 'decimal:2',
             'completado' => 'boolean',
+            'series_realizadas' => 'array',
         ];
     }
 

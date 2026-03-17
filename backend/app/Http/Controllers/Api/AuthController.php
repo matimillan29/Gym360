@@ -8,6 +8,7 @@ use App\Models\OtpCode;
 use App\Models\GymConfig;
 use App\Mail\OtpMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
@@ -115,8 +116,6 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Si el email está registrado, recibirás un código de acceso.',
-            // Solo en desarrollo, quitar en producción:
-            'debug_code' => config('app.debug') ? $otp->code : null,
         ]);
     }
 
@@ -130,11 +129,24 @@ class AuthController extends Controller
             'code' => 'required|string|size:6',
         ]);
 
-        $user = User::where('email', $request->email)
+        $email = $request->email;
+
+        // Brute force protection: max 5 failed attempts per email in 10 minutes
+        $attemptsKey = "otp_attempts:{$email}";
+        $attempts = Cache::get($attemptsKey, 0);
+
+        if ($attempts >= 5) {
+            throw ValidationException::withMessages([
+                'code' => ['Demasiados intentos fallidos. Esperá unos minutos antes de reintentar.'],
+            ]);
+        }
+
+        $user = User::where('email', $email)
             ->where('role', 'entrenado')
             ->first();
 
         if (!$user) {
+            Cache::put($attemptsKey, $attempts + 1, now()->addMinutes(10));
             throw ValidationException::withMessages([
                 'code' => ['Código inválido o expirado.'],
             ]);
@@ -147,10 +159,14 @@ class AuthController extends Controller
             ->first();
 
         if (!$otp) {
+            Cache::put($attemptsKey, $attempts + 1, now()->addMinutes(10));
             throw ValidationException::withMessages([
                 'code' => ['Código inválido o expirado.'],
             ]);
         }
+
+        // Éxito: limpiar contador de intentos
+        Cache::forget($attemptsKey);
 
         // Marcar código como usado
         $otp->markAsUsed();
@@ -190,8 +206,8 @@ class AuthController extends Controller
 
     /**
      * Login para entrenados (email + password)
-     * El password es: MaMi + DNI (primeras 2 letras de nombre + 2 letras de apellido + DNI)
-     * Ejemplo: Matias Millan con DNI 39934190 -> password: MaMi39934190
+     * ADVERTENCIA: Este método usa una fórmula predecible (primeras 2 letras nombre + 2 letras apellido + DNI).
+     * Es una conveniencia temporal; se recomienda migrar a OTP o contraseñas reales.
      */
     public function loginEntrenado(Request $request)
     {
@@ -200,12 +216,24 @@ class AuthController extends Controller
             'password' => 'required|string|min:5',
         ]);
 
+        // Rate limiting: max 10 intentos por IP por minuto
+        $ip = $request->ip();
+        $rateLimitKey = "login_entrenado_attempts:{$ip}";
+        $loginAttempts = Cache::get($rateLimitKey, 0);
+
+        if ($loginAttempts >= 10) {
+            throw ValidationException::withMessages([
+                'email' => ['Demasiados intentos. Esperá un momento antes de reintentar.'],
+            ]);
+        }
+
         // Buscar entrenado por email
         $user = User::where('email', $request->email)
             ->where('role', 'entrenado')
             ->first();
 
         if (!$user) {
+            Cache::put($rateLimitKey, $loginAttempts + 1, now()->addMinute());
             throw ValidationException::withMessages([
                 'email' => ['Credenciales incorrectas.'],
             ]);
@@ -222,6 +250,7 @@ class AuthController extends Controller
         $expectedUsuario = $this->generateUsername($user->nombre, $user->apellido);
 
         if (strtolower($inputUsuario) !== strtolower($expectedUsuario) || $inputDni !== $user->dni) {
+            Cache::put($rateLimitKey, $loginAttempts + 1, now()->addMinute());
             throw ValidationException::withMessages([
                 'password' => ['Credenciales incorrectas.'],
             ]);
@@ -232,6 +261,9 @@ class AuthController extends Controller
                 'email' => ['Tu cuenta está desactivada.'],
             ]);
         }
+
+        // Éxito: limpiar contador de intentos
+        Cache::forget($rateLimitKey);
 
         // Revocar tokens anteriores
         $user->tokens()->delete();

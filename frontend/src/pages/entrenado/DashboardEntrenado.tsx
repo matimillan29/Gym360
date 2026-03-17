@@ -58,20 +58,7 @@ export default function DashboardEntrenado() {
     },
   });
 
-  // Fetch estadísticas rápidas
-  const { data: estadisticas } = useQuery<EstadisticasRapidas | null>({
-    queryKey: ['estadisticas-rapidas'],
-    queryFn: async () => {
-      try {
-        const response = await api.get('/mi/estadisticas');
-        return response.data.data || response.data;
-      } catch {
-        return null;
-      }
-    },
-  });
-
-  // Fetch estadísticas completas (rachas y logros)
+  // Fetch estadísticas completas (incluye rapidas, rachas y logros)
   const { data: estadisticasCompletas } = useQuery<EstadisticasCompletas | null>({
     queryKey: ['mis-estadisticas'],
     queryFn: async () => {
@@ -82,6 +69,15 @@ export default function DashboardEntrenado() {
       }
     },
   });
+
+  // Derive quick stats from complete stats
+  const estadisticas: EstadisticasRapidas | null = estadisticasCompletas ? {
+    porcentaje_asistencia: (estadisticasCompletas as any).porcentaje_asistencia ?? 0,
+    sesiones_completadas: estadisticasCompletas.entrenamientos?.total ?? 0,
+    sesiones_totales: estadisticasCompletas.entrenamientos?.total ?? 0,
+    racha_actual: estadisticasCompletas.racha?.actual ?? 0,
+    tonelaje_ultimo_mes: (estadisticasCompletas as any).tonelaje_ultimo_mes ?? 0,
+  } : null;
 
   const getCuotaStatus = () => {
     if (!cuotaActual) return null;

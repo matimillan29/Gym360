@@ -8,7 +8,7 @@ import type { Macrociclo, Mesociclo, Microciclo, Sesion, SesionEjercicio } from 
 export interface CreateMacrocicloData {
   nombre: string;
   fecha_inicio: string;
-  fecha_fin?: string;
+  fecha_fin_estimada?: string;
   objetivo?: string;
   notas?: string;
 }

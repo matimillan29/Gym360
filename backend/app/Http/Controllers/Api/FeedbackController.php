@@ -62,6 +62,14 @@ class FeedbackController extends Controller
             ], 404);
         }
 
+        // Si es entrenado, solo puede ver sus propios feedbacks
+        $currentUser = auth()->user();
+        if ($currentUser->isEntrenado() && $currentUser->id !== $entrenado->id) {
+            return response()->json([
+                'message' => 'No autorizado.',
+            ], 403);
+        }
+
         // Si es el propio entrenado, solo ver los públicos (no privados)
         $query = $entrenado->feedbacks()
             ->with('entrenador:id,nombre,apellido')

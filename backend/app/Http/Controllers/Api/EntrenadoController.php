@@ -64,7 +64,6 @@ class EntrenadoController extends Controller
         $entrenado = User::create([
             'email' => $request->email,
             'password' => null, // Entrenados usan OTP
-            'role' => 'entrenado',
             'nombre' => $request->nombre,
             'apellido' => $request->apellido,
             'dni' => $request->dni,
@@ -74,6 +73,8 @@ class EntrenadoController extends Controller
             'estado' => 'activo',
             'entrenador_asignado_id' => $request->entrenador_asignado_id ?? auth()->id(),
         ]);
+        $entrenado->role = 'entrenado';
+        $entrenado->save();
 
         return response()->json([
             'data' => $entrenado->load('entrenadorAsignado:id,nombre,apellido'),
@@ -126,6 +127,11 @@ class EntrenadoController extends Controller
             ], 404);
         }
 
+        $user = auth()->user();
+        if (!$user->isAdmin() && $entrenado->entrenador_asignado_id !== $user->id) {
+            return response()->json(['message' => 'No autorizado para modificar este entrenado.'], 403);
+        }
+
         $request->validate([
             'email' => ['sometimes', 'required', 'email', Rule::unique('users')->ignore($entrenado->id)],
             'nombre' => 'sometimes|required|string|max:255',
@@ -163,6 +169,11 @@ class EntrenadoController extends Controller
             return response()->json([
                 'message' => 'Usuario no es entrenado.',
             ], 404);
+        }
+
+        $user = auth()->user();
+        if (!$user->isAdmin() && $entrenado->entrenador_asignado_id !== $user->id) {
+            return response()->json(['message' => 'No autorizado para modificar este entrenado.'], 403);
         }
 
         $entrenado->delete();
@@ -393,7 +404,7 @@ class EntrenadoController extends Controller
             $vencimiento = \Carbon\Carbon::parse($cuotaActual->fecha_vencimiento)->startOfDay();
             $diasRestantes = $hoy->diffInDays($vencimiento, false);
 
-            if ($cuotaActual->estado === 'pagada') {
+            if ($cuotaActual->estado === 'pagado') {
                 $estadoCuota = $diasRestantes >= 0 ? 'al_dia' : 'vencida';
             } elseif ($cuotaActual->estado === 'parcial') {
                 $estadoCuota = 'parcial';
@@ -425,7 +436,7 @@ class EntrenadoController extends Controller
                     'id' => $cuotaActual->id,
                     'plan' => $cuotaActual->planCuota?->nombre ?? 'Sin plan',
                     'monto' => $cuotaActual->monto,
-                    'monto_pagado' => $cuotaActual->monto_pagado,
+                    'monto_pagado' => $cuotaActual->total_pagado,
                     'fecha_vencimiento' => $cuotaActual->fecha_vencimiento,
                     'estado' => $estadoCuota,
                     'dias_restantes' => $diasRestantes,
@@ -472,7 +483,7 @@ class EntrenadoController extends Controller
             $vencimiento = \Carbon\Carbon::parse($cuotaActual->fecha_vencimiento)->startOfDay();
             $diasRestantes = $hoy->diffInDays($vencimiento, false);
 
-            if ($cuotaActual->estado === 'pagada') {
+            if ($cuotaActual->estado === 'pagado') {
                 $estadoCuota = $diasRestantes >= 0 ? 'al_dia' : 'vencida';
             } elseif ($cuotaActual->estado === 'parcial') {
                 $estadoCuota = 'parcial';
@@ -531,8 +542,8 @@ class EntrenadoController extends Controller
 
         if (!$cuotaActual) {
             $warning = 'Sin cuota asignada.';
-        } elseif ($cuotaActual->estado === 'vencida' ||
-                  (\Carbon\Carbon::parse($cuotaActual->fecha_vencimiento)->isPast() && $cuotaActual->estado !== 'pagada')) {
+        } elseif ($cuotaActual->estado === 'vencido' ||
+                  (\Carbon\Carbon::parse($cuotaActual->fecha_vencimiento)->isPast() && $cuotaActual->estado !== 'pagado')) {
             $warning = 'Cuota vencida.';
         } elseif ($cuotaActual->estado === 'pendiente') {
             $warning = 'Cuota pendiente de pago.';
@@ -549,6 +560,7 @@ class EntrenadoController extends Controller
             }
 
             $cuotaActual->update(['clases_usadas' => $clasesUsadas + 1]);
+            $cuotaActual->refresh();
         }
 
         return response()->json([
@@ -591,8 +603,8 @@ class EntrenadoController extends Controller
 
         if (!$cuotaActual) {
             $warning = 'El entrenado no tiene cuota asignada.';
-        } elseif ($cuotaActual->estado === 'vencida' ||
-                  (\Carbon\Carbon::parse($cuotaActual->fecha_vencimiento)->isPast() && $cuotaActual->estado !== 'pagada')) {
+        } elseif ($cuotaActual->estado === 'vencido' ||
+                  (\Carbon\Carbon::parse($cuotaActual->fecha_vencimiento)->isPast() && $cuotaActual->estado !== 'pagado')) {
             $warning = 'La cuota está vencida.';
         } elseif ($cuotaActual->estado === 'pendiente') {
             $warning = 'La cuota aún no fue pagada.';
@@ -610,6 +622,7 @@ class EntrenadoController extends Controller
             }
 
             $cuotaActual->update(['clases_usadas' => $clasesUsadas + 1]);
+            $cuotaActual->refresh();
         }
 
         // TODO: Registrar en tabla de ingresos si se quiere historial

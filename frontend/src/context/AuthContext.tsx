@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import axios from 'axios';
 import type { User, GymConfig } from '../types';
 import { authService } from '../services/auth';
 import api from '../services/api';
@@ -31,9 +32,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await api.get<{ data: GymConfig | null; is_configured: boolean }>('/config');
       setGymConfig(response.data.data);
       setNeedsSetup(!response.data.is_configured);
-    } catch {
-      // Config no existe aún (primera instalación)
-      setNeedsSetup(true);
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.status === 404) {
+        setNeedsSetup(true);
+      }
+      // Other errors: don't set needsSetup
     }
   };
 

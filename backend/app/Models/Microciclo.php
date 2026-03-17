@@ -11,6 +11,7 @@ class Microciclo extends Model
     protected $fillable = [
         'mesociclo_id',
         'numero',
+        'nombre',
         'tipo',
     ];
 

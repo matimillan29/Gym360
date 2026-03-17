@@ -182,9 +182,16 @@ class ConfigController extends Controller
             'password' => 'required|string',
         ]);
 
-        $superPassword = env('SUPER_ADMIN_PASSWORD', 'Pwr360SuperAdmin2024!');
+        $superPassword = env('SUPER_ADMIN_PASSWORD');
 
-        if ($request->password !== $superPassword) {
+        if ($superPassword === null) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'SUPER_ADMIN_PASSWORD no configurado en el servidor.',
+            ], 403);
+        }
+
+        if (!hash_equals($superPassword, $request->password)) {
             return response()->json([
                 'valid' => false,
                 'message' => 'Contraseña incorrecta.',
@@ -206,9 +213,15 @@ class ConfigController extends Controller
             'password' => 'required|string',
         ]);
 
-        $superPassword = env('SUPER_ADMIN_PASSWORD', 'Pwr360SuperAdmin2024!');
+        $superPassword = env('SUPER_ADMIN_PASSWORD');
 
-        if ($request->password !== $superPassword) {
+        if ($superPassword === null) {
+            return response()->json([
+                'message' => 'SUPER_ADMIN_PASSWORD no configurado en el servidor.',
+            ], 403);
+        }
+
+        if (!hash_equals($superPassword, $request->password)) {
             return response()->json([
                 'message' => 'Contraseña incorrecta.',
             ], 401);
@@ -245,9 +258,15 @@ class ConfigController extends Controller
             'smtp_from_name' => 'nullable|string|max:255',
         ]);
 
-        $superPassword = env('SUPER_ADMIN_PASSWORD', 'Pwr360SuperAdmin2024!');
+        $superPassword = env('SUPER_ADMIN_PASSWORD');
 
-        if ($request->password !== $superPassword) {
+        if ($superPassword === null) {
+            return response()->json([
+                'message' => 'SUPER_ADMIN_PASSWORD no configurado en el servidor.',
+            ], 403);
+        }
+
+        if (!hash_equals($superPassword, $request->password)) {
             return response()->json([
                 'message' => 'Contraseña incorrecta.',
             ], 401);

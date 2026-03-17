@@ -127,7 +127,7 @@ export default function ClasesGestion() {
   const { data: asistencias = [], isLoading: loadingAsistencias } = useQuery<Asistencia[]>({
     queryKey: ['horario-asistencias', selectedHorario?.id, asistenciasFecha],
     queryFn: async () => {
-      const response = await api.get(`/horarios-clase/${selectedHorario!.id}/asistencias`, {
+      const response = await api.get(`/horarios-clase/${selectedHorario!.id}/asistentes`, {
         params: { fecha: asistenciasFecha },
       });
       return response.data.data || [];
@@ -184,7 +184,7 @@ export default function ClasesGestion() {
 
   const updateAsistenciaMutation = useMutation({
     mutationFn: ({ asistenciaId, estado }: { asistenciaId: number; estado: string }) =>
-      api.put(`/asistencias-clase/${asistenciaId}`, { estado }),
+      api.post(`/asistencias-clase/${asistenciaId}/checkin`, { estado }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['horario-asistencias', selectedHorario?.id, asistenciasFecha] });
     },

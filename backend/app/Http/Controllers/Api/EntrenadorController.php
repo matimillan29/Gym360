@@ -57,13 +57,14 @@ class EntrenadorController extends Controller
         $entrenador = User::create([
             'email' => $request->email,
             'password' => $request->password,
-            'role' => $request->input('role', 'entrenador'),
             'nombre' => $request->nombre,
             'apellido' => $request->apellido,
             'dni' => $request->dni,
             'telefono' => $request->telefono,
             'estado' => 'activo',
         ]);
+        $entrenador->role = $request->input('role', 'entrenador');
+        $entrenador->save();
 
         return response()->json([
             'data' => $entrenador,
@@ -115,13 +116,19 @@ class EntrenadorController extends Controller
             'role' => 'sometimes|in:admin,entrenador',
         ]);
 
-        $data = $request->only(['email', 'nombre', 'apellido', 'dni', 'telefono', 'estado', 'role']);
+        $data = $request->only(['email', 'nombre', 'apellido', 'dni', 'telefono', 'estado']);
 
         if ($request->filled('password')) {
             $data['password'] = $request->password;
         }
 
         $user->update($data);
+
+        // Actualizar role explícitamente (no es fillable por seguridad)
+        if ($request->filled('role')) {
+            $user->role = $request->role;
+            $user->save();
+        }
 
         return response()->json([
             'data' => $user->fresh(),

@@ -7,6 +7,7 @@ export interface User {
   id: number;
   email: string;
   role: UserRole;
+  usuario?: string;
   nombre: string;
   apellido: string;
   dni?: string;
@@ -69,6 +70,7 @@ export interface Ejercicio {
 export interface Macrociclo {
   id: number;
   entrenado_id: number;
+  nombre?: string;
   fecha_inicio: string;
   fecha_fin_estimada?: string;
   objetivo_general?: string;
@@ -82,7 +84,7 @@ export interface Mesociclo {
   numero: number;
   nombre: string;
   objetivo?: string;
-  tipo: 'introductorio' | 'desarrollador' | 'estabilizador' | 'recuperacion';
+  tipo: string;
   desbloqueado: boolean;
   microciclos?: Microciclo[];
 }
@@ -280,7 +282,7 @@ export interface CuotaWithRelations extends Cuota {
     apellido: string;
   };
   pagos?: Pago[];
-  monto_pagado?: number;
+  total_pagado?: number;
 }
 
 export interface SesionEjercicioDisplay {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../services/api';
@@ -40,6 +40,8 @@ export default function RegistrarSesion() {
     icono: string;
     color: string;
   }>>([]);
+  const [initialized, setInitialized] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const { data: sesion, isLoading } = useQuery<SesionRegistro | null>({
     queryKey: ['sesion', id || 'hoy'],
@@ -50,28 +52,6 @@ export default function RegistrarSesion() {
         const response = await api.get(endpoint);
         const data = response.data.data || response.data;
 
-        // Inicializar registros vacíos
-        if (data?.ejercicios) {
-          const initialRegistros: Record<number, RegistroEjercicio> = {};
-          data.ejercicios.forEach((ej: SesionEjercicioDisplay) => {
-            initialRegistros[ej.sesion_ejercicio_id] = {
-              sesion_ejercicio_id: ej.sesion_ejercicio_id,
-              peso: null,
-              repeticiones: null,
-              series_completadas: 0,
-              intensidad_percibida: 7,
-              percepcion_carga: 5,
-              sensacion_general: 7,
-              completado: false,
-              observaciones: '',
-            };
-          });
-          setRegistros(initialRegistros);
-          if (data.ejercicios.length > 0) {
-            setEjercicioActivo(data.ejercicios[0].sesion_ejercicio_id);
-          }
-        }
-
         return data;
       } catch {
         return null;
@@ -79,13 +59,42 @@ export default function RegistrarSesion() {
     },
   });
 
+  // Initialize state only once when data is loaded
+  useEffect(() => {
+    if (sesion?.ejercicios && !initialized) {
+      const initialRegistros: Record<number, RegistroEjercicio> = {};
+      sesion.ejercicios.forEach((ej: SesionEjercicioDisplay) => {
+        initialRegistros[ej.sesion_ejercicio_id] = {
+          sesion_ejercicio_id: ej.sesion_ejercicio_id,
+          peso: null,
+          repeticiones: null,
+          series_completadas: 0,
+          intensidad_percibida: 7,
+          percepcion_carga: 5,
+          sensacion_general: 7,
+          completado: false,
+          observaciones: '',
+        };
+      });
+      setRegistros(initialRegistros);
+      if (sesion.ejercicios.length > 0) {
+        setEjercicioActivo(sesion.ejercicios[0].sesion_ejercicio_id);
+      }
+      setInitialized(true);
+    }
+  }, [sesion, initialized]);
+
   const guardarMutation = useMutation({
     mutationFn: async () => {
+      setSaveError(null);
       const response = await api.post(`/mi/sesiones/${sesion?.id}/registrar`, {
         ejercicios: Object.values(registros),
         feedback_general: feedbackGeneral,
       });
       return response.data;
+    },
+    onError: (error: any) => {
+      setSaveError(error?.response?.data?.message || 'Error al guardar la sesión. Intentá nuevamente.');
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['sesion'] });
@@ -465,6 +474,13 @@ export default function RegistrarSesion() {
           placeholder="¿Cómo te sentiste? ¿Alguna observación para tu entrenador?"
         />
       </div>
+
+      {/* Error al guardar */}
+      {saveError && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
+          {saveError}
+        </div>
+      )}
 
       {/* Botón guardar */}
       <div className="sticky bottom-4">

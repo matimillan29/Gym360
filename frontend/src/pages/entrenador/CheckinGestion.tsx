@@ -20,7 +20,7 @@ interface EntrenadoCheckin {
     id: number;
     plan: string;
     monto: number;
-    monto_pagado: number;
+    total_pagado: number;
     fecha_vencimiento: string;
     estado: 'al_dia' | 'pendiente' | 'parcial' | 'vencida' | 'sin_cuota';
     dias_restantes: number | null;

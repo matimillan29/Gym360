@@ -317,6 +317,9 @@ export default function EntrenadoDetalle() {
       queryClient.invalidateQueries({ queryKey: ['anamnesis', id] });
       setIsEditingAnamnesis(false);
     },
+    onError: (error: any) => {
+      alert(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
+    },
   });
 
   const saveCuotaMutation = useMutation({
@@ -327,6 +330,9 @@ export default function EntrenadoDetalle() {
       queryClient.invalidateQueries({ queryKey: ['cuotas', id] });
       setShowCuotaModal(false);
       setCuotaForm({ plan_id: '', monto: '', fecha_inicio: '' });
+    },
+    onError: (error: any) => {
+      alert(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
     },
   });
 
@@ -339,6 +345,9 @@ export default function EntrenadoDetalle() {
       setShowPagoModal(false);
       setSelectedCuota(null);
       setPagoForm({ monto: '', metodo: 'efectivo', comprobante: '', notas: '' });
+    },
+    onError: (error: any) => {
+      alert(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
     },
   });
 
@@ -358,6 +367,9 @@ export default function EntrenadoDetalle() {
         fecha: new Date().toISOString().split('T')[0]
       });
     },
+    onError: (error: any) => {
+      alert(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
+    },
   });
 
   const saveLinkMutation = useMutation({
@@ -368,6 +380,9 @@ export default function EntrenadoDetalle() {
       queryClient.invalidateQueries({ queryKey: ['links', id] });
       setShowLinkModal(false);
       setLinkForm({ titulo: '', url: '', descripcion: '', categoria: 'video_tecnica' });
+    },
+    onError: (error: any) => {
+      alert(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
     },
   });
 
@@ -388,6 +403,9 @@ export default function EntrenadoDetalle() {
       queryClient.invalidateQueries({ queryKey: ['feedback', id] });
       setShowFeedbackModal(false);
       setFeedbackForm({ tipo: 'progreso', contenido: '', privado: false });
+    },
+    onError: (error: any) => {
+      alert(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
     },
   });
 

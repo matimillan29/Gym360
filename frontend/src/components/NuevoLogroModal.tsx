@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 interface LogroInfo {
@@ -70,6 +70,16 @@ export default function NuevoLogroModal({ logros, onClose }: NuevoLogroModalProp
     }
   };
 
+  const confettiDots = useMemo(() =>
+    [...Array(20)].map((_, i) => ({
+      key: i,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      delay: `${Math.random() * 2}s`,
+      duration: `${1 + Math.random()}s`,
+    })),
+  []);
+
   if (!currentLogro) return null;
 
   const iconPath = iconMap[currentLogro.icono] || iconMap.star;
@@ -87,15 +97,15 @@ export default function NuevoLogroModal({ logros, onClose }: NuevoLogroModalProp
           style={{ backgroundColor: currentLogro.color }}
         >
           <div className="absolute inset-0 opacity-20">
-            {[...Array(20)].map((_, i) => (
+            {confettiDots.map((dot) => (
               <div
-                key={i}
+                key={dot.key}
                 className="absolute w-2 h-2 rounded-full bg-white animate-bounce"
                 style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 2}s`,
-                  animationDuration: `${1 + Math.random()}s`,
+                  left: dot.left,
+                  top: dot.top,
+                  animationDelay: dot.delay,
+                  animationDuration: dot.duration,
                 }}
               />
             ))}

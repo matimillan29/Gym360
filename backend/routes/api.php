@@ -22,6 +22,9 @@ use App\Http\Controllers\Api\LogroController;
 use App\Http\Controllers\Api\PlantillaController;
 use App\Http\Controllers\Api\ClaseController;
 use App\Http\Controllers\Api\SucursalController;
+use App\Http\Controllers\Api\AuditController;
+use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\ProgresionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -56,7 +59,7 @@ Route::post('/checkin-publico/buscar', [EntrenadoController::class, 'buscarPorDn
 Route::post('/checkin-publico/{entrenado}/registrar', [EntrenadoController::class, 'registrarIngresoPublico']);
 
 // Autenticación
-Route::prefix('auth')->group(function () {
+Route::prefix('auth')->middleware('throttle:10,1')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/login-entrenado', [AuthController::class, 'loginEntrenado']);
     Route::post('/otp/request', [AuthController::class, 'requestOtp']);
@@ -79,6 +82,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/config/super-admin/verify', [ConfigController::class, 'verifySuperAdmin']);
         Route::post('/config/super-admin/smtp', [ConfigController::class, 'getSmtpConfig']);
         Route::put('/config/super-admin/smtp', [ConfigController::class, 'updateSmtpConfig']);
+
+        // Auditoría
+        Route::get('/audit', [AuditController::class, 'index']);
+        Route::get('/audit/user/{userId}', [AuditController::class, 'byUser']);
+        Route::get('/audit/entity/{type}/{id}', [AuditController::class, 'byEntity']);
 
         // Sucursales (multi-sede)
         Route::apiResource('sucursales', SucursalController::class);
@@ -106,6 +114,11 @@ Route::middleware('auth:sanctum')->group(function () {
         // Check-in de entrenados
         Route::post('/checkin/buscar', [EntrenadoController::class, 'buscarParaCheckin']);
         Route::post('/checkin/{entrenado}/registrar', [EntrenadoController::class, 'registrarIngreso']);
+
+        // Dashboard del entrenador
+        Route::get('/dashboard/entrenador', [DashboardController::class, 'entrenador']);
+        Route::get('/dashboard/actividad-reciente', [DashboardController::class, 'actividadReciente']);
+        Route::get('/dashboard/alertas', [DashboardController::class, 'alertas']);
     });
 
     // Ejercicios (entrenadores y admin pueden crear/editar, todos pueden ver)
@@ -187,6 +200,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/cuotas/{cuota}', [CuotaController::class, 'update']);
         Route::delete('/cuotas/{cuota}', [CuotaController::class, 'destroy']);
         Route::post('/cuotas/{cuota}/pago', [CuotaController::class, 'registrarPago']);
+        Route::get('/cuotas', [CuotaController::class, 'indexAll']);
+        Route::get('/cuotas/{cuota}/pagos', [CuotaController::class, 'pagos']);
 
         // Planes de cuota
         Route::get('/planes-cuota', [CuotaController::class, 'indexPlanes']);
@@ -294,8 +309,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/sesiones/{sesion}/ejercicios/{ejercicio}/registrar', [SesionController::class, 'registrarEjercicio']);
         Route::post('/sesiones/{sesion}/registrar', [SesionController::class, 'registrarSesionCompleta']);
 
+        // Ver sesión específica
+        Route::get('/sesiones/{sesion}', [SesionController::class, 'showForEntrenado']);
+
         // Historial de sesiones de entrenamiento
         Route::get('/historial', [SesionController::class, 'miHistorial']);
+
+        // Progresión y estadísticas de rendimiento
+        Route::get('/progresion/ejercicios', [ProgresionController::class, 'ejercicios']);
+        Route::get('/progresion/tonelaje', [ProgresionController::class, 'tonelaje']);
+        Route::get('/progresion/distribucion', [ProgresionController::class, 'distribucion']);
 
         // Mis cuotas
         Route::get('/cuotas', [CuotaController::class, 'misCuotas']);
