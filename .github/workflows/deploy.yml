@@ -68,8 +68,8 @@ jobs:
           mkdir -p /tmp/deploy/bootstrap/cache
 
           # Reemplazar workspace con el build listo
-          rm -rf $GITHUB_WORKSPACE/*
-          mv /tmp/deploy/* $GITHUB_WORKSPACE/
+          find $GITHUB_WORKSPACE -mindepth 1 -delete
+          mv /tmp/deploy/* /tmp/deploy/.* $GITHUB_WORKSPACE/ 2>/dev/null || true
 
       - name: Push to Cloudron
         uses: cloudron-io/cloudron-push-to-app@latest
