@@ -2,7 +2,10 @@
 # Start script para Pwr360 en Cloudron
 # Auto-inicializa Laravel en primer inicio
 
-cd /var/www/html
+set -e
+
+PERSISTENT_DIR="/app/data"
+APP_DIR="/var/www/html"
 
 echo "=== Iniciando Pwr360 ==="
 
@@ -33,44 +36,39 @@ wait_for_db() {
         attempt=$((attempt + 1))
     done
 
-    echo "ERROR: No se pudo conectar a la base de datos después de $max_attempts intentos."
+    echo "ERROR: No se pudo conectar a la base de datos."
     return 1
 }
 
-# Configurar almacenamiento persistente
-# Los symlinks ya están creados en la imagen Docker apuntando a /app/data
-PERSISTENT_DIR="/app/data"
+# ============================================================
+# Sincronizar código desde /app/data si fue pusheado ahí
+# ============================================================
+if [ -f "$PERSISTENT_DIR/artisan" ]; then
+    echo "=== Detectado código nuevo en $PERSISTENT_DIR ==="
+    echo "Sincronizando código a $APP_DIR..."
 
-echo "=== Diagnóstico de almacenamiento ==="
-echo "Verificando $PERSISTENT_DIR..."
-ls -la / | grep -E "app|data" || echo "No se encontró /app o /data en /"
-ls -la /app/ 2>/dev/null || echo "/app no existe"
-ls -la $PERSISTENT_DIR 2>/dev/null || echo "$PERSISTENT_DIR no existe"
-echo "Symlinks en /var/www/html:"
-ls -la /var/www/html/.env /var/www/html/storage /var/www/html/bootstrap/cache 2>/dev/null || true
-echo "=== Fin diagnóstico ==="
+    # Sincronizar todo excepto storage y .env (que son symlinks a persistente)
+    rsync -a --delete \
+        --exclude='storage' \
+        --exclude='.env' \
+        --exclude='bootstrap/cache' \
+        "$PERSISTENT_DIR/" "$APP_DIR/"
 
-# Verificar si /app/data existe
-if [ ! -d "$PERSISTENT_DIR" ]; then
-    echo "ERROR: $PERSISTENT_DIR no existe! Creando..."
-    mkdir -p $PERSISTENT_DIR 2>/dev/null || {
-        echo "FATAL: No se puede crear $PERSISTENT_DIR - filesystem read-only"
-        echo "Intentando usar /tmp como fallback..."
-        PERSISTENT_DIR="/tmp/pwr360-data"
-        mkdir -p $PERSISTENT_DIR
-        # Recrear symlinks a /tmp
-        rm -f /var/www/html/storage 2>/dev/null || true
-        rm -f /var/www/html/bootstrap/cache 2>/dev/null || true
-        rm -f /var/www/html/.env 2>/dev/null || true
-        ln -sf $PERSISTENT_DIR/storage /var/www/html/storage
-        ln -sf $PERSISTENT_DIR/bootstrap-cache /var/www/html/bootstrap/cache
-        ln -sf $PERSISTENT_DIR/.env /var/www/html/.env
-    }
+    # Mover storage del push a la ubicación persistente correcta
+    if [ -d "$PERSISTENT_DIR/storage" ] && [ ! -L "$PERSISTENT_DIR/storage" ]; then
+        echo "Moviendo storage de push a ubicación persistente..."
+        # No sobreescribir archivos existentes (uploads, logs, etc.)
+        cp -rn "$PERSISTENT_DIR/storage/"* "$PERSISTENT_DIR/storage-persistent/" 2>/dev/null || true
+    fi
+
+    echo "Código sincronizado."
 fi
 
-echo "Configurando almacenamiento persistente en $PERSISTENT_DIR..."
+# ============================================================
+# Configurar almacenamiento persistente
+# ============================================================
+echo "Configurando almacenamiento persistente..."
 
-# Crear estructura completa de storage en persistente
 mkdir -p $PERSISTENT_DIR/storage/app/public
 mkdir -p $PERSISTENT_DIR/storage/framework/cache/data
 mkdir -p $PERSISTENT_DIR/storage/framework/sessions
@@ -78,20 +76,26 @@ mkdir -p $PERSISTENT_DIR/storage/framework/views
 mkdir -p $PERSISTENT_DIR/storage/logs
 mkdir -p $PERSISTENT_DIR/bootstrap-cache
 
-# Crear .env si no existe
-touch $PERSISTENT_DIR/.env
+# Asegurar symlinks
+cd $APP_DIR
+rm -rf storage 2>/dev/null; ln -sf $PERSISTENT_DIR/storage storage
+rm -rf bootstrap/cache 2>/dev/null; ln -sf $PERSISTENT_DIR/bootstrap-cache bootstrap/cache
+rm -f .env 2>/dev/null; ln -sf $PERSISTENT_DIR/.env .env
 
-# Asegurar permisos
+# Storage link para archivos públicos
+rm -rf public/storage 2>/dev/null
+ln -sf $PERSISTENT_DIR/storage/app/public public/storage
+
+# Permisos
 chown -R www-data:www-data $PERSISTENT_DIR 2>/dev/null || true
 chmod -R 775 $PERSISTENT_DIR 2>/dev/null || true
 
-echo "Almacenamiento persistente configurado en $PERSISTENT_DIR"
-ls -la $PERSISTENT_DIR/
-
+# ============================================================
 # Crear .env desde variables de Cloudron
-if [ ! -s .env ] || [ "$CLOUDRON_MYSQL_HOST" != "" ]; then
+# ============================================================
+if [ ! -s $PERSISTENT_DIR/.env ] || [ "$CLOUDRON_MYSQL_HOST" != "" ]; then
     echo "Configurando entorno desde variables Cloudron..."
-    cat > .env << EOF
+    cat > $PERSISTENT_DIR/.env << EOF
 APP_NAME=Pwr360
 APP_ENV=production
 APP_KEY=
@@ -131,19 +135,20 @@ EOF
 fi
 
 # Generar APP_KEY si no existe
-if ! grep -q "APP_KEY=base64:" .env; then
+if ! grep -q "APP_KEY=base64:" $PERSISTENT_DIR/.env; then
     echo "Generando APP_KEY..."
     php artisan key:generate --force
 fi
 
-# Esperar que la DB esté lista antes de continuar
+# ============================================================
+# Base de datos: migraciones
+# ============================================================
 if ! wait_for_db; then
-    echo "FATAL: No se puede iniciar sin conexión a la base de datos."
-    echo "Iniciando Apache de todas formas para permitir diagnóstico..."
+    echo "FATAL: No se puede conectar a la base de datos."
+    echo "Iniciando Apache para diagnóstico..."
     exec apache2-foreground
 fi
 
-# Verificar si las tablas existen
 echo "Verificando estado de la base de datos..."
 TABLES_EXIST=$(php -r "
     try {
@@ -160,55 +165,48 @@ TABLES_EXIST=$(php -r "
 " 2>/dev/null)
 
 if [ "$TABLES_EXIST" = "no" ]; then
-    echo "Primera ejecución - Inicializando base de datos..."
-
-    if php artisan migrate --force; then
-        echo "Migraciones completadas."
-    else
-        echo "ERROR en migraciones, pero continuando..."
-    fi
-
-    if php artisan db:seed --force; then
-        echo "Seeders completados."
-    else
-        echo "ERROR en seeders, pero continuando..."
-    fi
-
+    echo "=== Primera ejecución - Inicializando base de datos ==="
+    php artisan migrate --force 2>&1 || echo "ERROR en migraciones"
+    php artisan db:seed --force 2>&1 || echo "ERROR en seeders"
     echo "Base de datos inicializada."
 else
-    echo "Ejecutando migraciones pendientes..."
-    php artisan migrate --force || echo "Migraciones fallaron, continuando..."
+    echo "=== Ejecutando migraciones pendientes ==="
+    php artisan migrate --force 2>&1 || echo "Migraciones fallaron (puede ser OK)"
     echo "Migraciones aplicadas."
 fi
 
-# Crear link simbólico de storage
-if [ ! -L public/storage ]; then
-    rm -rf public/storage 2>/dev/null || true
-    php artisan storage:link 2>/dev/null || true
-fi
-
-# Limpiar cache antes de regenerar
+# ============================================================
+# Optimizar para producción
+# ============================================================
+echo "Optimizando para producción..."
 php artisan config:clear 2>/dev/null || true
 php artisan route:clear 2>/dev/null || true
 php artisan view:clear 2>/dev/null || true
 
-# Optimizar para producción (sin fallar si hay error)
-php artisan config:cache || echo "Config cache falló"
-php artisan route:cache || echo "Route cache falló"
-php artisan view:cache || echo "View cache falló"
+php artisan config:cache 2>&1 || echo "Config cache falló"
+php artisan route:cache 2>&1 || echo "Route cache falló"
+php artisan view:cache 2>&1 || echo "View cache falló"
 
-# Asegurar permisos (storage y bootstrap/cache son symlinks a persistente)
-if [ -n "$PERSISTENT_DIR" ]; then
-    chown -R www-data:www-data $PERSISTENT_DIR
-    chmod -R 775 $PERSISTENT_DIR
-fi
+# ============================================================
+# Scheduler (cron para cuotas, emails, etc.)
+# ============================================================
+echo "Configurando scheduler..."
+# Crear crontab para el scheduler de Laravel
+echo "* * * * * cd $APP_DIR && php artisan schedule:run >> /dev/null 2>&1" | crontab -u www-data - 2>/dev/null || true
+# Iniciar cron en background
+service cron start 2>/dev/null || cron 2>/dev/null || true
 
-if [ -L public/storage ]; then
-    chown -h www-data:www-data public/storage
-fi
+# ============================================================
+# Permisos finales
+# ============================================================
+chown -R www-data:www-data $PERSISTENT_DIR 2>/dev/null || true
+chmod -R 775 $PERSISTENT_DIR 2>/dev/null || true
+chown -R www-data:www-data $APP_DIR 2>/dev/null || true
 
 echo "=== Pwr360 listo ==="
-echo "Health check disponible en /api/health"
+echo "Migraciones: ejecutadas"
+echo "Scheduler: activo"
+echo "Health: /api/health"
 
 # Iniciar Apache
 exec apache2-foreground

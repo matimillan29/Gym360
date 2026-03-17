@@ -56,8 +56,9 @@ jobs:
           cp -r frontend/dist/* /tmp/deploy/public/
           mv /tmp/deploy/public/index.html /tmp/deploy/public/app.html
 
-          # Copiar start script
+          # Copiar start script y Dockerfile
           cp start.sh /tmp/deploy/
+          chmod +x /tmp/deploy/start.sh
 
           # Crear estructura de storage
           mkdir -p /tmp/deploy/storage/app/public
@@ -79,3 +80,10 @@ jobs:
           CLOUDRON_APP_ID: ${{ secrets.CLOUDRON_APP_ID }}
           CLOUDRON_PUSH_DESTINATION: "/app/data"
           CLOUDRON_CREATE_APP_BACKUP: "false"
+          # After push, Cloudron restarts the app automatically
+          # start.sh will:
+          # 1. Sync code from /app/data to /var/www/html
+          # 2. Run php artisan migrate --force
+          # 3. Clear and rebuild caches
+          # 4. Start cron scheduler (for cuota auto-renewal)
+          # 5. Start Apache
