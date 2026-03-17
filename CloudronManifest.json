@@ -1,0 +1,20 @@
+{
+  "id": "ar.pwr360.app",
+  "title": "Pwr360",
+  "version": "1.0.0",
+  "dockerImage": "hub.millan.ar/pwr360:latest",
+  "description": "Sistema de gestión para gimnasios - Planes de entrenamiento, cuotas, evaluaciones",
+  "tagline": "Gestión integral de gimnasios",
+  "author": "Mati",
+  "website": "https://pwr360.ar",
+  "contactEmail": "admin@pwr360.ar",
+  "healthCheckPath": "/api/health",
+  "httpPort": 80,
+  "manifestVersion": 2,
+  "addons": {
+    "mysql": {},
+    "localstorage": {},
+    "sendmail": {}
+  },
+  "minBoxVersion": "7.0.0"
+}

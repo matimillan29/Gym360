@@ -1,0 +1,458 @@
+@import "tailwindcss";
+
+/* Tailwind v4 theme configuration */
+@theme {
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* Light theme (default) */
+:root {
+  --color-primary: #3b82f6;
+  --color-primary-dark: #2563eb;
+  --color-secondary: #64748b;
+
+  /* Background colors */
+  --bg-base: #f9fafb;
+  --bg-card: #ffffff;
+  --bg-sidebar: #ffffff;
+  --bg-input: #ffffff;
+  --bg-hover: #f3f4f6;
+  --bg-active: #eff6ff;
+
+  /* Text colors */
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  --text-active: #1d4ed8;
+
+  /* Border colors */
+  --border-color: #e5e7eb;
+  --border-input: #e5e7eb;
+
+  /* Shadow */
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark theme */
+.dark {
+  --color-primary: #60a5fa;
+  --color-primary-dark: #3b82f6;
+  --color-secondary: #94a3b8;
+
+  /* Background colors */
+  --bg-base: #0f172a;
+  --bg-card: #1e293b;
+  --bg-sidebar: #1e293b;
+  --bg-input: #334155;
+  --bg-hover: #334155;
+  --bg-active: #1e3a5f;
+
+  /* Text colors */
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  --text-active: #60a5fa;
+
+  /* Border colors */
+  --border-color: #334155;
+  --border-input: #475569;
+
+  /* Shadow */
+  --shadow-color: rgba(0, 0, 0, 0.5);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Remove default black borders from inputs and cards */
+input, textarea, select {
+  border: 1px solid var(--border-input) !important;
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  outline: none;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Fix border for cards with explicit border */
+.border {
+  border-color: var(--border-color) !important;
+}
+
+.border-t, .border-b, .border-l, .border-r {
+  border-color: var(--border-color) !important;
+}
+
+/* Shadow cards should not have borders */
+.shadow-sm, .shadow, .shadow-md, .shadow-lg, .shadow-xl {
+  border-color: transparent;
+}
+
+/* Smooth transitions for all elements */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Animations for components */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Button hover effects */
+button {
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Sidebar transitions */
+aside {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Modal transitions */
+.modal-backdrop {
+  transition: opacity 0.3s ease;
+}
+
+.modal-content {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Solid color backgrounds for cards */
+.solid-blue {
+  background-color: #2563eb;
+}
+
+.solid-green {
+  background-color: #059669;
+}
+
+.solid-purple {
+  background-color: #7c3aed;
+}
+
+.solid-orange {
+  background-color: #ea580c;
+}
+
+.solid-red {
+  background-color: #dc2626;
+}
+
+/* ================================
+   DARK MODE OVERRIDES FOR TAILWIND
+   ================================ */
+
+/* Background overrides */
+.dark .bg-white {
+  background-color: var(--bg-card) !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: var(--bg-base) !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: var(--bg-hover) !important;
+}
+
+.dark .bg-gray-200 {
+  background-color: var(--bg-hover) !important;
+}
+
+/* Text color overrides */
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-700 {
+  color: var(--text-primary) !important;
+}
+
+.dark .text-gray-600,
+.dark .text-gray-500 {
+  color: var(--text-secondary) !important;
+}
+
+.dark .text-gray-400,
+.dark .text-gray-300 {
+  color: var(--text-muted) !important;
+}
+
+/* Border overrides */
+.dark .border-gray-200,
+.dark .border-gray-300 {
+  border-color: var(--border-color) !important;
+}
+
+.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--border-color) !important;
+}
+
+/* Ring overrides for focus states */
+.dark .ring-gray-300 {
+  --tw-ring-color: var(--border-color) !important;
+}
+
+/* Table overrides */
+.dark table,
+.dark thead,
+.dark tbody,
+.dark tr,
+.dark th,
+.dark td {
+  border-color: var(--border-color) !important;
+}
+
+.dark thead {
+  background-color: var(--bg-hover) !important;
+}
+
+.dark tbody tr:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+/* Modal/Dialog overrides */
+.dark [role="dialog"],
+.dark [role="alertdialog"] {
+  background-color: var(--bg-card) !important;
+}
+
+/* Dropdown/Menu overrides */
+.dark [role="menu"],
+.dark [role="listbox"] {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Hover state overrides */
+.dark .hover\:bg-gray-50:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+.dark .hover\:bg-gray-100:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+/* Badge/Chip backgrounds */
+.dark .bg-blue-50 {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.dark .bg-green-50 {
+  background-color: rgba(34, 197, 94, 0.2) !important;
+}
+
+.dark .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+.dark .bg-yellow-50 {
+  background-color: rgba(234, 179, 8, 0.2) !important;
+}
+
+.dark .bg-purple-50 {
+  background-color: rgba(168, 85, 247, 0.2) !important;
+}
+
+.dark .bg-orange-50 {
+  background-color: rgba(249, 115, 22, 0.2) !important;
+}
+
+.dark .bg-indigo-50 {
+  background-color: rgba(99, 102, 241, 0.2) !important;
+}
+
+/* Badge text colors for dark mode */
+.dark .text-blue-800,
+.dark .text-blue-700 {
+  color: rgb(147, 197, 253) !important;
+}
+
+.dark .text-green-800,
+.dark .text-green-700 {
+  color: rgb(134, 239, 172) !important;
+}
+
+.dark .text-red-800,
+.dark .text-red-700 {
+  color: rgb(252, 165, 165) !important;
+}
+
+.dark .text-yellow-800,
+.dark .text-yellow-700 {
+  color: rgb(253, 224, 71) !important;
+}
+
+.dark .text-purple-800,
+.dark .text-purple-700 {
+  color: rgb(216, 180, 254) !important;
+}
+
+.dark .text-orange-800,
+.dark .text-orange-700 {
+  color: rgb(253, 186, 116) !important;
+}
+
+/* Shadow adjustments for dark mode */
+.dark .shadow,
+.dark .shadow-sm,
+.dark .shadow-md,
+.dark .shadow-lg,
+.dark .shadow-xl {
+  --tw-shadow-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Icon color adjustments for dark mode */
+.dark svg {
+  opacity: 0.95;
+}
+
+.dark .text-gray-400 svg,
+.dark .text-gray-500 svg {
+  color: var(--text-muted) !important;
+}
+
+/* Specific icon colors that appear too light */
+.dark .text-blue-400 {
+  color: rgb(96, 165, 250) !important;
+}
+
+.dark .text-green-400 {
+  color: rgb(74, 222, 128) !important;
+}
+
+.dark .text-red-400 {
+  color: rgb(248, 113, 113) !important;
+}
+
+.dark .text-yellow-400 {
+  color: rgb(250, 204, 21) !important;
+}
+
+.dark .text-purple-400 {
+  color: rgb(192, 132, 252) !important;
+}
+
+.dark .text-indigo-400 {
+  color: rgb(129, 140, 248) !important;
+}
+
+/* Fix icon colors in specific contexts */
+.dark [class*="text-"][class*="-500"] svg,
+.dark [class*="text-"][class*="-600"] svg {
+  filter: brightness(1.1);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-hover);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Progress bar animation */
+@keyframes progressPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.progress-pulse {
+  animation: progressPulse 2s ease-in-out infinite;
+}
+
+/* Staggered animation for lists */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }

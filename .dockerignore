@@ -1,0 +1,45 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Dependencies (se instalan en build)
+backend/vendor
+frontend/node_modules
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs and cache
+backend/storage/logs/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+!backend/storage/logs/.gitkeep
+!backend/storage/framework/cache/.gitkeep
+!backend/storage/framework/sessions/.gitkeep
+!backend/storage/framework/views/.gitkeep
+
+# Build artifacts
+frontend/dist
+cloudron-deploy
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests
+backend/tests
+frontend/tests
+
+# Docs
+*.md
+!README.md

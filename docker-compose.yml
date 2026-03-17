@@ -1,0 +1,50 @@
+services:
+  app:
+    build: .
+    # image: hub.millan.ar/pwr360:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - app_data:/data  # Almacenamiento persistente para uploads y logs
+    environment:
+      # Simular variables de Cloudron
+      CLOUDRON_MYSQL_HOST: db
+      CLOUDRON_MYSQL_PORT: 3306
+      CLOUDRON_MYSQL_DATABASE: pwr360
+      CLOUDRON_MYSQL_USERNAME: pwr360
+      CLOUDRON_MYSQL_PASSWORD: pwr360_secret
+      CLOUDRON_APP_ORIGIN: http://localhost:8080
+      CLOUDRON_APP_DOMAIN: localhost
+      # Configuración SMTP
+      MAIL_MAILER: smtp
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION:-tls}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-noreply@example.com}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Mi Gimnasio}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root_secret
+      MYSQL_DATABASE: pwr360
+      MYSQL_USER: pwr360
+      MYSQL_PASSWORD: pwr360_secret
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_secret"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  app_data:  # Logos, fotos y archivos subidos
