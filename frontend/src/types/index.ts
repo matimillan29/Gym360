@@ -17,6 +17,7 @@ export interface User {
   foto?: string;
   estado: UserStatus;
   entrenador_asignado_id?: number;
+  plan_complejo?: boolean;
   entrenador?: {
     id: number;
     nombre: string;
@@ -71,6 +72,7 @@ export interface Macrociclo {
   id: number;
   entrenado_id: number;
   nombre?: string;
+  tipo_plan?: 'simple' | 'complejo';
   fecha_inicio: string;
   fecha_fin_estimada?: string;
   objetivo_general?: string;
@@ -330,9 +332,59 @@ export interface MesocicloDisplay {
 
 export interface PlanActivo {
   id: number;
+  tipo_plan?: 'simple' | 'complejo';
+  nombre?: string;
   objetivo_general?: string;
   fecha_inicio: string;
   mesociclo_actual?: MesocicloDisplay;
   total_mesociclos: number;
   mesociclos_desbloqueados: number;
+  // Simple plan fields
+  dias?: DiaSimple[];
+}
+
+// Planes simples
+export interface DiaEjercicio {
+  id: number;
+  sesion_ejercicio_id: number;
+  ejercicio_id: number;
+  ejercicio?: {
+    id: number;
+    nombre: string;
+    descripcion?: string;
+    video_url?: string;
+    imagen_url?: string;
+  };
+  orden: number;
+  etapa: string;
+  series: number;
+  repeticiones?: string | number;
+  tiempo?: number;
+  intensidad_tipo?: string;
+  intensidad_valor?: number;
+  descanso?: number;
+  observaciones?: string;
+  superserie_con?: number;
+}
+
+export interface DiaSimple {
+  id: number;
+  numero: number;
+  nombre?: string;
+  logica_entrenamiento?: string;
+  observaciones?: string;
+  completada?: boolean;
+  ejercicios: DiaEjercicio[];
+}
+
+export interface PlanSimple {
+  id: number;
+  tipo_plan: 'simple';
+  nombre: string;
+  objetivo_general?: string;
+  fecha_inicio: string;
+  activo: boolean;
+  entrenado_id: number;
+  created_at?: string;
+  dias: DiaSimple[];
 }

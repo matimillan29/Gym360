@@ -5,10 +5,13 @@ import api from '../../services/api';
 
 interface Macrociclo {
   id: number;
+  nombre?: string;
+  tipo_plan?: 'simple' | 'complejo';
   entrenado: {
     id: number;
     nombre: string;
     apellido: string;
+    plan_complejo?: boolean;
   };
   fecha_inicio: string;
   fecha_fin_estimada?: string;
@@ -143,8 +146,13 @@ export default function PlanesList() {
         setIsApplying(false);
       }
     } else {
-      // Crear plan desde cero
-      navigate(`/entrenador/planes/nuevo?entrenado=${selectedEntrenado}`);
+      // Crear plan desde cero - determinar tipo segun entrenado
+      const entrenadoData = entrenados.find((e: { id: number; plan_complejo?: boolean }) => e.id === selectedEntrenado);
+      if (entrenadoData?.plan_complejo) {
+        navigate(`/entrenador/planes/nuevo?entrenado=${selectedEntrenado}`);
+      } else {
+        navigate(`/entrenador/planes/simple/nuevo?entrenado=${selectedEntrenado}`);
+      }
     }
     setShowNewPlanModal(false);
     setSelectedPlantilla(null);
@@ -246,9 +254,21 @@ export default function PlanesList() {
                       {plan.entrenado?.nombre?.[0]}{plan.entrenado?.apellido?.[0]}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">
-                        {plan.entrenado?.nombre} {plan.entrenado?.apellido}
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-gray-900">
+                          {plan.entrenado?.nombre} {plan.entrenado?.apellido}
+                        </h3>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          plan.tipo_plan === 'simple'
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'bg-purple-100 text-purple-700'
+                        }`}>
+                          {plan.tipo_plan === 'simple' ? 'Simple' : 'Complejo'}
+                        </span>
+                      </div>
+                      {plan.nombre && (
+                        <p className="text-sm font-medium text-gray-700 mt-0.5">{plan.nombre}</p>
+                      )}
                       <p className="text-gray-600 mt-1">{plan.objetivo_general}</p>
                       <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-500">
                         <span className="flex items-center gap-1">
@@ -293,7 +313,11 @@ export default function PlanesList() {
                       </button>
                       <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
                         <button
-                          onClick={() => navigate(`/entrenador/planes/${plan.id}`)}
+                          onClick={() => navigate(
+                            plan.tipo_plan === 'simple'
+                              ? `/entrenador/planes/simple/${plan.id}`
+                              : `/entrenador/planes/${plan.id}`
+                          )}
                           className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

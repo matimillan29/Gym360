@@ -21,6 +21,7 @@ import EntrenadoDetalle from './pages/entrenador/EntrenadoDetalle';
 import EjerciciosList from './pages/entrenador/EjerciciosList';
 import PlanesList from './pages/entrenador/PlanesList';
 import PlanEditor from './pages/entrenador/PlanEditor';
+import PlanSimpleEditor from './pages/entrenador/PlanSimpleEditor';
 import EvaluacionesList from './pages/entrenador/EvaluacionesList';
 import CuotasGestion from './pages/entrenador/CuotasGestion';
 import FeedbackGestion from './pages/entrenador/FeedbackGestion';
@@ -138,6 +139,8 @@ function AppRoutes() {
         <Route path="entrenados/:id" element={<EntrenadoDetalle />} />
         <Route path="ejercicios" element={<EjerciciosList />} />
         <Route path="planes" element={<PlanesList />} />
+        <Route path="planes/simple/nuevo" element={<PlanSimpleEditor />} />
+        <Route path="planes/simple/:id" element={<PlanSimpleEditor />} />
         <Route path="planes/:id" element={<PlanEditor />} />
         <Route path="evaluaciones" element={<EvaluacionesList />} />
         <Route path="cuotas" element={<CuotasGestion />} />

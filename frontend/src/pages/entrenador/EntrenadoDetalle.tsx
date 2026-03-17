@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 interface Entrenado {
   id: number;
@@ -14,6 +15,7 @@ interface Entrenado {
   profesion?: string;
   foto?: string;
   estado: 'activo' | 'baja_temporal' | 'inactivo';
+  plan_complejo?: boolean;
   entrenador_asignado_id?: number;
   entrenador_asignado?: {
     id: number;
@@ -167,6 +169,7 @@ export default function EntrenadoDetalle() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('info');
 
   // Anamnesis state
@@ -440,6 +443,23 @@ export default function EntrenadoDetalle() {
       alert('Error al asignar entrenador. Por favor, intenta nuevamente.');
     },
   });
+
+  // Toggle plan complejo (admin only)
+  const togglePlanComplejoMutation = useMutation({
+    mutationFn: async () => {
+      return api.post(`/entrenados/${id}/toggle-plan-complejo`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['entrenado', id] });
+    },
+    onError: (error: any) => {
+      alert(error?.response?.data?.message || 'Error al cambiar tipo de plan.');
+    },
+  });
+
+  const handleTogglePlanComplejo = () => {
+    togglePlanComplejoMutation.mutate();
+  };
 
   // Handler para subir foto
   const handleFotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -744,6 +764,33 @@ export default function EntrenadoDetalle() {
                 </div>
               </div>
             </div>
+
+            {/* Toggle plan complejo - Admin only */}
+            {user?.role === 'admin' && (
+              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Periodizacion avanzada</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Habilita planes con macro/meso/microciclos
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleTogglePlanComplejo}
+                      disabled={togglePlanComplejoMutation.isPending}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        entrenado?.plan_complejo ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600'
+                      } ${togglePlanComplejoMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        entrenado?.plan_complejo ? 'translate-x-6' : 'translate-x-1'
+                      }`} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
