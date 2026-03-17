@@ -136,10 +136,12 @@ interface Feedback {
 
 interface Macrociclo {
   id: number;
+  nombre?: string;
   objetivo_general: string;
   fecha_inicio: string;
   fecha_fin_estimada?: string;
   activo: boolean;
+  tipo_plan?: string;
   mesociclos_count?: number;
 }
 
@@ -1575,7 +1577,7 @@ export default function EntrenadoDetalle() {
                     className={`border rounded-xl p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
                       plan.activo ? 'border-green-200 bg-green-50/50' : ''
                     }`}
-                    onClick={() => navigate(`/entrenador/planes/${plan.id}`)}
+                    onClick={() => navigate(plan.tipo_plan === 'simple' ? `/entrenador/planes/simple/${plan.id}` : `/entrenador/planes/${plan.id}`)}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">

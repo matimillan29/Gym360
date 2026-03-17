@@ -1,22 +1,17 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('sesion_ejercicios', function (Blueprint $table) {
-            $table->string('repeticiones', 50)->nullable()->change();
-        });
+        DB::statement('ALTER TABLE sesion_ejercicios MODIFY repeticiones VARCHAR(50) NULL');
     }
 
     public function down(): void
     {
-        Schema::table('sesion_ejercicios', function (Blueprint $table) {
-            $table->integer('repeticiones')->nullable()->change();
-        });
+        DB::statement('ALTER TABLE sesion_ejercicios MODIFY repeticiones INT NULL');
     }
 };
