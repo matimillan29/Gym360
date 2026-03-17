@@ -43,25 +43,47 @@ wait_for_db() {
 # ============================================================
 # Sincronizar código desde /app/data si fue pusheado ahí
 # ============================================================
-if [ -f "$PERSISTENT_DIR/artisan" ]; then
-    echo "=== Detectado código nuevo en $PERSISTENT_DIR ==="
+CODE_DIR="/app/code"
+
+# Sincronizar código nuevo si fue pusheado a /app/code
+if [ -f "$CODE_DIR/artisan" ]; then
+    echo "=== Detectado código en $CODE_DIR ==="
     echo "Sincronizando código a $APP_DIR..."
+
+    # Limpiar caches viejos ANTES de sincronizar
+    rm -rf $PERSISTENT_DIR/bootstrap-cache/*.php 2>/dev/null || true
 
     # Sincronizar todo excepto storage y .env (que son symlinks a persistente)
     rsync -a --delete \
         --exclude='storage' \
         --exclude='.env' \
         --exclude='bootstrap/cache' \
-        "$PERSISTENT_DIR/" "$APP_DIR/"
+        "$CODE_DIR/" "$APP_DIR/"
 
-    # Mover storage del push a la ubicación persistente correcta
-    if [ -d "$PERSISTENT_DIR/storage" ] && [ ! -L "$PERSISTENT_DIR/storage" ]; then
-        echo "Moviendo storage de push a ubicación persistente..."
-        # No sobreescribir archivos existentes (uploads, logs, etc.)
-        cp -rn "$PERSISTENT_DIR/storage/"* "$PERSISTENT_DIR/storage-persistent/" 2>/dev/null || true
-    fi
+    # Copiar start.sh actualizado
+    cp "$CODE_DIR/start.sh" /start.sh 2>/dev/null || true
+    chmod +x /start.sh 2>/dev/null || true
+
+    # Borrar lock file de migraciones para que se re-corran
+    rm -f $PERSISTENT_DIR/storage/app/.migrations_done 2>/dev/null || true
 
     echo "Código sincronizado."
+elif [ -f "$PERSISTENT_DIR/artisan" ]; then
+    # Fallback: si el código fue pusheado a /app/data (método anterior)
+    echo "=== Detectado código en $PERSISTENT_DIR (legacy) ==="
+    echo "Sincronizando código a $APP_DIR..."
+
+    rm -rf $PERSISTENT_DIR/bootstrap-cache/*.php 2>/dev/null || true
+
+    rsync -a --delete \
+        --exclude='storage' \
+        --exclude='.env' \
+        --exclude='bootstrap/cache' \
+        "$PERSISTENT_DIR/" "$APP_DIR/"
+
+    rm -f $PERSISTENT_DIR/storage/app/.migrations_done 2>/dev/null || true
+
+    echo "Código sincronizado (legacy)."
 fi
 
 # ============================================================
@@ -178,14 +200,22 @@ fi
 # ============================================================
 # Optimizar para producción
 # ============================================================
-echo "Optimizando para producción..."
+echo "Limpiando caches..."
 php artisan config:clear 2>/dev/null || true
 php artisan route:clear 2>/dev/null || true
 php artisan view:clear 2>/dev/null || true
+php artisan cache:clear 2>/dev/null || true
 
-php artisan config:cache 2>&1 || echo "Config cache falló"
-php artisan route:cache 2>&1 || echo "Route cache falló"
-php artisan view:cache 2>&1 || echo "View cache falló"
+echo "Generando caches de producción..."
+if ! php artisan config:cache 2>&1; then
+    echo "WARN: config:cache falló, usando sin cache"
+    php artisan config:clear 2>/dev/null || true
+fi
+if ! php artisan route:cache 2>&1; then
+    echo "WARN: route:cache falló, usando sin cache"
+    php artisan route:clear 2>/dev/null || true
+fi
+php artisan view:cache 2>&1 || true
 
 # ============================================================
 # Scheduler (cron para cuotas, emails, etc.)

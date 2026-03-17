@@ -60,6 +60,11 @@ jobs:
           cp start.sh /tmp/deploy/
           chmod +x /tmp/deploy/start.sh
 
+          # Borrar locks y caches viejos para forzar re-ejecución
+          rm -f /tmp/deploy/storage/app/.migrations_done 2>/dev/null || true
+          rm -f /tmp/deploy/storage/app/.last_migration_run 2>/dev/null || true
+          rm -f /tmp/deploy/bootstrap/cache/*.php 2>/dev/null || true
+
           # Crear estructura de storage
           mkdir -p /tmp/deploy/storage/app/public
           mkdir -p /tmp/deploy/storage/framework/cache/data
@@ -82,7 +87,7 @@ jobs:
           CLOUDRON_CREATE_APP_BACKUP: "false"
           # After push, Cloudron restarts the app automatically
           # start.sh will:
-          # 1. Sync code from /app/data to /var/www/html
+          # 1. Sync code from /app/code to /var/www/html
           # 2. Run php artisan migrate --force
           # 3. Clear and rebuild caches
           # 4. Start cron scheduler (for cuota auto-renewal)

@@ -82,54 +82,59 @@ ENV;
     chmod($envFile, 0640);
 }
 
-// Verificar si necesitamos correr migraciones
-$lockFile = __DIR__ . '/storage/app/.migrations_done';
+// Asegurar que los directorios de storage existen
+$storageDirs = [
+    __DIR__ . '/storage/app/public',
+    __DIR__ . '/storage/framework/cache/data',
+    __DIR__ . '/storage/framework/sessions',
+    __DIR__ . '/storage/framework/views',
+    __DIR__ . '/storage/logs',
+    __DIR__ . '/bootstrap/cache',
+];
 
-if (!file_exists($lockFile)) {
-    // Asegurar que los directorios de storage existen
-    $storageDirs = [
-        __DIR__ . '/storage/app/public',
-        __DIR__ . '/storage/framework/cache/data',
-        __DIR__ . '/storage/framework/sessions',
-        __DIR__ . '/storage/framework/views',
-        __DIR__ . '/storage/logs',
-        __DIR__ . '/bootstrap/cache',
-    ];
-
-    foreach ($storageDirs as $dir) {
-        if (!is_dir($dir)) {
-            mkdir($dir, 0775, true);
-        }
+foreach ($storageDirs as $dir) {
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0775, true);
     }
+}
 
-    // Ejecutar migraciones
+// Correr migraciones cuando el código cambia
+// Usa el mtime de artisan como proxy para detectar nuevos deploys
+$lockFile = __DIR__ . '/storage/app/.last_migration_run';
+$artisanMtime = @filemtime(__DIR__ . '/artisan');
+$lastRun = file_exists($lockFile) ? (int)trim(file_get_contents($lockFile)) : 0;
+
+if ($artisanMtime && $artisanMtime > $lastRun) {
     $output = [];
     $returnCode = 0;
-
-    // Cambiar al directorio de la app
     $currentDir = getcwd();
     chdir(__DIR__);
 
-    // Ejecutar artisan migrate
-    exec('php artisan migrate --force 2>&1', $output, $returnCode);
+    // Limpiar caches antes de migrar para evitar errores con cache vieja
+    $artisan = __DIR__ . '/artisan';
+    $php = PHP_BINARY;
+
+    $clearCmds = ['config:clear', 'route:clear', 'view:clear'];
+    foreach ($clearCmds as $cmd) {
+        $cmdOutput = [];
+        @exec(escapeshellarg($php) . ' ' . escapeshellarg($artisan) . ' ' . $cmd . ' 2>&1', $cmdOutput);
+    }
+
+    // Ejecutar migraciones pendientes
+    $migrateOutput = [];
+    @exec(escapeshellarg($php) . ' ' . escapeshellarg($artisan) . ' migrate --force 2>&1', $migrateOutput, $returnCode);
 
     if ($returnCode === 0) {
-        // Ejecutar seeders
-        exec('php artisan db:seed --force 2>&1', $output, $returnCode);
-
         // Crear link de storage
-        exec('php artisan storage:link --force 2>&1', $output, $returnCode);
-
-        // Limpiar cache
-        exec('php artisan config:clear 2>&1', $output, $returnCode);
-        exec('php artisan route:clear 2>&1', $output, $returnCode);
-        exec('php artisan view:clear 2>&1', $output, $returnCode);
+        @exec(escapeshellarg($php) . ' ' . escapeshellarg($artisan) . ' storage:link --force 2>&1');
 
         // Marcar como completado
-        file_put_contents($lockFile, date('Y-m-d H:i:s') . "\n" . implode("\n", $output));
+        @file_put_contents($lockFile, (string)$artisanMtime);
     } else {
-        // Log del error
-        file_put_contents(__DIR__ . '/storage/logs/migration_error.log', implode("\n", $output));
+        @file_put_contents(
+            __DIR__ . '/storage/logs/migration_error.log',
+            date('Y-m-d H:i:s') . "\n" . implode("\n", $migrateOutput)
+        );
     }
 
     chdir($currentDir);
