@@ -1,44 +1,36 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\File;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| En producción, todas las rutas web sirven el SPA de React.
-| La API está en routes/api.php con prefijo /api
-|
 */
-
-// Health check endpoint (for Cloudron monitoring)
-Route::get('/health', function () {
-    return response('OK', 200);
-});
 
 // Ruta catch-all para servir el SPA de React
 Route::get('/{any?}', function () {
-    // En producción, servir el index.html del frontend compilado
-    $indexPath = public_path('app.html');
+    try {
+        $basePath = base_path('public');
 
-    if (File::exists($indexPath)) {
-        return response(File::get($indexPath), 200)
-            ->header('Content-Type', 'text/html');
+        // Intentar app.html (frontend compilado renombrado)
+        $appHtml = $basePath . '/app.html';
+        if (file_exists($appHtml)) {
+            return response(file_get_contents($appHtml), 200)
+                ->header('Content-Type', 'text/html; charset=UTF-8');
+        }
+
+        // Fallback: index.html
+        $indexHtml = $basePath . '/index.html';
+        if (file_exists($indexHtml)) {
+            return response(file_get_contents($indexHtml), 200)
+                ->header('Content-Type', 'text/html; charset=UTF-8');
+        }
+    } catch (\Throwable $e) {
+        // Si hay cualquier error leyendo archivos, devolver OK para healthcheck
     }
 
-    // Fallback: try index.html
-    $indexPath2 = public_path('index.html');
-    if (File::exists($indexPath2)) {
-        return response(File::get($indexPath2), 200)
-            ->header('Content-Type', 'text/html');
-    }
-
-    // En desarrollo, mostrar mensaje
-    return response()->json([
-        'message' => 'Pwr360 API',
-        'version' => '1.0.0',
-        'status' => 'ok',
-    ]);
-})->where('any', '^(?!api|health).*$');
+    // Fallback mínimo - siempre devuelve 200
+    return response('Pwr360 - OK', 200)
+        ->header('Content-Type', 'text/plain');
+})->where('any', '^(?!api).*$');

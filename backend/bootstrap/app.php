@@ -24,12 +24,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
 
-        // Para API, devolver 401 JSON en vez de redirigir a login
+        // Siempre devolver 401 JSON para guests (es una SPA, no hay login page en Laravel)
         $middleware->redirectGuestsTo(function (Request $request) {
-            if ($request->expectsJson() || $request->is('api/*')) {
-                return null; // No redirigir, dejar que el handler de excepciones maneje
-            }
-            return route('login');
+            return null;
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
