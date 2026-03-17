@@ -71,7 +71,7 @@ export default function DashboardEntrenador() {
     queryKey: ['entrenados-recientes'],
     queryFn: async () => {
       try {
-        const response = await api.get('/entrenados?limit=5&sort=ultima_actividad');
+        const response = await api.get('/entrenados?per_page=5&sort=ultima_actividad');
         return response.data.data || response.data || [];
       } catch {
         return [];

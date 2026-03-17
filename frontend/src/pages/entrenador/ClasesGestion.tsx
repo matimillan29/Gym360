@@ -107,8 +107,8 @@ export default function ClasesGestion() {
   const { data: sucursales = [] } = useQuery<Sucursal[]>({
     queryKey: ['sucursales'],
     queryFn: async () => {
-      const response = await api.get('/sucursales');
-      return (response.data.data || []).filter((s: Sucursal) => s.activa);
+      const response = await api.get('/sucursales-activas');
+      return response.data.data || response.data || [];
     },
     enabled: !!gymConfig?.multi_sucursal,
   });

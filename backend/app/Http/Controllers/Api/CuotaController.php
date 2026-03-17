@@ -144,13 +144,14 @@ class CuotaController extends Controller
         $request->validate([
             'monto' => 'required|numeric|min:0.01',
             'metodo' => 'required|in:efectivo,transferencia,debito,credito,otro',
+            'fecha' => 'nullable|date',
             'notas' => 'nullable|string',
         ]);
 
         $pago = Pago::create([
             'cuota_id' => $cuota->id,
             'monto' => $request->monto,
-            'fecha' => Carbon::now(),
+            'fecha' => $request->fecha ? Carbon::parse($request->fecha) : Carbon::now(),
             'metodo' => $request->metodo,
             'notas' => $request->notas,
         ]);

@@ -138,7 +138,14 @@ class LinkAdjuntoController extends Controller
             $query->where('categoria', $request->categoria);
         }
 
-        $links = $query->orderByDesc('created_at')->get();
+        $query->orderByDesc('created_at');
+
+        if ($request->has('per_page') || $request->has('page')) {
+            $links = $query->paginate($request->get('per_page', 50));
+            return response()->json($links);
+        }
+
+        $links = $query->get();
 
         return response()->json([
             'data' => $links,

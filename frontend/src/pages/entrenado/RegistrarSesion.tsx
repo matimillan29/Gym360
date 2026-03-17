@@ -200,9 +200,9 @@ export default function RegistrarSesion() {
         </div>
 
         {/* Barra de progreso */}
-        <div className="h-2 bg-white dark:bg-gray-800 rounded-full overflow-hidden">
+        <div className="h-2 bg-white/30 rounded-full overflow-hidden">
           <div
-            className="h-full bg-white dark:bg-gray-800 transition-all duration-300"
+            className="h-full bg-white transition-all duration-300"
             style={{ width: `${progreso}%` }}
           />
         </div>

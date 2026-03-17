@@ -40,7 +40,8 @@ class EntrenadoController extends Controller
             $query->where('entrenador_asignado_id', $request->entrenador_id);
         }
 
-        $entrenados = $query->paginate($request->get('per_page', 15));
+        $perPage = $request->get('per_page', $request->get('limit', 15));
+        $entrenados = $query->paginate($perPage);
 
         return response()->json($entrenados);
     }

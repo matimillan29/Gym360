@@ -102,9 +102,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // Sucursales activas (para selectores - disponible para todos los autenticados)
     Route::get('/sucursales-activas', [SucursalController::class, 'activas']);
 
-    // Entrenadores (solo admin)
+    // Entrenadores - GET index disponible para entrenadores, resto solo admin
+    Route::middleware('role:admin,entrenador')->group(function () {
+        Route::get('/entrenadores', [EntrenadorController::class, 'index']);
+    });
     Route::middleware('role:admin')->group(function () {
-        Route::apiResource('entrenadores', EntrenadorController::class);
+        Route::post('/entrenadores', [EntrenadorController::class, 'store']);
+        Route::get('/entrenadores/{entrenador}', [EntrenadorController::class, 'show']);
+        Route::put('/entrenadores/{entrenador}', [EntrenadorController::class, 'update']);
+        Route::delete('/entrenadores/{entrenador}', [EntrenadorController::class, 'destroy']);
     });
 
     // Entrenados (entrenadores y admin)
