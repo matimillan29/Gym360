@@ -43,7 +43,7 @@ export default function MisLogros() {
   if (!estadisticas) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">No se pudieron cargar las estadisticas</p>
+        <p className="text-gray-500 dark:text-gray-400">No se pudieron cargar las estadisticas</p>
       </div>
     );
   }
@@ -55,14 +55,14 @@ export default function MisLogros() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Mis logros</h1>
-          <p className="text-gray-500">Tu progreso y medallas</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Mis logros</h1>
+          <p className="text-gray-500 dark:text-gray-400">Tu progreso y medallas</p>
         </div>
         <div className="text-right">
           <p className="text-3xl font-bold text-green-600">
             {logros.desbloqueados}/{logros.total}
           </p>
-          <p className="text-sm text-gray-500">logros desbloqueados</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">logros desbloqueados</p>
         </div>
       </div>
 
@@ -77,23 +77,23 @@ export default function MisLogros() {
       />
 
       {/* Progreso general */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Progreso general</h2>
-        <div className="h-4 bg-gray-100 rounded-full overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Progreso general</h2>
+        <div className="h-4 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-500"
-            style={{ width: `${(logros.desbloqueados / logros.total) * 100}%` }}
+            style={{ width: `${logros.total > 0 ? (logros.desbloqueados / logros.total) * 100 : 0}%` }}
           />
         </div>
-        <p className="text-sm text-gray-500 mt-2">
-          {Math.round((logros.desbloqueados / logros.total) * 100)}% completado
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+          {logros.total > 0 ? Math.round((logros.desbloqueados / logros.total) * 100) : 0}% completado
         </p>
       </div>
 
       {/* Logros recientes */}
       {logros.recientes.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Logros recientes</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Logros recientes</h2>
           <div className="flex flex-wrap gap-6 justify-center">
             {logros.recientes.map((logro) => (
               <LogroBadge
@@ -113,15 +113,15 @@ export default function MisLogros() {
 
       {/* Logros por categoria */}
       {Object.entries(logros.por_categoria).map(([categoria, logrosCategoria]) => (
-        <div key={categoria} className="bg-white rounded-xl shadow-sm p-6">
+        <div key={categoria} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
           <div className="flex items-center gap-2 mb-4">
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {CATEGORIA_ICONS[categoria]}
             </svg>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               {CATEGORIA_LABELS[categoria] || categoria}
             </h2>
-            <span className="ml-auto text-sm text-gray-500">
+            <span className="ml-auto text-sm text-gray-500 dark:text-gray-400">
               {logrosCategoria.filter((l) => l.desbloqueado).length}/{logrosCategoria.length}
             </span>
           </div>

@@ -86,13 +86,13 @@ export default function Evaluaciones() {
 
   const getColorClasses = (color: string) => {
     const colors: Record<string, { bg: string; text: string; border: string }> = {
-      red: { bg: 'bg-red-100', text: 'text-red-600', border: 'border-red-200' },
-      yellow: { bg: 'bg-yellow-100', text: 'text-yellow-600', border: 'border-yellow-200' },
-      pink: { bg: 'bg-pink-100', text: 'text-pink-600', border: 'border-pink-200' },
-      purple: { bg: 'bg-purple-100', text: 'text-purple-600', border: 'border-purple-200' },
-      blue: { bg: 'bg-blue-100', text: 'text-blue-600', border: 'border-blue-200' },
-      green: { bg: 'bg-green-100', text: 'text-green-600', border: 'border-green-200' },
-      orange: { bg: 'bg-orange-100', text: 'text-orange-600', border: 'border-orange-200' },
+      red: { bg: 'bg-red-100 dark:bg-red-900/50', text: 'text-red-600', border: 'border-red-200 dark:border-red-800' },
+      yellow: { bg: 'bg-yellow-100 dark:bg-yellow-900/50', text: 'text-yellow-600', border: 'border-yellow-200 dark:border-yellow-800' },
+      pink: { bg: 'bg-pink-100 dark:bg-pink-900/50', text: 'text-pink-600', border: 'border-pink-200' },
+      purple: { bg: 'bg-purple-100 dark:bg-purple-900/50', text: 'text-purple-600', border: 'border-purple-200 dark:border-purple-800' },
+      blue: { bg: 'bg-blue-100 dark:bg-blue-900/50', text: 'text-blue-600', border: 'border-blue-200' },
+      green: { bg: 'bg-green-100 dark:bg-green-900/50', text: 'text-green-600', border: 'border-green-200 dark:border-green-800' },
+      orange: { bg: 'bg-orange-100 dark:bg-orange-900/50', text: 'text-orange-600', border: 'border-orange-200 dark:border-orange-800' },
     };
     return colors[color] || colors.blue;
   };
@@ -100,7 +100,7 @@ export default function Evaluaciones() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Cargando evaluaciones...</p>
+        <p className="text-gray-500 dark:text-gray-400">Cargando evaluaciones...</p>
       </div>
     );
   }
@@ -116,14 +116,14 @@ export default function Evaluaciones() {
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-xl shadow-sm p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setTipoFiltro('')}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               !tipoFiltro
-                ? 'bg-orange-100 text-orange-700'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-orange-100 dark:bg-orange-900/50 text-orange-700'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
             }`}
           >
             Todas
@@ -134,8 +134,8 @@ export default function Evaluaciones() {
               onClick={() => setTipoFiltro(key)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 tipoFiltro === key
-                  ? 'bg-orange-100 text-orange-700'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-orange-100 dark:bg-orange-900/50 text-orange-700'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
               {config.label}
@@ -156,13 +156,13 @@ export default function Evaluaciones() {
             return (
               <div
                 key={`${grupo.tipo}-${grupo.nombre}`}
-                className="bg-white rounded-xl shadow-sm overflow-hidden"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden"
               >
                 <button
                   onClick={() =>
                     setEvaluacionExpandida(isExpanded ? null : `${grupo.tipo}-${grupo.nombre}`)
                   }
-                  className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-xl ${colorClasses.bg} flex items-center justify-center`}>
@@ -171,8 +171,8 @@ export default function Evaluaciones() {
                       </svg>
                     </div>
                     <div className="text-left">
-                      <p className="font-medium text-gray-900">{grupo.nombre}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="font-medium text-gray-900 dark:text-white">{grupo.nombre}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
                         {tipoConfig.label} • {grupo.evaluaciones.length} registros
                       </p>
                     </div>
@@ -180,8 +180,8 @@ export default function Evaluaciones() {
 
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-gray-900">
-                        {ultimaEvaluacion.valor} <span className="text-sm font-normal text-gray-500">{grupo.unidad}</span>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {ultimaEvaluacion.valor} <span className="text-sm font-normal text-gray-500 dark:text-gray-400">{grupo.unidad}</span>
                       </p>
                       {grupo.mejora_porcentaje !== undefined && (
                         <p className={`text-sm font-medium ${
@@ -193,7 +193,7 @@ export default function Evaluaciones() {
                       )}
                     </div>
                     <svg
-                      className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                      className={`w-5 h-5 text-gray-400 dark:text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -204,21 +204,21 @@ export default function Evaluaciones() {
                 </button>
 
                 {isExpanded && (
-                  <div className="px-4 pb-4 border-t">
-                    <h4 className="text-sm font-medium text-gray-700 mt-4 mb-3">Historial de evaluaciones:</h4>
+                  <div className="px-4 pb-4 border-t dark:border-gray-700">
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-4 mb-3">Historial de evaluaciones:</h4>
                     <div className="space-y-2">
                       {grupo.evaluaciones.slice().reverse().map((ev, idx) => (
                         <div
                           key={ev.id}
                           className={`flex items-center justify-between p-3 rounded-lg ${
-                            idx === 0 ? `${colorClasses.bg} ${colorClasses.border} border` : 'bg-gray-50'
+                            idx === 0 ? `${colorClasses.bg} ${colorClasses.border} border` : 'bg-gray-50 dark:bg-gray-700'
                           }`}
                         >
                           <div>
-                            <p className={`font-medium ${idx === 0 ? colorClasses.text : 'text-gray-900'}`}>
+                            <p className={`font-medium ${idx === 0 ? colorClasses.text : 'text-gray-900 dark:text-white'}`}>
                               {ev.valor} {ev.unidad}
                             </p>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
                               {new Date(ev.fecha).toLocaleDateString('es-AR', {
                                 day: 'numeric',
                                 month: 'long',
@@ -227,7 +227,7 @@ export default function Evaluaciones() {
                               {' • '}Por {ev.entrenador_nombre}
                             </p>
                             {ev.descripcion && (
-                              <p className="text-xs text-gray-400 mt-1">{ev.descripcion}</p>
+                              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{ev.descripcion}</p>
                             )}
                           </div>
                           {idx === 0 && (
@@ -241,11 +241,11 @@ export default function Evaluaciones() {
 
                     {/* Mini gráfico de evolución */}
                     {grupo.evaluaciones.length > 1 && (
-                      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                        <h5 className="text-xs font-medium text-gray-500 mb-2">Evolución</h5>
+                      <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Evolución</h5>
                         <div className="flex items-end gap-1 h-16">
                           {grupo.evaluaciones.map((ev, idx) => {
-                            const max = Math.max(...grupo.evaluaciones.map((e) => e.valor));
+                            const max = Math.max(...grupo.evaluaciones.map((e) => e.valor), 1);
                             const height = (ev.valor / max) * 100;
                             return (
                               <div
@@ -270,12 +270,12 @@ export default function Evaluaciones() {
           })}
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-          <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 text-center">
+          <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
-          <h3 className="text-lg font-medium text-gray-900 mb-1">No hay evaluaciones</h3>
-          <p className="text-gray-500">Tu entrenador registrará tus evaluaciones de rendimiento</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">No hay evaluaciones</h3>
+          <p className="text-gray-500 dark:text-gray-400">Tu entrenador registrará tus evaluaciones de rendimiento</p>
         </div>
       )}
     </div>

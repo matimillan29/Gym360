@@ -315,6 +315,8 @@ Route::middleware('auth:sanctum')->group(function () {
         // Mi plan activo
         Route::get('/plan', [MacrocicloController::class, 'miPlanActivo']);
         Route::get('/plan/sesion-hoy', [SesionController::class, 'miSesionHoy']);
+        Route::get('/plan/pdf', [MacrocicloController::class, 'miPlanPdf']);
+        Route::post('/plan/enviar-email', [MacrocicloController::class, 'enviarPlanEmail']);
 
         // Registrar desempeño de sesión
         Route::post('/sesiones/{sesion}/iniciar', [SesionController::class, 'iniciarSesion']);

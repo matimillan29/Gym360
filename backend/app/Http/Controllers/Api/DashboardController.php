@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Cuota;
+use App\Models\Ejercicio;
+use App\Models\Evaluacion;
 use App\Models\Macrociclo;
 use App\Models\RegistroSesion;
 use App\Models\AuditLog;
@@ -21,38 +23,28 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        // Obtener IDs de entrenados asignados
-        $entrenadoIds = User::where('entrenador_asignado_id', $user->id)
-            ->pluck('id');
+        // Build base query for entrenados, scoped by role
+        $entrenados = User::where('role', 'entrenado');
+        if ($user->role !== 'admin') {
+            $entrenados = $entrenados->where('entrenador_asignado_id', $user->id);
+        }
 
-        $totalEntrenados = $entrenadoIds->count();
-        $entrenadosActivos = User::where('entrenador_asignado_id', $user->id)
-            ->where('estado', 'activo')
-            ->count();
+        $entrenadoIds = (clone $entrenados)->pluck('id');
 
-        // Planes activos de sus entrenados
-        $planesActivos = Macrociclo::whereIn('entrenado_id', $entrenadoIds)
-            ->where('activo', true)
-            ->count();
-
-        // Cuotas pendientes/vencidas
-        $cuotasPendientes = Cuota::whereIn('entrenado_id', $entrenadoIds)
-            ->whereIn('estado', ['pendiente', 'mora'])
-            ->count();
-
-        // Actividad reciente (últimos 7 días)
-        $actividadReciente = RegistroSesion::whereIn('entrenado_id', $entrenadoIds)
-            ->where('fecha', '>=', Carbon::now()->subDays(7))
-            ->count();
+        $stats = [
+            'entrenados_activos' => (clone $entrenados)->where('estado', 'activo')->count(),
+            'entrenados_baja_temporal' => (clone $entrenados)->where('estado', 'baja_temporal')->count(),
+            'planes_activos' => Macrociclo::whereIn('entrenado_id', $entrenadoIds)->where('activo', true)->count(),
+            'total_ejercicios' => Ejercicio::count(),
+            'sesiones_hoy' => RegistroSesion::whereDate('fecha', today())->count(),
+            'cuotas_pendientes' => Cuota::whereIn('entrenado_id', $entrenadoIds)->where('estado', 'pendiente')->count(),
+            'cuotas_vencidas' => Cuota::whereIn('entrenado_id', $entrenadoIds)->whereIn('estado', ['vencido', 'mora'])->count(),
+            'asistencia_promedio' => 0, // TODO: calculate from registros
+            'evaluaciones_mes' => Evaluacion::whereIn('entrenado_id', $entrenadoIds)->whereMonth('created_at', now()->month)->count(),
+        ];
 
         return response()->json([
-            'data' => [
-                'total_entrenados' => $totalEntrenados,
-                'entrenados_activos' => $entrenadosActivos,
-                'planes_activos' => $planesActivos,
-                'cuotas_pendientes' => $cuotasPendientes,
-                'actividad_reciente_7d' => $actividadReciente,
-            ],
+            'data' => $stats,
         ]);
     }
 
@@ -63,20 +55,29 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        $entrenadoIds = User::where('entrenador_asignado_id', $user->id)
-            ->pluck('id');
+        $entrenados = User::where('role', 'entrenado');
+        if ($user->role !== 'admin') {
+            $entrenados = $entrenados->where('entrenador_asignado_id', $user->id);
+        }
+        $entrenadoIds = $entrenados->pluck('id');
 
-        $registros = RegistroSesion::whereIn('entrenado_id', $entrenadoIds)
-            ->with([
-                'entrenado:id,nombre,apellido,foto',
-                'sesion:id,numero,microciclo_id',
-            ])
-            ->orderByDesc('fecha')
-            ->limit(20)
-            ->get();
+        $actividad = RegistroSesion::with('entrenado', 'sesion')
+            ->whereIn('entrenado_id', $entrenadoIds)
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($registro) {
+                return [
+                    'id' => $registro->id,
+                    'tipo' => 'sesion',
+                    'descripcion' => 'Completó sesión ' . ($registro->sesion->numero ?? ''),
+                    'entrenado_nombre' => $registro->entrenado->nombre . ' ' . $registro->entrenado->apellido,
+                    'fecha' => $registro->created_at->toISOString(),
+                ];
+            });
 
         return response()->json([
-            'data' => $registros,
+            'data' => $actividad,
         ]);
     }
 
@@ -87,25 +88,32 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        $entrenadoIds = User::where('entrenador_asignado_id', $user->id)
-            ->where('estado', 'activo')
-            ->pluck('id');
+        $entrenados = User::where('role', 'entrenado')->where('estado', 'activo');
+        if ($user->role !== 'admin') {
+            $entrenados = $entrenados->where('entrenador_asignado_id', $user->id);
+        }
+        $entrenadoIds = $entrenados->pluck('id');
+
+        $alertas = [];
 
         // Entrenados con cuotas vencidas o en mora
-        $cuotasVencidas = Cuota::whereIn('entrenado_id', $entrenadoIds)
+        $cuotasVencidas = Cuota::with('entrenado')
+            ->whereIn('entrenado_id', $entrenadoIds)
             ->whereIn('estado', ['vencido', 'mora'])
-            ->with('entrenado:id,nombre,apellido')
-            ->get()
-            ->map(function ($cuota) {
-                return [
+            ->get();
+        foreach ($cuotasVencidas as $cuota) {
+            if ($cuota->entrenado) {
+                $alertas[] = [
+                    'id' => $cuota->entrenado_id,
+                    'nombre' => $cuota->entrenado->nombre,
+                    'apellido' => $cuota->entrenado->apellido,
                     'tipo' => 'cuota_vencida',
-                    'entrenado' => $cuota->entrenado,
-                    'detalle' => 'Cuota vencida desde ' . $cuota->fecha_vencimiento->format('d/m/Y'),
+                    'detalle' => 'Cuota vencida desde ' . ($cuota->fecha_vencimiento ? $cuota->fecha_vencimiento->format('d/m/Y') : 'N/A'),
                 ];
-            });
+            }
+        }
 
         // Entrenados con baja asistencia (menos de 2 sesiones en las últimas 2 semanas)
-        $bajaAsistencia = collect();
         foreach ($entrenadoIds as $entrenadoId) {
             $sesionesRecientes = RegistroSesion::where('entrenado_id', $entrenadoId)
                 ->where('fecha', '>=', Carbon::now()->subWeeks(2))
@@ -114,11 +122,13 @@ class DashboardController extends Controller
             if ($sesionesRecientes < 2) {
                 $entrenado = User::select('id', 'nombre', 'apellido')->find($entrenadoId);
                 if ($entrenado) {
-                    $bajaAsistencia->push([
+                    $alertas[] = [
+                        'id' => $entrenado->id,
+                        'nombre' => $entrenado->nombre,
+                        'apellido' => $entrenado->apellido,
                         'tipo' => 'baja_asistencia',
-                        'entrenado' => $entrenado,
                         'detalle' => "Solo {$sesionesRecientes} sesiones en las últimas 2 semanas",
-                    ]);
+                    ];
                 }
             }
         }
@@ -130,21 +140,21 @@ class DashboardController extends Controller
             ->where('fecha_fin_estimada', '<=', Carbon::now()->addWeeks(2))
             ->where('fecha_fin_estimada', '>=', Carbon::now())
             ->with('entrenado:id,nombre,apellido')
-            ->get()
-            ->map(function ($macro) {
-                return [
+            ->get();
+        foreach ($planesPorVencer as $macro) {
+            if ($macro->entrenado) {
+                $alertas[] = [
+                    'id' => $macro->entrenado->id,
+                    'nombre' => $macro->entrenado->nombre,
+                    'apellido' => $macro->entrenado->apellido,
                     'tipo' => 'plan_por_vencer',
-                    'entrenado' => $macro->entrenado,
                     'detalle' => 'Plan "' . $macro->nombre . '" vence el ' . $macro->fecha_fin_estimada->format('d/m/Y'),
                 ];
-            });
-
-        $alertas = $cuotasVencidas
-            ->concat($bajaAsistencia)
-            ->concat($planesPorVencer);
+            }
+        }
 
         return response()->json([
-            'data' => $alertas->values(),
+            'data' => $alertas,
         ]);
     }
 }

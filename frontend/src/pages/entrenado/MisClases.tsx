@@ -122,7 +122,7 @@ export default function MisClases() {
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             activeTab === 'disponibles'
               ? 'bg-purple-600 text-white'
-              : 'bg-white text-gray-600 hover:bg-gray-100'
+              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
         >
           Actividades disponibles
@@ -132,13 +132,13 @@ export default function MisClases() {
           className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
             activeTab === 'reservas'
               ? 'bg-purple-600 text-white'
-              : 'bg-white text-gray-600 hover:bg-gray-100'
+              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
         >
           Mis reservas
           {misReservas.length > 0 && (
             <span className={`px-2 py-0.5 rounded-full text-xs ${
-              activeTab === 'reservas' ? 'bg-white/20' : 'bg-purple-100 text-purple-600'
+              activeTab === 'reservas' ? 'bg-white dark:bg-gray-800' : 'bg-purple-100 dark:bg-purple-900/50 text-purple-600'
             }`}>
               {misReservas.length}
             </span>
@@ -149,7 +149,7 @@ export default function MisClases() {
       {activeTab === 'disponibles' && (
         <>
           {/* Selector de día */}
-          <div className="bg-white rounded-xl shadow-sm p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
             <div className="flex gap-2 overflow-x-auto pb-2">
               {getNextDays().map((day) => (
                 <button
@@ -158,7 +158,7 @@ export default function MisClases() {
                   className={`flex-shrink-0 px-4 py-3 rounded-xl text-center transition-colors ${
                     selectedDate === day
                       ? 'bg-purple-600 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                 >
                   <p className="text-xs uppercase">
@@ -174,39 +174,39 @@ export default function MisClases() {
 
           {/* Lista de clases */}
           <div className="space-y-4">
-            <h2 className="font-semibold text-gray-900 capitalize">
+            <h2 className="font-semibold text-gray-900 dark:text-white capitalize">
               {getDayName(selectedDate)}
             </h2>
 
             {loadingDisponibles ? (
-              <div className="bg-white rounded-xl p-8 text-center">
-                <p className="text-gray-500">Cargando actividades...</p>
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center">
+                <p className="text-gray-500 dark:text-gray-400">Cargando actividades...</p>
               </div>
             ) : clasesDisponibles.length === 0 ? (
-              <div className="bg-white rounded-xl p-8 text-center">
-                <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center">
+                <svg className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <p className="text-gray-500">No hay actividades programadas para este día</p>
+                <p className="text-gray-500 dark:text-gray-400">No hay actividades programadas para este día</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {clasesDisponibles.map((clase) => (
                   <div
                     key={clase.id}
-                    className="bg-white rounded-xl shadow-sm overflow-hidden"
+                    className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden"
                   >
                     <div className="h-1" style={{ backgroundColor: clase.clase.color }} />
                     <div className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <span className="text-lg font-bold text-gray-900">
+                            <span className="text-lg font-bold text-gray-900 dark:text-white">
                               {clase.hora_inicio.slice(0, 5)}
                             </span>
                             <div>
-                              <h3 className="font-semibold text-gray-900">{clase.clase.nombre}</h3>
-                              <p className="text-sm text-gray-500">
+                              <h3 className="font-semibold text-gray-900 dark:text-white">{clase.clase.nombre}</h3>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
                                 {clase.clase.duracion_minutos} min
                                 {clase.instructor && ` • ${clase.instructor.nombre} ${clase.instructor.apellido}`}
                               </p>
@@ -216,10 +216,10 @@ export default function MisClases() {
                           <div className="flex items-center gap-2 text-sm">
                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                               clase.lugares_disponibles > 3
-                                ? 'bg-green-100 text-green-700'
+                                ? 'bg-green-100 dark:bg-green-900/50 text-green-700'
                                 : clase.lugares_disponibles > 0
-                                ? 'bg-yellow-100 text-yellow-700'
-                                : 'bg-red-100 text-red-700'
+                                ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700'
+                                : 'bg-red-100 dark:bg-red-900/50 text-red-700'
                             }`}>
                               {clase.lugares_disponibles > 0
                                 ? `${clase.lugares_disponibles} lugares`
@@ -230,12 +230,12 @@ export default function MisClases() {
 
                         <div>
                           {!clase.clase.requiere_reserva ? (
-                            <span className="px-3 py-2 bg-green-50 text-green-700 rounded-lg text-sm font-medium">
+                            <span className="px-3 py-2 bg-green-50 dark:bg-green-900/30 text-green-700 rounded-lg text-sm font-medium">
                               Entrada libre
                             </span>
                           ) : clase.ya_reservado ? (
                             <div className="text-center">
-                              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium mb-2 inline-block">
+                              <span className="px-3 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 rounded-full text-sm font-medium mb-2 inline-block">
                                 Reservado
                               </span>
                               <button
@@ -272,18 +272,18 @@ export default function MisClases() {
 
       {activeTab === 'reservas' && (
         <div className="space-y-4">
-          <h2 className="font-semibold text-gray-900">Próximas reservas</h2>
+          <h2 className="font-semibold text-gray-900 dark:text-white">Próximas reservas</h2>
 
           {loadingReservas ? (
-            <div className="bg-white rounded-xl p-8 text-center">
-              <p className="text-gray-500">Cargando reservas...</p>
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center">
+              <p className="text-gray-500 dark:text-gray-400">Cargando reservas...</p>
             </div>
           ) : misReservas.length === 0 ? (
-            <div className="bg-white rounded-xl p-8 text-center">
-              <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center">
+              <svg className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              <p className="text-gray-500 mb-2">No tenés reservas pendientes</p>
+              <p className="text-gray-500 dark:text-gray-400 mb-2">No tenés reservas pendientes</p>
               <button
                 onClick={() => setActiveTab('disponibles')}
                 className="text-purple-600 hover:text-purple-700 font-medium"
@@ -296,13 +296,13 @@ export default function MisClases() {
               {misReservas.map((reserva) => (
                 <div
                   key={reserva.id}
-                  className="bg-white rounded-xl shadow-sm overflow-hidden"
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden"
                 >
                   <div className="h-1" style={{ backgroundColor: reserva.horario_clase.clase.color }} />
                   <div className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-gray-500 mb-1">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
                           {new Date(reserva.fecha + 'T12:00:00').toLocaleDateString('es-AR', {
                             weekday: 'long',
                             day: 'numeric',
@@ -310,15 +310,15 @@ export default function MisClases() {
                           })}
                         </p>
                         <div className="flex items-center gap-3">
-                          <span className="text-lg font-bold text-gray-900">
+                          <span className="text-lg font-bold text-gray-900 dark:text-white">
                             {reserva.horario_clase.hora_inicio.slice(0, 5)}
                           </span>
                           <div>
-                            <h3 className="font-semibold text-gray-900">
+                            <h3 className="font-semibold text-gray-900 dark:text-white">
                               {reserva.horario_clase.clase.nombre}
                             </h3>
                             {reserva.horario_clase.instructor && (
-                              <p className="text-sm text-gray-500">
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
                                 {reserva.horario_clase.instructor.nombre} {reserva.horario_clase.instructor.apellido}
                               </p>
                             )}
@@ -329,10 +329,10 @@ export default function MisClases() {
                       <div className="text-right">
                         <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                           reserva.estado === 'reservado'
-                            ? 'bg-blue-100 text-blue-700'
+                            ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700'
                             : reserva.estado === 'presente'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-gray-100 text-gray-600'
+                            ? 'bg-green-100 dark:bg-green-900/50 text-green-700'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                         }`}>
                           {reserva.estado === 'reservado' ? 'Confirmado' : reserva.estado}
                         </span>

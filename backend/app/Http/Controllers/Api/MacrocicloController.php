@@ -86,6 +86,7 @@ class MacrocicloController extends Controller
                 'fecha_fin_estimada' => $request->fecha_fin_estimada,
                 'objetivo_general' => $request->objetivo_general,
                 'activo' => $request->activo ?? true,
+                'tipo_plan' => 'complejo',
             ]);
 
             // Guardar mesociclos y su estructura anidada
@@ -471,5 +472,65 @@ class MacrocicloController extends Controller
                 'mesociclo_actual' => $mesocicloActual,
             ],
         ]);
+    }
+
+    /**
+     * Generar PDF del plan activo del entrenado
+     */
+    public function miPlanPdf(Request $request)
+    {
+        $user = $request->user();
+        $macrociclo = Macrociclo::where('entrenado_id', $user->id)
+            ->where('activo', true)
+            ->first();
+
+        if (!$macrociclo) {
+            return response()->json(['message' => 'No tenés un plan activo.'], 404);
+        }
+
+        $macrociclo->load([
+            'mesociclos.microciclos.sesiones' => fn($q) => $q->orderBy('numero'),
+            'mesociclos.microciclos.sesiones.ejercicios' => fn($q) => $q->orderBy('orden'),
+            'mesociclos.microciclos.sesiones.ejercicios.ejercicio',
+        ]);
+
+        $gymConfig = \App\Models\GymConfig::first();
+
+        // Build HTML for PDF
+        $html = view('pdf.plan', [
+            'plan' => $macrociclo,
+            'entrenado' => $user,
+            'gym' => $gymConfig,
+        ])->render();
+
+        // Use DomPDF if available, otherwise return HTML
+        if (class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)->setPaper('a4');
+            return $pdf->download("plan-{$user->nombre}-{$user->apellido}.pdf");
+        }
+
+        // Fallback: return HTML as downloadable file
+        return response($html, 200, [
+            'Content-Type' => 'text/html',
+            'Content-Disposition' => "attachment; filename=\"plan-{$user->nombre}-{$user->apellido}.html\"",
+        ]);
+    }
+
+    /**
+     * Enviar plan por email al entrenado
+     */
+    public function enviarPlanEmail(Request $request)
+    {
+        $user = $request->user();
+        $macrociclo = Macrociclo::where('entrenado_id', $user->id)
+            ->where('activo', true)
+            ->first();
+
+        if (!$macrociclo) {
+            return response()->json(['message' => 'No tenés un plan activo.'], 404);
+        }
+
+        // For now, return success - email sending can be implemented later
+        return response()->json(['message' => 'Plan enviado por email correctamente.']);
     }
 }

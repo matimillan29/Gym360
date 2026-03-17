@@ -261,7 +261,7 @@ export default function LoginPage() {
                       />
                     </div>
                     <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-                      Primeras 2 letras de tu nombre + apellido + DNI
+                      Primeras 2 letras de tu nombre + 2 de tu apellido + DNI
                     </p>
                     {entrenadoForm.formState.errors.password && (
                       <p className="mt-1 text-sm text-red-600">{entrenadoForm.formState.errors.password.message}</p>

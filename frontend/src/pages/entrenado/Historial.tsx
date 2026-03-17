@@ -84,7 +84,7 @@ export default function Historial() {
   const getEstadoConfig = (estado: string) => {
     const configs = {
       completado: {
-        bg: 'bg-green-100',
+        bg: 'bg-green-100 dark:bg-green-900/50',
         text: 'text-green-700',
         label: 'Completada',
         icon: (
@@ -94,7 +94,7 @@ export default function Historial() {
         ),
       },
       parcial: {
-        bg: 'bg-yellow-100',
+        bg: 'bg-yellow-100 dark:bg-yellow-900/50',
         text: 'text-yellow-700',
         label: 'Parcial',
         icon: (
@@ -104,7 +104,7 @@ export default function Historial() {
         ),
       },
       falto: {
-        bg: 'bg-red-100',
+        bg: 'bg-red-100 dark:bg-red-900/50',
         text: 'text-red-700',
         label: 'Faltó',
         icon: (
@@ -133,7 +133,7 @@ export default function Historial() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Cargando historial...</p>
+        <p className="text-gray-500 dark:text-gray-400">Cargando historial...</p>
       </div>
     );
   }
@@ -149,58 +149,58 @@ export default function Historial() {
       {/* Estadísticas */}
       {estadisticas && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl shadow-sm p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
                 <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{estadisticas.total_sesiones}</p>
-                <p className="text-xs text-gray-500">Sesiones totales</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{estadisticas.total_sesiones}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Sesiones totales</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
                 <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{estadisticas.sesiones_completadas}</p>
-                <p className="text-xs text-gray-500">Completadas</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{estadisticas.sesiones_completadas}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Completadas</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
                 <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{estadisticas.asistencia_porcentaje}%</p>
-                <p className="text-xs text-gray-500">Asistencia</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{estadisticas.asistencia_porcentaje}%</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Asistencia</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center">
                 <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                 </svg>
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{estadisticas.tonelaje_total.toLocaleString()}</p>
-                <p className="text-xs text-gray-500">Tonelaje (kg)</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{estadisticas.tonelaje_total.toLocaleString()}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Tonelaje (kg)</p>
               </div>
             </div>
           </div>
@@ -208,13 +208,13 @@ export default function Historial() {
       )}
 
       {/* Filtro */}
-      <div className="bg-white rounded-xl shadow-sm p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
         <div className="flex items-center gap-4">
-          <label className="text-sm font-medium text-gray-700">Filtrar por mes:</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Filtrar por mes:</label>
           <select
             value={filtroMes}
             onChange={(e) => setFiltroMes(e.target.value)}
-            className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            className="px-3 py-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
           >
             <option value="">Todos</option>
             {mesesDisponibles().map((mes) => (
@@ -236,21 +236,21 @@ export default function Historial() {
             return (
               <div
                 key={registro.id}
-                className="bg-white rounded-xl shadow-sm overflow-hidden"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden"
               >
                 <button
                   onClick={() => setExpandedRegistro(isExpanded ? null : registro.id)}
-                  className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
                       <span className="text-lg font-bold text-purple-600">{registro.sesion_numero}</span>
                     </div>
                     <div className="text-left">
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium text-gray-900 dark:text-white min-w-0 truncate">
                         Sesión {registro.sesion_numero} - {registro.mesociclo_nombre}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
                         {new Date(registro.fecha).toLocaleDateString('es-AR', {
                           weekday: 'long',
                           day: 'numeric',
@@ -267,7 +267,7 @@ export default function Historial() {
                       {estadoConfig.label}
                     </span>
                     <svg
-                      className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                      className={`w-5 h-5 text-gray-400 dark:text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -278,9 +278,9 @@ export default function Historial() {
                 </button>
 
                 {isExpanded && (
-                  <div className="px-4 pb-4 border-t">
+                  <div className="px-4 pb-4 border-t dark:border-gray-700">
                     {registro.feedback_general && (
-                      <div className="mt-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                      <div className="mt-4 p-3 bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 rounded-lg">
                         <p className="text-sm text-purple-800">
                           <strong>Feedback:</strong> {registro.feedback_general}
                         </p>
@@ -288,12 +288,12 @@ export default function Historial() {
                     )}
 
                     <div className="mt-4 space-y-2">
-                      <h4 className="text-sm font-medium text-gray-700">Ejercicios registrados:</h4>
+                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Ejercicios registrados:</h4>
                       {registro.ejercicios.map((ejercicio) => (
                         <div
                           key={ejercicio.id}
                           className={`flex items-center justify-between p-3 rounded-lg ${
-                            ejercicio.completado ? 'bg-green-50' : 'bg-gray-50'
+                            ejercicio.completado ? 'bg-green-50 dark:bg-green-900/30' : 'bg-gray-50 dark:bg-gray-700'
                           }`}
                         >
                           <div className="flex items-center gap-3">
@@ -302,15 +302,15 @@ export default function Historial() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
                             ) : (
-                              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                               </svg>
                             )}
-                            <span className="font-medium text-gray-900">{ejercicio.ejercicio_nombre}</span>
+                            <span className="font-medium text-gray-900 dark:text-white min-w-0 truncate">{ejercicio.ejercicio_nombre}</span>
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {ejercicio.peso && `${ejercicio.peso}kg`}
-                            {ejercicio.repeticiones && ` × ${ejercicio.repeticiones} reps`}
+                          <div className="text-sm text-gray-500 dark:text-gray-400 flex-shrink-0">
+                            {ejercicio.peso != null && `${ejercicio.peso}kg`}
+                            {ejercicio.repeticiones != null && ` × ${ejercicio.repeticiones} reps`}
                             {ejercicio.series_completadas > 0 && ` × ${ejercicio.series_completadas} series`}
                             {ejercicio.intensidad_percibida && ` • RPE ${ejercicio.intensidad_percibida}`}
                           </div>
@@ -324,12 +324,12 @@ export default function Historial() {
           })}
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-          <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 text-center">
+          <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <h3 className="text-lg font-medium text-gray-900 mb-1">No hay registros</h3>
-          <p className="text-gray-500">Completá sesiones para ver tu historial</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">No hay registros</h3>
+          <p className="text-gray-500 dark:text-gray-400">Completá sesiones para ver tu historial</p>
         </div>
       )}
     </div>

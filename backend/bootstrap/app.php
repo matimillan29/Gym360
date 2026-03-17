@@ -10,6 +10,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Schedule $schedule): void {
         // Send birthday emails at 8 AM every day
         $schedule->command('gym:birthday-emails')->dailyAt('08:00');
+        // Auto-renovar cuotas mensuales y marcar vencidas a las 6 AM
+        $schedule->command('gym:renovar-cuotas')->dailyAt('06:00');
     })
     ->withRouting(
         web: __DIR__.'/../routes/web.php',

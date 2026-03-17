@@ -56,7 +56,15 @@ class CuotaController extends Controller
         // Obtener el plan para calcular fecha de vencimiento
         $plan = PlanCuota::findOrFail($request->plan_id);
         $fechaInicio = Carbon::parse($request->fecha_inicio);
-        $fechaVencimiento = $fechaInicio->copy()->addDays($plan->duracion_dias);
+
+        // Vencimiento fijo: día 10 del mes de la cuota
+        // Si la fecha de inicio es después del día 10, vence el 10 del mes siguiente
+        $mesInicio = $fechaInicio->copy()->startOfMonth();
+        if ($fechaInicio->day > 10) {
+            $fechaVencimiento = $mesInicio->copy()->addMonth()->day(10);
+        } else {
+            $fechaVencimiento = $mesInicio->copy()->day(10);
+        }
 
         $cuota = Cuota::create([
             'entrenado_id' => $entrenado->id,

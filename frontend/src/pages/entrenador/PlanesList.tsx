@@ -74,7 +74,10 @@ export default function PlanesList() {
 
   // Mutation para eliminar plan
   const deletePlanMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async ({ id, tipo_plan }: { id: number; tipo_plan?: string }) => {
+      if (tipo_plan === 'simple') {
+        return api.delete(`/planes-simples/${id}`);
+      }
       return api.delete(`/macrociclos/${id}`);
     },
     onSuccess: () => {
@@ -338,7 +341,7 @@ export default function PlanesList() {
                         <button
                           onClick={() => {
                             if (confirm('¿Estás seguro de eliminar este plan?')) {
-                              deletePlanMutation.mutate(plan.id);
+                              deletePlanMutation.mutate({ id: plan.id, tipo_plan: plan.tipo_plan });
                             }
                           }}
                           className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"

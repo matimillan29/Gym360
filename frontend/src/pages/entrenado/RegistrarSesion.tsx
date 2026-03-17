@@ -149,7 +149,7 @@ export default function RegistrarSesion() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Cargando sesión...</p>
+        <p className="text-gray-500 dark:text-gray-400">Cargando sesión...</p>
       </div>
     );
   }
@@ -162,12 +162,12 @@ export default function RegistrarSesion() {
           <p className="text-green-100">Cargá tu entrenamiento del día</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-          <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 text-center">
+          <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <h3 className="text-lg font-medium text-gray-900 mb-1">No hay sesión para hoy</h3>
-          <p className="text-gray-500 mb-4">Consultá tu plan para ver las próximas sesiones</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">No hay sesión para hoy</h3>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">Consultá tu plan para ver las próximas sesiones</p>
           <button
             onClick={() => navigate('/entrenado/plan')}
             className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -200,9 +200,9 @@ export default function RegistrarSesion() {
         </div>
 
         {/* Barra de progreso */}
-        <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+        <div className="h-2 bg-white dark:bg-gray-800 rounded-full overflow-hidden">
           <div
-            className="h-full bg-white transition-all duration-300"
+            className="h-full bg-white dark:bg-gray-800 transition-all duration-300"
             style={{ width: `${progreso}%` }}
           />
         </div>
@@ -218,19 +218,19 @@ export default function RegistrarSesion() {
           return (
             <div
               key={ejercicio.sesion_ejercicio_id}
-              className={`bg-white rounded-xl shadow-sm overflow-hidden transition-all ${
-                isCompleted ? 'border-green-300 bg-green-50/50' : ''
+              className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden transition-all ${
+                isCompleted ? 'border-green-300 bg-green-50 dark:bg-green-900/30' : ''
               }`}
             >
               {/* Header del ejercicio */}
               <button
                 onClick={() => setEjercicioActivo(isActive ? null : ejercicio.sesion_ejercicio_id)}
-                className="w-full p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors"
+                className="w-full p-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold ${
                   isCompleted
-                    ? 'bg-green-100 text-green-600'
-                    : 'bg-gray-100 text-gray-600'
+                    ? 'bg-green-100 dark:bg-green-900/50 text-green-600'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                 }`}>
                   {isCompleted ? (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,15 +241,15 @@ export default function RegistrarSesion() {
                   )}
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="font-medium text-gray-900">{ejercicio.nombre}</p>
-                  <p className="text-sm text-gray-500">
+                  <p className="font-medium text-gray-900 dark:text-white">{ejercicio.nombre}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     {ejercicio.series} x {ejercicio.repeticiones} •{' '}
-                    {ejercicio.intensidad_tipo.toUpperCase()} {ejercicio.intensidad_valor} •{' '}
+                    {ejercicio.intensidad_tipo?.toUpperCase()} {ejercicio.intensidad_valor} •{' '}
                     {ejercicio.descanso}s descanso
                   </p>
                 </div>
                 <svg
-                  className={`w-5 h-5 text-gray-400 transition-transform ${isActive ? 'rotate-180' : ''}`}
+                  className={`w-5 h-5 text-gray-400 dark:text-gray-500 transition-transform ${isActive ? 'rotate-180' : ''}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -260,9 +260,9 @@ export default function RegistrarSesion() {
 
               {/* Formulario de registro */}
               {isActive && registro && (
-                <div className="px-4 pb-4 space-y-4 border-t">
+                <div className="px-4 pb-4 space-y-4 border-t dark:border-gray-700">
                   {ejercicio.observaciones && (
-                    <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg">
                       <p className="text-sm text-amber-800">
                         <strong>Nota del entrenador:</strong> {ejercicio.observaciones}
                       </p>
@@ -271,7 +271,7 @@ export default function RegistrarSesion() {
 
                   <div className="grid grid-cols-2 gap-4 mt-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Peso (kg)
                       </label>
                       <input
@@ -285,12 +285,12 @@ export default function RegistrarSesion() {
                             e.target.value ? parseFloat(e.target.value) : null
                           )
                         }
-                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        className="w-full px-3 py-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                         placeholder="0"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Repeticiones
                       </label>
                       <input
@@ -303,7 +303,7 @@ export default function RegistrarSesion() {
                             e.target.value ? parseInt(e.target.value) : null
                           )
                         }
-                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        className="w-full px-3 py-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                         placeholder="0"
                       />
                     </div>
@@ -311,7 +311,7 @@ export default function RegistrarSesion() {
 
                   {/* Series completadas */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Series completadas
                     </label>
                     <div className="flex items-center gap-2">
@@ -323,7 +323,7 @@ export default function RegistrarSesion() {
                             Math.max(0, registro.series_completadas - 1)
                           )
                         }
-                        className="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+                        className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
@@ -340,7 +340,7 @@ export default function RegistrarSesion() {
                             Math.min(ejercicio.series, registro.series_completadas + 1)
                           )
                         }
-                        className="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+                        className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -350,13 +350,13 @@ export default function RegistrarSesion() {
                   </div>
 
                   {/* Rating bars para feedback */}
-                  <div className="space-y-4 bg-gray-50 rounded-lg p-4">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Tu percepción del ejercicio</p>
+                  <div className="space-y-4 bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tu percepción del ejercicio</p>
 
                     {/* Intensidad percibida */}
                     <div>
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm text-gray-600">Intensidad</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Intensidad</span>
                         <span className="text-sm font-medium text-green-600">{registro.intensidad_percibida}/10</span>
                       </div>
                       <div className="flex gap-1">
@@ -367,7 +367,7 @@ export default function RegistrarSesion() {
                             className={`flex-1 h-8 rounded transition-colors ${
                               n <= registro.intensidad_percibida
                                 ? n <= 3 ? 'bg-green-400' : n <= 6 ? 'bg-yellow-400' : n <= 8 ? 'bg-orange-400' : 'bg-red-500'
-                                : 'bg-gray-200'
+                                : 'bg-gray-200 dark:bg-gray-600'
                             }`}
                           />
                         ))}
@@ -377,7 +377,7 @@ export default function RegistrarSesion() {
                     {/* Percepción de carga */}
                     <div>
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm text-gray-600">Carga</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Carga</span>
                         <span className="text-sm font-medium text-blue-600">{registro.percepcion_carga}/10</span>
                       </div>
                       <div className="flex gap-1">
@@ -388,7 +388,7 @@ export default function RegistrarSesion() {
                             className={`flex-1 h-8 rounded transition-colors ${
                               n <= registro.percepcion_carga
                                 ? n <= 3 ? 'bg-blue-300' : n <= 6 ? 'bg-blue-400' : n <= 8 ? 'bg-blue-500' : 'bg-blue-600'
-                                : 'bg-gray-200'
+                                : 'bg-gray-200 dark:bg-gray-600'
                             }`}
                           />
                         ))}
@@ -398,7 +398,7 @@ export default function RegistrarSesion() {
                     {/* Sensación general */}
                     <div>
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm text-gray-600">Cómo te sentís</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Cómo te sentís</span>
                         <span className="text-sm font-medium text-purple-600">{registro.sensacion_general}/10</span>
                       </div>
                       <div className="flex gap-1">
@@ -409,7 +409,7 @@ export default function RegistrarSesion() {
                             className={`flex-1 h-8 rounded transition-colors ${
                               n <= registro.sensacion_general
                                 ? n <= 3 ? 'bg-red-400' : n <= 5 ? 'bg-orange-400' : n <= 7 ? 'bg-yellow-400' : 'bg-green-500'
-                                : 'bg-gray-200'
+                                : 'bg-gray-200 dark:bg-gray-600'
                             }`}
                           />
                         ))}
@@ -418,7 +418,7 @@ export default function RegistrarSesion() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Observaciones
                     </label>
                     <textarea
@@ -427,7 +427,7 @@ export default function RegistrarSesion() {
                         actualizarRegistro(ejercicio.sesion_ejercicio_id, 'observaciones', e.target.value)
                       }
                       rows={2}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      className="w-full px-3 py-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                       placeholder="Notas sobre el ejercicio..."
                     />
                   </div>
@@ -436,7 +436,7 @@ export default function RegistrarSesion() {
                     onClick={() => toggleCompletado(ejercicio.sesion_ejercicio_id)}
                     className={`w-full py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
                       isCompleted
-                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                        ? 'bg-green-100 dark:bg-green-900/50 text-green-700 hover:bg-green-200'
                         : 'bg-green-600 text-white hover:bg-green-700'
                     }`}
                   >
@@ -464,20 +464,20 @@ export default function RegistrarSesion() {
       </div>
 
       {/* Feedback general */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h3 className="font-medium text-gray-900 mb-3">Feedback de la sesión</h3>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <h3 className="font-medium text-gray-900 dark:text-white mb-3">Feedback de la sesión</h3>
         <textarea
           value={feedbackGeneral}
           onChange={(e) => setFeedbackGeneral(e.target.value)}
           rows={3}
-          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+          className="w-full px-3 py-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
           placeholder="¿Cómo te sentiste? ¿Alguna observación para tu entrenador?"
         />
       </div>
 
       {/* Error al guardar */}
       {saveError && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
+        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-4 text-red-700 text-sm">
           {saveError}
         </div>
       )}

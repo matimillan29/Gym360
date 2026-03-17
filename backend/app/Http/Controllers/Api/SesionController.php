@@ -162,7 +162,7 @@ class SesionController extends Controller
             'orden' => 'required|integer|min:1',
             'etapa' => 'required|string|max:50',
             'series' => 'required|integer|min:1|max:20',
-            'repeticiones' => 'nullable|integer|min:1',
+            'repeticiones' => 'nullable|string|max:50',
             'tiempo' => 'nullable|integer|min:1',
             'intensidad_tipo' => 'nullable|in:rir,rpe,porcentaje',
             'intensidad_valor' => 'nullable|numeric',
@@ -214,7 +214,7 @@ class SesionController extends Controller
             'orden' => 'sometimes|required|integer|min:1',
             'etapa' => 'sometimes|required|string|max:50',
             'series' => 'sometimes|required|integer|min:1|max:20',
-            'repeticiones' => 'nullable|integer|min:1',
+            'repeticiones' => 'nullable|string|max:50',
             'tiempo' => 'nullable|integer|min:1',
             'intensidad_tipo' => 'nullable|in:rir,rpe,porcentaje',
             'intensidad_valor' => 'nullable|numeric',
@@ -308,28 +308,60 @@ class SesionController extends Controller
         $user = $request->user();
 
         if (!$this->sesionPerteneceAUsuario($sesion, $user)) {
-            return response()->json([
-                'message' => 'Esta sesión no te pertenece.',
-            ], 403);
+            return response()->json(['message' => 'No autorizado.'], 403);
         }
 
-        $sesion->load([
-            'ejercicios' => function ($q) {
-                $q->orderBy('orden');
-            },
-            'ejercicios.ejercicio',
-        ]);
+        $sesion->load(['ejercicios.ejercicio', 'registros' => function ($query) use ($user) {
+            $query->where('entrenado_id', $user->id)->latest();
+        }, 'registros.registrosEjercicio']);
 
-        // Cargar registros del entrenado para esta sesión
-        $registroSesion = RegistroSesion::where('entrenado_id', $user->id)
-            ->where('sesion_id', $sesion->id)
-            ->with('registrosEjercicio')
-            ->latest('fecha')
-            ->first();
+        $registroExistente = $sesion->registros->first();
+
+        $ejerciciosTransformed = $sesion->ejercicios->sortBy('orden')->values()->map(function ($se) {
+            return [
+                'id' => $se->id,
+                'sesion_ejercicio_id' => $se->id,
+                'ejercicio_id' => $se->ejercicio_id,
+                'nombre' => $se->ejercicio?->nombre ?? '',
+                'video_url' => $se->ejercicio?->video_url,
+                'etapa' => $se->etapa,
+                'orden' => $se->orden,
+                'series' => $se->series,
+                'repeticiones' => $se->repeticiones,
+                'tiempo' => $se->tiempo,
+                'intensidad_tipo' => $se->intensidad_tipo,
+                'intensidad_valor' => $se->intensidad_valor,
+                'descanso' => $se->descanso,
+                'observaciones' => $se->observaciones,
+                'superserie_con' => $se->superserie_con,
+            ];
+        });
 
         return response()->json([
-            'data' => $sesion,
-            'registro' => $registroSesion,
+            'data' => [
+                'id' => $sesion->id,
+                'numero' => $sesion->numero,
+                'nombre' => $sesion->nombre ?? null,
+                'logica_entrenamiento' => $sesion->logica_entrenamiento,
+                'observaciones' => $sesion->observaciones,
+                'ejercicios' => $ejerciciosTransformed,
+            ],
+            'registro' => $registroExistente ? [
+                'id' => $registroExistente->id,
+                'estado' => $registroExistente->estado,
+                'feedback_general' => $registroExistente->feedback_general,
+                'ejercicios' => $registroExistente->registrosEjercicio->map(function ($re) {
+                    return [
+                        'sesion_ejercicio_id' => $re->sesion_ejercicio_id,
+                        'peso' => $re->peso,
+                        'repeticiones' => $re->repeticiones,
+                        'series_completadas' => $re->series_completadas,
+                        'intensidad_percibida' => $re->intensidad_percibida,
+                        'completado' => $re->completado,
+                        'observaciones' => $re->observaciones,
+                    ];
+                }),
+            ] : null,
         ]);
     }
 

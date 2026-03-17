@@ -40,6 +40,21 @@ class EjercicioController extends Controller
             $query->where('dificultad', $request->dificultad);
         }
 
+        if ($request->has('etapa')) {
+            $etapa = $request->etapa;
+            $query->where('etapas', 'LIKE', "%{$etapa}%");
+        }
+
+        if ($request->has('categoria')) {
+            $categoria = $request->categoria;
+            $query->where('categorias_zona', 'LIKE', "%{$categoria}%");
+        }
+
+        if ($request->has('patron')) {
+            $patron = $request->patron;
+            $query->where('patrones_movimiento', 'LIKE', "%{$patron}%");
+        }
+
         $query->orderBy('nombre');
 
         // Si se solicita paginación
@@ -69,8 +84,8 @@ class EjercicioController extends Controller
             'grupos_musculares.*' => 'string',
             'equipamiento' => 'nullable|array',
             'equipamiento.*' => 'string',
-            'tipo' => 'required|in:fuerza,cardio,flexibilidad,potencia,resistencia',
-            'dificultad' => 'required|in:principiante,intermedio,avanzado',
+            'tipo' => 'nullable|in:fuerza,cardio,flexibilidad,potencia,resistencia',
+            'dificultad' => 'nullable|in:principiante,intermedio,avanzado',
             'video_url' => 'nullable|url',
             'imagen_url' => 'nullable|url',
         ]);
@@ -127,8 +142,8 @@ class EjercicioController extends Controller
             'grupos_musculares.*' => 'string',
             'equipamiento' => 'nullable|array',
             'equipamiento.*' => 'string',
-            'tipo' => 'sometimes|required|in:fuerza,cardio,flexibilidad,potencia,resistencia',
-            'dificultad' => 'sometimes|required|in:principiante,intermedio,avanzado',
+            'tipo' => 'nullable|in:fuerza,cardio,flexibilidad,potencia,resistencia',
+            'dificultad' => 'nullable|in:principiante,intermedio,avanzado',
             'video_url' => 'nullable|url',
             'imagen_url' => 'nullable|url',
         ]);

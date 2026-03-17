@@ -17,10 +17,16 @@ interface Entrenado {
   estado: 'activo' | 'baja_temporal' | 'inactivo';
   plan_complejo?: boolean;
   entrenador_asignado_id?: number;
+  plan_cuota_id?: number;
   entrenador_asignado?: {
     id: number;
     nombre: string;
     apellido: string;
+  };
+  plan_cuota?: {
+    id: number;
+    nombre: string;
+    precio: number;
   };
   created_at: string;
 }
@@ -1758,6 +1764,41 @@ export default function EntrenadoDetalle() {
         {/* Cuotas Tab */}
         {activeTab === 'cuotas' && (
           <div className="space-y-4">
+            {/* Plan de cuota mensual auto-renovable */}
+            <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Plan de cuota mensual (auto-renovable)
+              </label>
+              <select
+                value={entrenado?.plan_cuota_id || ''}
+                onChange={async (e) => {
+                  const planId = e.target.value ? Number(e.target.value) : null;
+                  try {
+                    await api.put(`/entrenados/${id}`, { plan_cuota_id: planId });
+                    queryClient.invalidateQueries({ queryKey: ['entrenado', id] });
+                  } catch (err) {
+                    console.error('Error actualizando plan de cuota:', err);
+                  }
+                }}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Sin plan asignado (manual)</option>
+                {planesCuota.map((plan) => (
+                  <option key={plan.id} value={plan.id}>
+                    {plan.nombre} - ${plan.precio?.toLocaleString()}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Se crea automaticamente una cuota el 1 de cada mes. Vence el dia 10.
+              </p>
+              {entrenado?.plan_cuota && (
+                <p className="mt-1 text-xs text-blue-600 dark:text-blue-400 font-medium">
+                  Plan actual: {entrenado.plan_cuota.nombre} - ${entrenado.plan_cuota.precio?.toLocaleString()}
+                </p>
+              )}
+            </div>
+
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900">Cuotas y Pagos</h3>
               <button

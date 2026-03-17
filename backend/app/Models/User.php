@@ -28,6 +28,7 @@ class User extends Authenticatable
         'estado',
         'plan_complejo',
         'entrenador_asignado_id',
+        'plan_cuota_id',
         'sucursal_id',
     ];
 
@@ -66,6 +67,11 @@ class User extends Authenticatable
     public function entrenadorAsignado(): BelongsTo
     {
         return $this->belongsTo(User::class, 'entrenador_asignado_id');
+    }
+
+    public function planCuota(): BelongsTo
+    {
+        return $this->belongsTo(PlanCuota::class);
     }
 
     public function entrenadosAsignados(): HasMany

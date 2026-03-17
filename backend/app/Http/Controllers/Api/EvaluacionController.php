@@ -60,7 +60,7 @@ class EvaluacionController extends Controller
         }
 
         $request->validate([
-            'tipo' => 'required|in:vo2max,fuerza,amplitud_movimiento,flexibilidad,potencia_aerobica,potencia_anaerobica,fuerza_maxima,resistencia,otro',
+            'tipo' => 'required|in:vo2max,fuerza,amplitud_movimiento,flexibilidad,potencia_aerobica,potencia_anaerobica,fuerza_maxima,resistencia,aerobico,composicion,personalizado,otro',
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
             'valor' => 'nullable|numeric',
@@ -103,7 +103,7 @@ class EvaluacionController extends Controller
     public function update(Request $request, Evaluacion $evaluacion)
     {
         $request->validate([
-            'tipo' => 'sometimes|required|in:vo2max,fuerza,amplitud_movimiento,flexibilidad,potencia_aerobica,potencia_anaerobica,fuerza_maxima,resistencia,otro',
+            'tipo' => 'sometimes|required|in:vo2max,fuerza,amplitud_movimiento,flexibilidad,potencia_aerobica,potencia_anaerobica,fuerza_maxima,resistencia,aerobico,composicion,personalizado,otro',
             'nombre' => 'sometimes|required|string|max:255',
             'descripcion' => 'nullable|string',
             'valor' => 'nullable|numeric',

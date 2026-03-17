@@ -102,7 +102,7 @@ class PlanSimpleController extends Controller
         });
 
         return response()->json([
-            'data' => $this->formatPlanSimple($plan->fresh(['mesociclos.microciclos.sesiones.ejercicios.ejercicio'])),
+            'data' => $this->formatPlanSimple($plan->fresh(['mesociclos.microciclos.sesiones.ejercicios.ejercicio', 'mesociclos.microciclos.sesiones.registros'])),
             'message' => 'Plan creado correctamente.',
         ], 201);
     }
@@ -113,7 +113,10 @@ class PlanSimpleController extends Controller
             return response()->json(['message' => 'Este plan no es simple.'], 400);
         }
 
-        $plan->load('mesociclos.microciclos.sesiones.ejercicios.ejercicio');
+        $plan->load([
+            'mesociclos.microciclos.sesiones.ejercicios.ejercicio',
+            'mesociclos.microciclos.sesiones.registros',
+        ]);
 
         return response()->json([
             'data' => $this->formatPlanSimple($plan),
@@ -147,6 +150,7 @@ class PlanSimpleController extends Controller
             'dias.*.ejercicios.*.observaciones' => 'nullable|string',
         ]);
 
+        try {
         DB::transaction(function () use ($request, $plan) {
             $plan->update([
                 'nombre' => $request->nombre ?? $plan->nombre,
@@ -154,9 +158,17 @@ class PlanSimpleController extends Controller
             ]);
 
             if ($request->has('dias')) {
-                // Check for existing registros before deleting
                 $microciclo = $plan->mesociclos->first()?->microciclos->first();
                 if ($microciclo) {
+                    // Proteger registros existentes
+                    $tieneRegistros = \App\Models\RegistroSesion::whereIn(
+                        'sesion_id', $microciclo->sesiones()->pluck('id')
+                    )->exists();
+
+                    if ($tieneRegistros) {
+                        throw new \Exception('TIENE_REGISTROS');
+                    }
+
                     // Delete old sesiones and recreate
                     $microciclo->sesiones()->each(function ($sesion) {
                         $sesion->ejercicios()->delete();
@@ -190,9 +202,20 @@ class PlanSimpleController extends Controller
                 }
             }
         });
+        } catch (\Exception $e) {
+            if ($e->getMessage() === 'TIENE_REGISTROS') {
+                return response()->json([
+                    'message' => 'No se puede modificar la estructura del plan porque el entrenado ya tiene registros de sesiones. Creá un plan nuevo.',
+                ], 409);
+            }
+            throw $e;
+        }
 
         return response()->json([
-            'data' => $this->formatPlanSimple($plan->fresh(['mesociclos.microciclos.sesiones.ejercicios.ejercicio'])),
+            'data' => $this->formatPlanSimple($plan->fresh([
+                'mesociclos.microciclos.sesiones.ejercicios.ejercicio',
+                'mesociclos.microciclos.sesiones.registros',
+            ])),
             'message' => 'Plan actualizado correctamente.',
         ]);
     }
@@ -219,7 +242,7 @@ class PlanSimpleController extends Controller
         $plan->update(['activo' => true]);
 
         return response()->json([
-            'data' => $this->formatPlanSimple($plan->fresh(['mesociclos.microciclos.sesiones.ejercicios.ejercicio'])),
+            'data' => $this->formatPlanSimple($plan->fresh(['mesociclos.microciclos.sesiones.ejercicios.ejercicio', 'mesociclos.microciclos.sesiones.registros'])),
             'message' => 'Plan activado correctamente.',
         ]);
     }

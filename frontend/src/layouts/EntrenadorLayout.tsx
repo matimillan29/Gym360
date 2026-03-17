@@ -19,6 +19,7 @@ export default function EntrenadorLayout() {
     { name: 'Ejercicios', href: '/entrenador/ejercicios', icon: 'dumbbell' },
     { name: 'Planes', href: '/entrenador/planes', icon: 'clipboard' },
     { name: 'Actividades', href: '/entrenador/clases', icon: 'group' },
+    { name: 'Calendario Clases', href: '/entrenador/calendario-clases', icon: 'calendar-class' },
     { name: 'Plantillas', href: '/entrenador/plantillas', icon: 'template' },
     { name: 'Evaluaciones', href: '/entrenador/evaluaciones', icon: 'chart' },
     { name: 'Cuotas', href: '/entrenador/cuotas', icon: 'money' },
@@ -113,6 +114,12 @@ export default function EntrenadorLayout() {
       calendar: (
         <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      ),
+      'calendar-class': (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14v3m-2-1.5h4" />
         </svg>
       ),
       group: (

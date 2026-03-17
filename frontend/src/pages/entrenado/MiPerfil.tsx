@@ -201,7 +201,7 @@ export default function MiPerfil() {
       pagado: {
         label: 'Al día',
         color: 'text-green-700',
-        bgColor: 'bg-green-50 border-green-200',
+        bgColor: 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800',
         icon: (
           <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -211,7 +211,7 @@ export default function MiPerfil() {
       pendiente: {
         label: 'Pendiente',
         color: 'text-yellow-700',
-        bgColor: 'bg-yellow-50 border-yellow-200',
+        bgColor: 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800',
         icon: (
           <svg className="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -221,7 +221,7 @@ export default function MiPerfil() {
       vencido: {
         label: 'Vencida',
         color: 'text-orange-700',
-        bgColor: 'bg-orange-50 border-orange-200',
+        bgColor: 'bg-orange-50 dark:bg-orange-900/30 border-orange-200 dark:border-orange-800',
         icon: (
           <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -231,7 +231,7 @@ export default function MiPerfil() {
       mora: {
         label: 'En mora',
         color: 'text-red-700',
-        bgColor: 'bg-red-50 border-red-200',
+        bgColor: 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800',
         icon: (
           <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -277,7 +277,7 @@ export default function MiPerfil() {
           <button
             onClick={handlePhotoClick}
             disabled={isUploading}
-            className="relative h-20 w-20 rounded-full bg-white/20 flex items-center justify-center overflow-hidden group hover:ring-4 hover:ring-white/30 transition-all cursor-pointer disabled:opacity-50"
+            className="relative h-20 w-20 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center overflow-hidden group hover:ring-4 hover:ring-white/30 transition-all cursor-pointer disabled:opacity-50"
             title="Cambiar foto de perfil"
           >
             {user?.foto ? (
@@ -336,10 +336,10 @@ export default function MiPerfil() {
                   Cuota: {getCuotaStatusInfo(cuotaActual.estado).label}
                 </h3>
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 {cuotaActual.plan.nombre} - ${cuotaActual.monto.toLocaleString()}
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {cuotaActual.estado === 'pagado' ? (
                   <>Vence el {new Date(cuotaActual.fecha_vencimiento).toLocaleDateString('es-AR')}</>
                 ) : cuotaActual.estado === 'vencido' || cuotaActual.estado === 'mora' ? (
@@ -357,73 +357,73 @@ export default function MiPerfil() {
       )}
 
       {/* Datos personales */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
             <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
-          <h2 className="text-lg font-semibold text-gray-900">Datos personales</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Datos personales</h2>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-500 mb-1">DNI</p>
-            <p className="font-medium text-gray-900">{user?.dni || '-'}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg min-w-0 overflow-hidden">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">DNI</p>
+            <p className="font-medium text-sm text-gray-900 dark:text-white truncate">{user?.dni || '-'}</p>
           </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-500 mb-1">Teléfono</p>
-            <p className="font-medium text-gray-900">{user?.telefono || '-'}</p>
+          <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg min-w-0 overflow-hidden">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Teléfono</p>
+            <p className="font-medium text-sm text-gray-900 dark:text-white truncate">{user?.telefono || '-'}</p>
           </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-500 mb-1">Fecha de nacimiento</p>
-            <p className="font-medium text-gray-900">
+          <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg min-w-0 overflow-hidden">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Fecha de nac.</p>
+            <p className="font-medium text-sm text-gray-900 dark:text-white truncate">
               {user?.fecha_nacimiento
                 ? new Date(user.fecha_nacimiento).toLocaleDateString('es-AR')
                 : '-'}
             </p>
           </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-500 mb-1">Profesión</p>
-            <p className="font-medium text-gray-900">{user?.profesion || '-'}</p>
+          <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg min-w-0 overflow-hidden">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Profesión</p>
+            <p className="font-medium text-sm text-gray-900 dark:text-white truncate">{user?.profesion || '-'}</p>
           </div>
         </div>
       </div>
 
       {/* Anamnesis */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
             <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
             </svg>
           </div>
-          <h2 className="text-lg font-semibold text-gray-900">Anamnesis deportiva</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Anamnesis deportiva</h2>
         </div>
 
         {anamnesis ? (
           <div className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-4 bg-green-50 rounded-xl border border-green-100">
+              <div className="p-4 bg-green-50 dark:bg-green-900/30 rounded-xl border border-green-100 dark:border-green-800">
                 <p className="text-xs text-green-600 mb-1">Peso</p>
                 <p className="text-2xl font-bold text-green-700">
                   {anamnesis.peso ? `${anamnesis.peso} kg` : '-'}
                 </p>
               </div>
-              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl border border-blue-100 dark:border-blue-800">
                 <p className="text-xs text-blue-600 mb-1">Altura</p>
                 <p className="text-2xl font-bold text-blue-700">
                   {anamnesis.altura ? `${anamnesis.altura} cm` : '-'}
                 </p>
               </div>
-              <div className="p-4 bg-purple-50 rounded-xl border border-purple-100">
+              <div className="p-4 bg-purple-50 dark:bg-purple-900/30 rounded-xl border border-purple-100 dark:border-purple-800">
                 <p className="text-xs text-purple-600 mb-1">IMC</p>
                 <p className="text-2xl font-bold text-purple-700">
                   {calcularIMC() || '-'}
                 </p>
               </div>
-              <div className="p-4 bg-orange-50 rounded-xl border border-orange-100">
+              <div className="p-4 bg-orange-50 dark:bg-orange-900/30 rounded-xl border border-orange-100 dark:border-orange-800">
                 <p className="text-xs text-orange-600 mb-1">Experiencia</p>
                 <p className="text-lg font-bold text-orange-700">
                   {getExperienciaLabel(anamnesis.experiencia_gym)}
@@ -433,43 +433,43 @@ export default function MiPerfil() {
 
             {/* Medidas corporales */}
             {anamnesis.medidas && Object.values(anamnesis.medidas).some(v => v) && (
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <p className="text-sm font-medium text-gray-700 mb-3">Medidas corporales (cm)</p>
+              <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Medidas corporales (cm)</p>
                 <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
                   {anamnesis.medidas.hombros && (
                     <div className="text-center">
-                      <p className="text-lg font-semibold text-gray-900">{anamnesis.medidas.hombros}</p>
-                      <p className="text-xs text-gray-500">Hombros</p>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">{anamnesis.medidas.hombros}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Hombros</p>
                     </div>
                   )}
                   {anamnesis.medidas.torax && (
                     <div className="text-center">
-                      <p className="text-lg font-semibold text-gray-900">{anamnesis.medidas.torax}</p>
-                      <p className="text-xs text-gray-500">Tórax</p>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">{anamnesis.medidas.torax}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Tórax</p>
                     </div>
                   )}
                   {anamnesis.medidas.cintura && (
                     <div className="text-center">
-                      <p className="text-lg font-semibold text-gray-900">{anamnesis.medidas.cintura}</p>
-                      <p className="text-xs text-gray-500">Cintura</p>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">{anamnesis.medidas.cintura}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Cintura</p>
                     </div>
                   )}
                   {anamnesis.medidas.cadera && (
                     <div className="text-center">
-                      <p className="text-lg font-semibold text-gray-900">{anamnesis.medidas.cadera}</p>
-                      <p className="text-xs text-gray-500">Cadera</p>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">{anamnesis.medidas.cadera}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Cadera</p>
                     </div>
                   )}
                   {anamnesis.medidas.brazo_derecho && (
                     <div className="text-center">
-                      <p className="text-lg font-semibold text-gray-900">{anamnesis.medidas.brazo_derecho}</p>
-                      <p className="text-xs text-gray-500">Brazo D</p>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">{anamnesis.medidas.brazo_derecho}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Brazo D</p>
                     </div>
                   )}
                   {anamnesis.medidas.brazo_izquierdo && (
                     <div className="text-center">
-                      <p className="text-lg font-semibold text-gray-900">{anamnesis.medidas.brazo_izquierdo}</p>
-                      <p className="text-xs text-gray-500">Brazo I</p>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">{anamnesis.medidas.brazo_izquierdo}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Brazo I</p>
                     </div>
                   )}
                 </div>
@@ -477,23 +477,23 @@ export default function MiPerfil() {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-xs text-gray-500 mb-1">Objetivos principales</p>
-                <p className="font-medium text-gray-900">
+              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Objetivos principales</p>
+                <p className="font-medium text-gray-900 dark:text-white">
                   {anamnesis.objetivos_principales || 'No definidos'}
                 </p>
               </div>
               {anamnesis.objetivos_secundarios && (
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-xs text-gray-500 mb-1">Objetivos secundarios</p>
-                  <p className="font-medium text-gray-900">
+                <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Objetivos secundarios</p>
+                  <p className="font-medium text-gray-900 dark:text-white">
                     {anamnesis.objetivos_secundarios}
                   </p>
                 </div>
               )}
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-xs text-gray-500 mb-1">Disponibilidad</p>
-                <p className="font-medium text-gray-900">
+              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Disponibilidad</p>
+                <p className="font-medium text-gray-900 dark:text-white">
                   {anamnesis.disponibilidad_dias
                     ? `${anamnesis.disponibilidad_dias} días por semana`
                     : 'No definida'}
@@ -503,8 +503,8 @@ export default function MiPerfil() {
             </div>
           </div>
         ) : (
-          <div className="text-center py-8 text-gray-500">
-            <svg className="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <svg className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <p>Tu anamnesis deportiva aparecerá aquí</p>
@@ -515,36 +515,36 @@ export default function MiPerfil() {
 
       {/* Feedback del entrenador */}
       {feedbackList.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
               <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-gray-900">Feedback de tu entrenador</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Feedback de tu entrenador</h2>
           </div>
 
           <div className="space-y-3">
             {feedbackList.slice(0, 5).map((fb) => (
-              <div key={fb.id} className="p-4 bg-gray-50 rounded-lg">
+              <div key={fb.id} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                    fb.tipo === 'progreso' ? 'bg-green-100 text-green-700' :
-                    fb.tipo === 'tecnica' ? 'bg-blue-100 text-blue-700' :
-                    fb.tipo === 'asistencia' ? 'bg-yellow-100 text-yellow-700' :
-                    fb.tipo === 'actitud' ? 'bg-purple-100 text-purple-700' :
-                    'bg-gray-100 text-gray-700'
+                    fb.tipo === 'progreso' ? 'bg-green-100 dark:bg-green-900/50 text-green-700' :
+                    fb.tipo === 'tecnica' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700' :
+                    fb.tipo === 'asistencia' ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700' :
+                    fb.tipo === 'actitud' ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700' :
+                    'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                   }`}>
                     {getFeedbackTipoLabel(fb.tipo)}
                   </span>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-gray-400 dark:text-gray-500">
                     {new Date(fb.created_at).toLocaleDateString('es-AR')}
                   </span>
                 </div>
-                <p className="text-gray-700">{fb.contenido}</p>
+                <p className="text-gray-700 dark:text-gray-300">{fb.contenido}</p>
                 {fb.entrenador && (
-                  <p className="text-xs text-gray-400 mt-2">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
                     Por {fb.entrenador.nombre} {fb.entrenador.apellido}
                   </p>
                 )}
@@ -555,14 +555,14 @@ export default function MiPerfil() {
       )}
 
       {/* Links útiles */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
             <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
             </svg>
           </div>
-          <h2 className="text-lg font-semibold text-gray-900">Links útiles</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Links útiles</h2>
         </div>
 
         {links && links.length > 0 ? (
@@ -573,28 +573,28 @@ export default function MiPerfil() {
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group"
+                className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors group"
               >
-                <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 flex items-center justify-center">
                   {getCategoriaIcon(link.categoria)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">
+                  <p className="font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors">
                     {link.titulo}
                   </p>
                   {link.descripcion && (
-                    <p className="text-sm text-gray-500 truncate">{link.descripcion}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{link.descripcion}</p>
                   )}
                 </div>
-                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
               </a>
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 text-gray-500">
-            <svg className="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <svg className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
             </svg>
             <p>Tu entrenador puede adjuntarte links útiles aquí</p>

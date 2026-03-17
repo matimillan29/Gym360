@@ -59,6 +59,7 @@ class EntrenadoController extends Controller
             'fecha_nacimiento' => 'nullable|date',
             'profesion' => 'nullable|string|max:255',
             'entrenador_asignado_id' => 'nullable|exists:users,id',
+            'plan_cuota_id' => 'nullable|exists:planes_cuota,id',
         ]);
 
         $entrenado = User::create([
@@ -72,6 +73,7 @@ class EntrenadoController extends Controller
             'profesion' => $request->profesion,
             'estado' => 'activo',
             'entrenador_asignado_id' => $request->entrenador_asignado_id ?? auth()->id(),
+            'plan_cuota_id' => $request->plan_cuota_id,
         ]);
         $entrenado->role = 'entrenado';
         $entrenado->save();
@@ -95,6 +97,7 @@ class EntrenadoController extends Controller
 
         $entrenado->load([
             'entrenadorAsignado:id,nombre,apellido',
+            'planCuota:id,nombre,precio',
             'anamnesis',
             'macrociclos' => function ($q) {
                 $q->where('activo', true);
@@ -141,6 +144,7 @@ class EntrenadoController extends Controller
             'fecha_nacimiento' => 'nullable|date',
             'profesion' => 'nullable|string|max:255',
             'entrenador_asignado_id' => 'nullable|exists:users,id',
+            'plan_cuota_id' => 'nullable|exists:planes_cuota,id',
         ]);
 
         $entrenado->update($request->only([
@@ -152,6 +156,7 @@ class EntrenadoController extends Controller
             'fecha_nacimiento',
             'profesion',
             'entrenador_asignado_id',
+            'plan_cuota_id',
         ]));
 
         return response()->json([

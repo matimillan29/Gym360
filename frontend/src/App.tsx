@@ -32,6 +32,7 @@ import CuponesGestion from './pages/entrenador/CuponesGestion';
 import CalendarioGestion from './pages/entrenador/CalendarioGestion';
 import CheckinGestion from './pages/entrenador/CheckinGestion';
 import ClasesGestion from './pages/entrenador/ClasesGestion';
+import CalendarioClases from './pages/entrenador/CalendarioClases';
 
 // Entrenado pages
 import DashboardEntrenado from './pages/entrenado/DashboardEntrenado';
@@ -141,6 +142,7 @@ function AppRoutes() {
         <Route path="planes" element={<PlanesList />} />
         <Route path="planes/simple/nuevo" element={<PlanSimpleEditor />} />
         <Route path="planes/simple/:id" element={<PlanSimpleEditor />} />
+        <Route path="planes/nuevo" element={<PlanEditor />} />
         <Route path="planes/:id" element={<PlanEditor />} />
         <Route path="evaluaciones" element={<EvaluacionesList />} />
         <Route path="cuotas" element={<CuotasGestion />} />
@@ -152,6 +154,7 @@ function AppRoutes() {
         <Route path="calendario" element={<CalendarioGestion />} />
         <Route path="checkin" element={<CheckinGestion />} />
         <Route path="clases" element={<ClasesGestion />} />
+        <Route path="calendario-clases" element={<CalendarioClases />} />
       </Route>
 
       {/* Admin only routes */}
