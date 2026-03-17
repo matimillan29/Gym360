@@ -80,15 +80,17 @@ jobs:
             const fs = require('fs');
             const os = require('os');
             const fqdn = process.env.CLOUDRON_FQDN;
+            const endpoint = 'https://' + fqdn.replace(/^https?:\/\//, '');
             const config = {
               cloudrons: {
-                default: fqdn,
-                [fqdn]: {
-                  apiEndpoint: fqdn,
+                default: endpoint,
+                [endpoint]: {
+                  apiEndpoint: endpoint,
                   token: process.env.CLOUDRON_TOKEN
                 }
               }
             };
             fs.writeFileSync(os.homedir() + '/.cloudron.json', JSON.stringify(config));
+            console.log('Cloudron config written for', endpoint);
           "
-          cloudron push --app "$APP_ID" deploy/ /app/code/
+          cloudron push --app "$APP_ID" deploy/. /app/code
