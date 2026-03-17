@@ -49,7 +49,7 @@ jobs:
 
           # Instalar dependencias PHP
           cd /tmp/deploy
-          composer install --no-dev --optimize-autoloader --no-interaction
+          composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=php
           cd -
 
           # Copiar frontend build al public
