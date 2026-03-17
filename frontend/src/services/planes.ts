@@ -64,7 +64,7 @@ export const duplicarMacrociclo = async (id: number, nombre: string, entrenadoId
 
 export interface CreateMesocicloData {
   nombre: string;
-  tipo: 'preparatorio' | 'competitivo' | 'transicion' | 'acumulacion' | 'transmutacion' | 'realizacion';
+  tipo: 'introductorio' | 'desarrollador' | 'estabilizador' | 'recuperacion';
   duracion_semanas: number;
   objetivo?: string;
   notas?: string;
@@ -112,7 +112,7 @@ export const desbloquearMesociclo = async (id: number) => {
 
 export interface CreateMicrocicloData {
   nombre: string;
-  tipo: 'carga' | 'descarga' | 'competicion' | 'recuperacion' | 'test';
+  tipo: 'introductorio' | 'desarrollo' | 'estabilizacion' | 'descarga';
   objetivo?: string;
   notas?: string;
 }

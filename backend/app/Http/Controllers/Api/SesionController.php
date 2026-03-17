@@ -38,6 +38,7 @@ class SesionController extends Controller
     {
         $request->validate([
             'numero' => 'required|integer|min:1',
+            'nombre' => 'nullable|string|max:255',
             'fecha_programada' => 'nullable|date',
             'logica_entrenamiento' => 'nullable|string|max:255',
             'observaciones' => 'nullable|string',
@@ -57,6 +58,7 @@ class SesionController extends Controller
         $sesion = Sesion::create([
             'microciclo_id' => $microciclo->id,
             'numero' => $request->numero,
+            'nombre' => $request->nombre,
             'fecha_programada' => $request->fecha_programada,
             'logica_entrenamiento' => $request->logica_entrenamiento,
             'observaciones' => $request->observaciones,
@@ -96,6 +98,7 @@ class SesionController extends Controller
 
         $request->validate([
             'numero' => 'sometimes|required|integer|min:1',
+            'nombre' => 'nullable|string|max:255',
             'fecha_programada' => 'nullable|date',
             'logica_entrenamiento' => 'nullable|string|max:255',
             'observaciones' => 'nullable|string',
@@ -117,6 +120,7 @@ class SesionController extends Controller
 
         $sesion->update($request->only([
             'numero',
+            'nombre',
             'fecha_programada',
             'logica_entrenamiento',
             'observaciones',
@@ -614,6 +618,9 @@ class SesionController extends Controller
                 [
                     'estado' => 'completado',
                     'feedback_general' => $request->feedback_general,
+                    'hora_inicio' => Carbon::now(),
+                    'hora_fin' => Carbon::now(),
+                    'completada' => true,
                 ]
             );
 

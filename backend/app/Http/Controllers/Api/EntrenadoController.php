@@ -54,7 +54,7 @@ class EntrenadoController extends Controller
             'email' => 'required|email|unique:users,email',
             'nombre' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
-            'dni' => 'required|string|max:20',
+            'dni' => 'required|string|max:20|unique:users,dni',
             'telefono' => 'required|string|max:50',
             'fecha_nacimiento' => 'nullable|date',
             'profesion' => 'nullable|string|max:255',
@@ -136,7 +136,7 @@ class EntrenadoController extends Controller
             'email' => ['sometimes', 'required', 'email', Rule::unique('users')->ignore($entrenado->id)],
             'nombre' => 'sometimes|required|string|max:255',
             'apellido' => 'sometimes|required|string|max:255',
-            'dni' => 'sometimes|required|string|max:20',
+            'dni' => 'sometimes|required|string|max:20|unique:users,dni,' . $entrenado->id,
             'telefono' => 'sometimes|required|string|max:50',
             'fecha_nacimiento' => 'nullable|date',
             'profesion' => 'nullable|string|max:255',
@@ -249,6 +249,23 @@ class EntrenadoController extends Controller
         return response()->json([
             'data' => $entrenado->load('entrenadorAsignado:id,nombre,apellido'),
             'message' => 'Entrenador asignado correctamente.',
+        ]);
+    }
+
+    /**
+     * Toggle plan complejo/simple para un entrenado
+     */
+    public function togglePlanComplejo(User $entrenado)
+    {
+        if (!$entrenado->isEntrenado()) {
+            return response()->json(['message' => 'Usuario no es entrenado.'], 404);
+        }
+
+        $entrenado->update(['plan_complejo' => !$entrenado->plan_complejo]);
+
+        return response()->json([
+            'data' => ['id' => $entrenado->id, 'plan_complejo' => $entrenado->plan_complejo],
+            'message' => $entrenado->plan_complejo ? 'Plan complejo habilitado.' : 'Plan simple habilitado.',
         ]);
     }
 

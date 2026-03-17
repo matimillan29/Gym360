@@ -193,14 +193,15 @@ class ClaseController extends Controller
         $horarios = HorarioClase::with(['clase', 'instructor:id,nombre,apellido'])
             ->where('cancelada', false)
             ->where(function ($query) use ($inicioSemana, $finSemana) {
-                // Horarios recurrentes (dia_semana)
-                $query->whereNotNull('dia_semana')
-                    ->whereNull('fecha_especifica');
-            })
-            ->orWhere(function ($query) use ($inicioSemana, $finSemana) {
-                // Clases especiales en el rango
-                $query->whereNotNull('fecha_especifica')
-                    ->whereBetween('fecha_especifica', [$inicioSemana, $finSemana]);
+                $query->where(function ($q) {
+                    // Horarios recurrentes (dia_semana)
+                    $q->whereNotNull('dia_semana')
+                        ->whereNull('fecha_especifica');
+                })->orWhere(function ($q) use ($inicioSemana, $finSemana) {
+                    // Clases especiales en el rango
+                    $q->whereNotNull('fecha_especifica')
+                        ->whereBetween('fecha_especifica', [$inicioSemana, $finSemana]);
+                });
             })
             ->get();
 
@@ -453,10 +454,13 @@ class ClaseController extends Controller
             ->whereHas('clase', fn($q) => $q->where('activa', true))
             ->where('cancelada', false)
             ->where(function ($query) use ($diaSemana, $fecha) {
-                $query->where('dia_semana', $diaSemana)
-                    ->whereNull('fecha_especifica');
+                $query->where(function ($q) use ($diaSemana) {
+                    $q->where('dia_semana', $diaSemana)
+                        ->whereNull('fecha_especifica');
+                })->orWhere(function ($q) use ($fecha) {
+                    $q->where('fecha_especifica', $fecha);
+                });
             })
-            ->orWhere('fecha_especifica', $fecha)
             ->orderBy('hora_inicio')
             ->get();
 

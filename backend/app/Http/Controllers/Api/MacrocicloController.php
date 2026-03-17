@@ -207,9 +207,9 @@ class MacrocicloController extends Controller
             // Actualizar datos del macrociclo
             $macrociclo->update([
                 'nombre' => $request->nombre ?? $macrociclo->nombre,
-                'objetivo_general' => $request->objetivo_general,
+                'objetivo_general' => $request->objetivo_general ?? $macrociclo->objetivo_general,
                 'fecha_inicio' => $request->fecha_inicio ?? $macrociclo->fecha_inicio,
-                'fecha_fin_estimada' => $request->fecha_fin_estimada,
+                'fecha_fin_estimada' => $request->fecha_fin_estimada ?? $macrociclo->fecha_fin_estimada,
                 'activo' => $request->activo ?? $macrociclo->activo,
             ]);
 
@@ -297,6 +297,8 @@ class MacrocicloController extends Controller
             ], 400);
         }
 
+        $macrociclo->load('mesociclos.microciclos.sesiones.ejercicios');
+
         $nuevoMacrociclo = DB::transaction(function () use ($macrociclo, $request, $targetUserId) {
             // Duplicar macrociclo
             $nuevo = $macrociclo->replicate();
@@ -363,6 +365,65 @@ class MacrocicloController extends Controller
             ]);
         }
 
+        // If it's a simple plan, return simplified format
+        if ($macrociclo->esSimple()) {
+            $macrociclo->load([
+                'mesociclos.microciclos.sesiones' => fn($q) => $q->orderBy('numero'),
+                'mesociclos.microciclos.sesiones.ejercicios' => fn($q) => $q->orderBy('orden'),
+                'mesociclos.microciclos.sesiones.ejercicios.ejercicio',
+                'mesociclos.microciclos.sesiones.registros' => fn($q) => $q->where('entrenado_id', $user->id),
+            ]);
+
+            $sesiones = $macrociclo->mesociclos->first()
+                ?->microciclos->first()
+                ?->sesiones ?? collect();
+
+            return response()->json([
+                'data' => [
+                    'tipo_plan' => 'simple',
+                    'id' => $macrociclo->id,
+                    'nombre' => $macrociclo->nombre,
+                    'objetivo_general' => $macrociclo->objetivo_general,
+                    'fecha_inicio' => $macrociclo->fecha_inicio,
+                    'dias' => $sesiones->sortBy('numero')->values()->map(function ($sesion) use ($user) {
+                        $registro = $sesion->registros->where('entrenado_id', $user->id)->first();
+                        return [
+                            'id' => $sesion->id,
+                            'numero' => $sesion->numero,
+                            'nombre' => $sesion->nombre,
+                            'logica_entrenamiento' => $sesion->logica_entrenamiento,
+                            'observaciones' => $sesion->observaciones,
+                            'completada' => $registro ? $registro->estado === 'completado' : false,
+                            'ejercicios' => $sesion->ejercicios->sortBy('orden')->values()->map(function ($ej) {
+                                return [
+                                    'id' => $ej->id,
+                                    'sesion_ejercicio_id' => $ej->id,
+                                    'ejercicio_id' => $ej->ejercicio_id,
+                                    'ejercicio' => $ej->ejercicio ? [
+                                        'id' => $ej->ejercicio->id,
+                                        'nombre' => $ej->ejercicio->nombre,
+                                        'descripcion' => $ej->ejercicio->descripcion,
+                                        'video_url' => $ej->ejercicio->video_url,
+                                        'imagen_url' => $ej->ejercicio->imagen_url,
+                                    ] : null,
+                                    'orden' => $ej->orden,
+                                    'etapa' => $ej->etapa,
+                                    'series' => $ej->series,
+                                    'repeticiones' => $ej->repeticiones,
+                                    'tiempo' => $ej->tiempo,
+                                    'intensidad_tipo' => $ej->intensidad_tipo,
+                                    'intensidad_valor' => $ej->intensidad_valor,
+                                    'descanso' => $ej->descanso,
+                                    'observaciones' => $ej->observaciones,
+                                    'superserie_con' => $ej->superserie_con,
+                                ];
+                            })->toArray(),
+                        ];
+                    })->toArray(),
+                ],
+            ]);
+        }
+
         // Contar mesociclos desbloqueados
         $mesociclosDesbloqueados = $macrociclo->mesociclos()->where('desbloqueado', true)->count();
 
@@ -400,6 +461,7 @@ class MacrocicloController extends Controller
 
         return response()->json([
             'data' => [
+                'tipo_plan' => 'complejo',
                 'id' => $macrociclo->id,
                 'nombre' => $macrociclo->nombre,
                 'objetivo_general' => $macrociclo->objetivo_general,

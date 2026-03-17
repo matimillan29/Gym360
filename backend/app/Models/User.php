@@ -26,6 +26,7 @@ class User extends Authenticatable
         'profesion',
         'foto',
         'estado',
+        'plan_complejo',
         'entrenador_asignado_id',
         'sucursal_id',
     ];
@@ -41,6 +42,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'fecha_nacimiento' => 'date',
+            'plan_complejo' => 'boolean',
         ];
     }
 
@@ -199,6 +201,11 @@ class User extends Authenticatable
     public function isEntrenado(): bool
     {
         return $this->role === 'entrenado';
+    }
+
+    public function usaPlanComplejo(): bool
+    {
+        return (bool) $this->plan_complejo;
     }
 
     public function getNombreCompletoAttribute(): string

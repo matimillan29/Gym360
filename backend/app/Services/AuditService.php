@@ -29,7 +29,6 @@ class AuditService
                 'old_data' => $oldData,
                 'new_data' => $newData,
                 'ip' => request()->ip(),
-                'timestamp' => now(),
             ]);
         } catch (\Exception $e) {
             // No dejar que un error en auditoría rompa la operación principal

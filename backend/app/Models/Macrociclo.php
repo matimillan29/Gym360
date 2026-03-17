@@ -15,6 +15,7 @@ class Macrociclo extends Model
         'fecha_fin_estimada',
         'objetivo_general',
         'activo',
+        'tipo_plan',
     ];
 
     protected function casts(): array
@@ -39,6 +40,11 @@ class Macrociclo extends Model
     public function scopeActivos($query)
     {
         return $query->where('activo', true);
+    }
+
+    public function esSimple(): bool
+    {
+        return $this->tipo_plan === 'simple';
     }
 
     public function getMesocicloActualAttribute(): ?Mesociclo

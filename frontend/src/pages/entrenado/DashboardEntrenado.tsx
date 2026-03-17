@@ -71,13 +71,17 @@ export default function DashboardEntrenado() {
   });
 
   // Derive quick stats from complete stats
-  const estadisticas: EstadisticasRapidas | null = estadisticasCompletas ? {
-    porcentaje_asistencia: (estadisticasCompletas as any).porcentaje_asistencia ?? 0,
-    sesiones_completadas: estadisticasCompletas.entrenamientos?.total ?? 0,
-    sesiones_totales: estadisticasCompletas.entrenamientos?.total ?? 0,
-    racha_actual: estadisticasCompletas.racha?.actual ?? 0,
-    tonelaje_ultimo_mes: (estadisticasCompletas as any).tonelaje_ultimo_mes ?? 0,
-  } : null;
+  const estadisticas: EstadisticasRapidas | null = estadisticasCompletas ? (() => {
+    const total = estadisticasCompletas.entrenamientos?.total ?? 0;
+    const mes = estadisticasCompletas.entrenamientos?.mes ?? 0;
+    return {
+      porcentaje_asistencia: total > 0 ? Math.round((mes / total) * 100) : 0,
+      sesiones_completadas: mes,
+      sesiones_totales: total,
+      racha_actual: estadisticasCompletas.racha?.actual ?? 0,
+      tonelaje_ultimo_mes: 0,
+    };
+  })() : null;
 
   const getCuotaStatus = () => {
     if (!cuotaActual) return null;

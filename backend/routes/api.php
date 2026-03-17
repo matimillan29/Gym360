@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\SucursalController;
 use App\Http\Controllers\Api\AuditController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ProgresionController;
+use App\Http\Controllers\Api\PlanSimpleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -87,6 +88,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/audit', [AuditController::class, 'index']);
         Route::get('/audit/user/{userId}', [AuditController::class, 'byUser']);
         Route::get('/audit/entity/{type}/{id}', [AuditController::class, 'byEntity']);
+
+        // Toggle plan complejo para entrenados
+        Route::post('/entrenados/{entrenado}/toggle-plan-complejo', [EntrenadoController::class, 'togglePlanComplejo']);
 
         // Sucursales (multi-sede)
         Route::apiResource('sucursales', SucursalController::class);
@@ -151,6 +155,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/macrociclos/{macrociclo}/activar', [MacrocicloController::class, 'activar']);
         Route::post('/macrociclos/{macrociclo}/duplicar', [MacrocicloController::class, 'duplicar']);
 
+        // Planes simples
+        Route::get('/entrenados/{entrenado}/planes-simples', [PlanSimpleController::class, 'index']);
+        Route::post('/entrenados/{entrenado}/planes-simples', [PlanSimpleController::class, 'store']);
+        Route::get('/planes-simples/{plan}', [PlanSimpleController::class, 'show']);
+        Route::put('/planes-simples/{plan}', [PlanSimpleController::class, 'update']);
+        Route::delete('/planes-simples/{plan}', [PlanSimpleController::class, 'destroy']);
+        Route::post('/planes-simples/{plan}/activar', [PlanSimpleController::class, 'activar']);
+
         // Plantillas de planes
         Route::get('/plantillas', [PlantillaController::class, 'index']);
         Route::post('/plantillas', [PlantillaController::class, 'store']);
@@ -200,6 +212,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/cuotas/{cuota}', [CuotaController::class, 'update']);
         Route::delete('/cuotas/{cuota}', [CuotaController::class, 'destroy']);
         Route::post('/cuotas/{cuota}/pago', [CuotaController::class, 'registrarPago']);
+        Route::post('/cuotas/{cuota}/pagos', [CuotaController::class, 'registrarPago']); // Alias plural
         Route::get('/cuotas', [CuotaController::class, 'indexAll']);
         Route::get('/cuotas/{cuota}/pagos', [CuotaController::class, 'pagos']);
 

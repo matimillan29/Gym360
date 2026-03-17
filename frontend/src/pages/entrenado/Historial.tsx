@@ -31,6 +31,12 @@ interface EstadisticaResumen {
   tonelaje_total: number;
 }
 
+interface EstadisticasApiResponse {
+  racha?: { actual?: number; maxima?: number; activa?: boolean };
+  entrenamientos?: { semana?: number; mes?: number; total?: number };
+  logros?: unknown;
+}
+
 export default function Historial() {
   const [expandedRegistro, setExpandedRegistro] = useState<number | null>(null);
   const [filtroMes, setFiltroMes] = useState<string>('');
@@ -53,7 +59,16 @@ export default function Historial() {
     queryFn: async () => {
       try {
         const response = await api.get('/mi/estadisticas');
-        return response.data.data || response.data;
+        const raw: EstadisticasApiResponse = response.data.data || response.data;
+        const total = raw.entrenamientos?.total || 0;
+        const mes = raw.entrenamientos?.mes || 0;
+        return {
+          total_sesiones: total,
+          sesiones_completadas: mes,
+          sesiones_parciales: 0,
+          asistencia_porcentaje: total > 0 ? Math.round((mes / total) * 100) : 0,
+          tonelaje_total: 0,
+        };
       } catch {
         return {
           total_sesiones: 0,

@@ -31,6 +31,7 @@ class MicrocicloController extends Controller
     {
         $request->validate([
             'tipo' => 'required|in:introductorio,desarrollo,estabilizacion,descarga',
+            'nombre' => 'nullable|string|max:255',
         ]);
 
         // Calcular próximo número
@@ -39,6 +40,7 @@ class MicrocicloController extends Controller
         $microciclo = Microciclo::create([
             'mesociclo_id' => $mesociclo->id,
             'tipo' => $request->tipo,
+            'nombre' => $request->nombre,
             'numero' => $ultimoNumero + 1,
         ]);
 
@@ -76,11 +78,13 @@ class MicrocicloController extends Controller
         $request->validate([
             'tipo' => 'sometimes|required|in:introductorio,desarrollo,estabilizacion,descarga',
             'numero' => 'sometimes|integer|min:1',
+            'nombre' => 'nullable|string|max:255',
         ]);
 
         $microciclo->update($request->only([
             'tipo',
             'numero',
+            'nombre',
         ]));
 
         return response()->json([

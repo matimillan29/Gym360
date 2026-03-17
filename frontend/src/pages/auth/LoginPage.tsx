@@ -248,6 +248,7 @@ export default function LoginPage() {
                           required: 'La contraseña es requerida',
                         })}
                         type="password"
+                        placeholder="Ej: JuPe12345678"
                         className="w-full pl-10 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-offset-0 transition-all"
                         style={{
                           backgroundColor: 'var(--bg-input)',
@@ -259,6 +260,9 @@ export default function LoginPage() {
                         onBlur={(e) => e.target.style.boxShadow = 'none'}
                       />
                     </div>
+                    <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                      Primeras 2 letras de tu nombre + apellido + DNI
+                    </p>
                     {entrenadoForm.formState.errors.password && (
                       <p className="mt-1 text-sm text-red-600">{entrenadoForm.formState.errors.password.message}</p>
                     )}
