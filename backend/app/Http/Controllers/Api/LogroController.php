@@ -90,6 +90,17 @@ class LogroController extends Controller
         // Agrupar logros por categoría
         $logrosPorCategoria = $todosLogros->groupBy('categoria');
 
+        // Calcular tonelaje del mes actual
+        $tonelajeMes = RegistroSesion::where('entrenado_id', $user->id)
+            ->where('fecha', '>=', now()->startOfMonth())
+            ->with('registrosEjercicio')
+            ->get()
+            ->sum(function ($regSesion) {
+                return $regSesion->registrosEjercicio->sum(function ($regEj) {
+                    return ($regEj->peso ?? 0) * ($regEj->repeticiones ?? 0) * ($regEj->series_completadas ?? 0);
+                });
+            });
+
         return response()->json([
             'data' => [
                 'racha' => [
@@ -103,6 +114,7 @@ class LogroController extends Controller
                     'mes' => $racha->entrenamientos_mes,
                     'total' => $racha->entrenamientos_total,
                 ],
+                'tonelaje_mes' => round($tonelajeMes, 2),
                 'logros' => [
                     'total' => $todosLogros->count(),
                     'desbloqueados' => $logrosDesbloqueados->count(),

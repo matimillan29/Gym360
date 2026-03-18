@@ -503,17 +503,11 @@ class MacrocicloController extends Controller
             'gym' => $gymConfig,
         ])->render();
 
-        // Use DomPDF if available, otherwise return HTML
-        if (class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)->setPaper('a4');
-            return $pdf->download("plan-{$user->nombre}-{$user->apellido}.pdf");
-        }
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)
+            ->setPaper('a4', 'landscape');
 
-        // Fallback: return HTML as downloadable file
-        return response($html, 200, [
-            'Content-Type' => 'text/html',
-            'Content-Disposition' => "attachment; filename=\"plan-{$user->nombre}-{$user->apellido}.html\"",
-        ]);
+        $filename = "plan-{$user->nombre}-{$user->apellido}.pdf";
+        return $pdf->download($filename);
     }
 
     /**
