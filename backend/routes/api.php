@@ -121,9 +121,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/entrenados/{entrenado}/asignar-entrenador', [EntrenadoController::class, 'asignarEntrenador']);
         Route::post('/entrenados/{entrenado}/foto', [EntrenadoController::class, 'uploadFoto']);
 
-        // Check-in de entrenados
+        // Check-in / Check-out de entrenados
         Route::post('/checkin/buscar', [EntrenadoController::class, 'buscarParaCheckin']);
         Route::post('/checkin/{entrenado}/registrar', [EntrenadoController::class, 'registrarIngreso']);
+        Route::post('/checkin/{entrenado}/salida', [EntrenadoController::class, 'registrarSalida']);
+        Route::get('/checkin/hoy', [EntrenadoController::class, 'ingresosHoy']);
+        Route::get('/checkin/historial', [EntrenadoController::class, 'ingresosHistorial']);
 
         // Dashboard del entrenador
         Route::get('/dashboard/entrenador', [DashboardController::class, 'entrenador']);

@@ -540,50 +540,129 @@ class EntrenadoController extends Controller
     }
 
     /**
+     * Validar acceso del entrenado según su cuota y plan
+     * Retorna [allowed, warning, cuota, clasesRestantes]
+     */
+    private function validarAcceso(User $entrenado): array
+    {
+        $cuotaActual = $entrenado->cuotas()
+            ->with('plan')
+            ->orderByDesc('fecha_vencimiento')
+            ->first();
+
+        if (!$cuotaActual) {
+            return [false, 'Sin cuota asignada.', null, null];
+        }
+
+        $plan = $cuotaActual->plan;
+        $vencida = \Carbon\Carbon::parse($cuotaActual->fecha_vencimiento)->isPast();
+
+        // Bloquear si cuota vencida
+        if ($vencida && $cuotaActual->estado !== 'pagado') {
+            return [false, 'Cuota vencida. Contactá a tu entrenador para renovar.', $cuotaActual, null];
+        }
+        if ($cuotaActual->estado === 'vencido' || $cuotaActual->estado === 'mora') {
+            return [false, 'Cuota vencida. Contactá a tu entrenador para renovar.', $cuotaActual, null];
+        }
+
+        // Warning si pendiente (pero permite acceso)
+        $warning = null;
+        if ($cuotaActual->estado === 'pendiente') {
+            $warning = 'Cuota pendiente de pago.';
+        }
+
+        // Validar según tipo de plan
+        if ($plan) {
+            $tipo = $plan->tipo;
+
+            // Pack de clases: verificar accesos restantes
+            if ($tipo === 'pack_clases' && $plan->cantidad_accesos) {
+                $clasesUsadas = $cuotaActual->clases_usadas ?? 0;
+                $clasesRestantes = $plan->cantidad_accesos - $clasesUsadas;
+                if ($clasesRestantes <= 0) {
+                    return [false, 'Sin accesos restantes en tu pack.', $cuotaActual, 0];
+                }
+                return [true, $warning, $cuotaActual, $clasesRestantes];
+            }
+
+            // Semanal 2x/3x: verificar límite semanal
+            if (in_array($tipo, ['semanal_2x', 'semanal_3x'])) {
+                $limiteHoy = $tipo === 'semanal_2x' ? 2 : 3;
+                $inicioSemana = now()->startOfWeek(\Carbon\Carbon::MONDAY);
+                $finSemana = now()->endOfWeek(\Carbon\Carbon::SUNDAY);
+
+                $ingresosEstaSemana = \App\Models\Ingreso::where('entrenado_id', $entrenado->id)
+                    ->whereBetween('fecha_entrada', [$inicioSemana, $finSemana])
+                    ->count();
+
+                if ($ingresosEstaSemana >= $limiteHoy) {
+                    return [false, "Ya usaste tus {$limiteHoy} accesos de esta semana.", $cuotaActual, 0];
+                }
+                return [true, $warning, $cuotaActual, $limiteHoy - $ingresosEstaSemana];
+            }
+
+            // Personalizado con cantidad_accesos: verificar total
+            if ($tipo === 'personalizado' && $plan->cantidad_accesos) {
+                $clasesUsadas = $cuotaActual->clases_usadas ?? 0;
+                $clasesRestantes = $plan->cantidad_accesos - $clasesUsadas;
+                if ($clasesRestantes <= 0) {
+                    return [false, 'Sin accesos restantes.', $cuotaActual, 0];
+                }
+                return [true, $warning, $cuotaActual, $clasesRestantes];
+            }
+        }
+
+        // mensual_libre o sin restricción: acceso ilimitado
+        return [true, $warning, $cuotaActual, null];
+    }
+
+    /**
+     * Registrar un ingreso y actualizar contadores
+     */
+    private function crearIngreso(User $entrenado, ?Cuota $cuota): \App\Models\Ingreso
+    {
+        $ingreso = \App\Models\Ingreso::create([
+            'entrenado_id' => $entrenado->id,
+            'cuota_id' => $cuota?->id,
+            'fecha_entrada' => now(),
+            'tipo' => 'musculacion',
+        ]);
+
+        // Incrementar clases_usadas para planes con accesos limitados
+        if ($cuota && $cuota->plan) {
+            $tipo = $cuota->plan->tipo;
+            if (in_array($tipo, ['pack_clases', 'personalizado']) && $cuota->plan->cantidad_accesos) {
+                $cuota->increment('clases_usadas');
+            }
+        }
+
+        return $ingreso;
+    }
+
+    /**
      * Registrar ingreso público (sin auth)
      */
     public function registrarIngresoPublico(Request $request, User $entrenado)
     {
         if (!$entrenado->isEntrenado()) {
-            return response()->json([
-                'message' => 'Usuario no es entrenado.',
-            ], 404);
+            return response()->json(['message' => 'Usuario no es entrenado.'], 404);
         }
 
         if ($entrenado->estado !== 'activo') {
-            return response()->json([
-                'message' => 'El entrenado no está activo.',
-            ], 400);
+            return response()->json(['message' => 'El entrenado no está activo.'], 400);
         }
 
-        $cuotaActual = $entrenado->cuotas()
-            ->with('planCuota')
-            ->orderByDesc('fecha_vencimiento')
-            ->first();
+        [$allowed, $warning, $cuota, $clasesRestantes] = $this->validarAcceso($entrenado);
 
-        $warning = null;
-
-        if (!$cuotaActual) {
-            $warning = 'Sin cuota asignada.';
-        } elseif ($cuotaActual->estado === 'vencido' ||
-                  (\Carbon\Carbon::parse($cuotaActual->fecha_vencimiento)->isPast() && $cuotaActual->estado !== 'pagado')) {
-            $warning = 'Cuota vencida.';
-        } elseif ($cuotaActual->estado === 'pendiente') {
-            $warning = 'Cuota pendiente de pago.';
+        if (!$allowed) {
+            return response()->json(['message' => $warning], 400);
         }
 
-        if ($cuotaActual && $cuotaActual->planCuota && $cuotaActual->planCuota->cantidad_accesos) {
-            $clasesUsadas = $cuotaActual->clases_usadas ?? 0;
-            $clasesDisponibles = $cuotaActual->planCuota->cantidad_accesos - $clasesUsadas;
+        $ingreso = $this->crearIngreso($entrenado, $cuota);
 
-            if ($clasesDisponibles <= 0) {
-                return response()->json([
-                    'message' => 'Sin clases disponibles.',
-                ], 400);
-            }
-
-            $cuotaActual->update(['clases_usadas' => $clasesUsadas + 1]);
-            $cuotaActual->refresh();
+        // Recalcular clases restantes post-ingreso
+        if ($clasesRestantes !== null) {
+            $clasesRestantes = max(0, $clasesRestantes - 1);
         }
 
         return response()->json([
@@ -592,9 +671,8 @@ class EntrenadoController extends Controller
             'data' => [
                 'nombre' => $entrenado->nombre . ' ' . $entrenado->apellido,
                 'hora' => now()->format('H:i'),
-                'clases_restantes' => $cuotaActual && $cuotaActual->planCuota && $cuotaActual->planCuota->cantidad_accesos
-                    ? $cuotaActual->planCuota->cantidad_accesos - ($cuotaActual->clases_usadas ?? 0)
-                    : null,
+                'ingreso_id' => $ingreso->id,
+                'clases_restantes' => $clasesRestantes,
             ],
         ]);
     }
@@ -605,50 +683,24 @@ class EntrenadoController extends Controller
     public function registrarIngreso(Request $request, User $entrenado)
     {
         if (!$entrenado->isEntrenado()) {
-            return response()->json([
-                'message' => 'Usuario no es entrenado.',
-            ], 404);
+            return response()->json(['message' => 'Usuario no es entrenado.'], 404);
         }
 
         if ($entrenado->estado !== 'activo') {
-            return response()->json([
-                'message' => 'El entrenado no está activo.',
-            ], 400);
+            return response()->json(['message' => 'El entrenado no está activo.'], 400);
         }
 
-        // Verificar cuota
-        $cuotaActual = $entrenado->cuotas()
-            ->with('planCuota')
-            ->orderByDesc('fecha_vencimiento')
-            ->first();
+        [$allowed, $warning, $cuota, $clasesRestantes] = $this->validarAcceso($entrenado);
 
-        $warning = null;
-
-        if (!$cuotaActual) {
-            $warning = 'El entrenado no tiene cuota asignada.';
-        } elseif ($cuotaActual->estado === 'vencido' ||
-                  (\Carbon\Carbon::parse($cuotaActual->fecha_vencimiento)->isPast() && $cuotaActual->estado !== 'pagado')) {
-            $warning = 'La cuota está vencida.';
-        } elseif ($cuotaActual->estado === 'pendiente') {
-            $warning = 'La cuota aún no fue pagada.';
+        if (!$allowed) {
+            return response()->json(['message' => $warning], 400);
         }
 
-        // Si el plan tiene clases limitadas, descontar una
-        if ($cuotaActual && $cuotaActual->planCuota && $cuotaActual->planCuota->cantidad_accesos) {
-            $clasesUsadas = $cuotaActual->clases_usadas ?? 0;
-            $clasesDisponibles = $cuotaActual->planCuota->cantidad_accesos - $clasesUsadas;
+        $ingreso = $this->crearIngreso($entrenado, $cuota);
 
-            if ($clasesDisponibles <= 0) {
-                return response()->json([
-                    'message' => 'No quedan clases disponibles en el plan.',
-                ], 400);
-            }
-
-            $cuotaActual->update(['clases_usadas' => $clasesUsadas + 1]);
-            $cuotaActual->refresh();
+        if ($clasesRestantes !== null) {
+            $clasesRestantes = max(0, $clasesRestantes - 1);
         }
-
-        // TODO: Registrar en tabla de ingresos si se quiere historial
 
         return response()->json([
             'message' => 'Ingreso registrado correctamente.',
@@ -656,10 +708,97 @@ class EntrenadoController extends Controller
             'data' => [
                 'nombre' => $entrenado->nombre . ' ' . $entrenado->apellido,
                 'hora' => now()->format('H:i'),
-                'clases_restantes' => $cuotaActual && $cuotaActual->planCuota && $cuotaActual->planCuota->cantidad_accesos
-                    ? $cuotaActual->planCuota->cantidad_accesos - ($cuotaActual->clases_usadas ?? 0)
-                    : null,
+                'ingreso_id' => $ingreso->id,
+                'clases_restantes' => $clasesRestantes,
             ],
         ]);
+    }
+
+    /**
+     * Registrar salida (check-out) del entrenado
+     */
+    public function registrarSalida(Request $request, User $entrenado)
+    {
+        if (!$entrenado->isEntrenado()) {
+            return response()->json(['message' => 'Usuario no es entrenado.'], 404);
+        }
+
+        // Buscar el ingreso abierto más reciente (sin fecha_salida)
+        $ingreso = \App\Models\Ingreso::where('entrenado_id', $entrenado->id)
+            ->whereNull('fecha_salida')
+            ->orderByDesc('fecha_entrada')
+            ->first();
+
+        if (!$ingreso) {
+            return response()->json(['message' => 'No se encontró un ingreso activo.'], 404);
+        }
+
+        $ahora = now();
+        $duracion = $ingreso->fecha_entrada->diffInMinutes($ahora);
+
+        $ingreso->update([
+            'fecha_salida' => $ahora,
+            'duracion_minutos' => $duracion,
+        ]);
+
+        return response()->json([
+            'message' => 'Salida registrada correctamente.',
+            'data' => [
+                'nombre' => $entrenado->nombre . ' ' . $entrenado->apellido,
+                'hora_entrada' => $ingreso->fecha_entrada->format('H:i'),
+                'hora_salida' => $ahora->format('H:i'),
+                'duracion_minutos' => $duracion,
+            ],
+        ]);
+    }
+
+    /**
+     * Listar ingresos de hoy (para CheckinGestion)
+     */
+    public function ingresosHoy(Request $request)
+    {
+        $ingresos = \App\Models\Ingreso::with('entrenado:id,nombre,apellido,foto,dni')
+            ->whereDate('fecha_entrada', today())
+            ->orderByDesc('fecha_entrada')
+            ->get()
+            ->map(fn($i) => [
+                'id' => $i->id,
+                'entrenado' => $i->entrenado ? [
+                    'id' => $i->entrenado->id,
+                    'nombre' => $i->entrenado->nombre,
+                    'apellido' => $i->entrenado->apellido,
+                    'foto' => $i->entrenado->foto,
+                    'dni' => $i->entrenado->dni,
+                ] : null,
+                'hora_entrada' => $i->fecha_entrada->format('H:i'),
+                'hora_salida' => $i->fecha_salida?->format('H:i'),
+                'duracion_minutos' => $i->duracion_minutos,
+                'activo' => $i->fecha_salida === null,
+            ]);
+
+        return response()->json(['data' => $ingresos]);
+    }
+
+    /**
+     * Historial de ingresos con filtros
+     */
+    public function ingresosHistorial(Request $request)
+    {
+        $query = \App\Models\Ingreso::with('entrenado:id,nombre,apellido,dni');
+
+        if ($request->filled('entrenado_id')) {
+            $query->where('entrenado_id', $request->entrenado_id);
+        }
+        if ($request->filled('fecha_desde')) {
+            $query->whereDate('fecha_entrada', '>=', $request->fecha_desde);
+        }
+        if ($request->filled('fecha_hasta')) {
+            $query->whereDate('fecha_entrada', '<=', $request->fecha_hasta);
+        }
+
+        $ingresos = $query->orderByDesc('fecha_entrada')
+            ->paginate($request->get('per_page', 20));
+
+        return response()->json($ingresos);
     }
 }

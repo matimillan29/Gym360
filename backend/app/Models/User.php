@@ -147,6 +147,11 @@ class User extends Authenticatable
         return $this->hasMany(AsistenciaClase::class, 'entrenado_id');
     }
 
+    public function ingresos(): HasMany
+    {
+        return $this->hasMany(Ingreso::class, 'entrenado_id');
+    }
+
     public function otpCodes(): HasMany
     {
         return $this->hasMany(OtpCode::class);
