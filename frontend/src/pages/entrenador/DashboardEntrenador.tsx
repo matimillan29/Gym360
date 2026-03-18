@@ -29,7 +29,8 @@ interface EntrenadoReciente {
   apellido: string;
   ultima_sesion?: string;
   proxima_sesion?: string;
-  estado_cuota: 'pagado' | 'pendiente' | 'vencido' | 'mora';
+  plan_activo_nombre?: string;
+  estado_cuota: 'pagado' | 'pendiente' | 'vencido' | 'mora' | 'sin_cuota';
 }
 
 interface ActividadReciente {
@@ -141,8 +142,9 @@ export default function DashboardEntrenador() {
       pendiente: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Pendiente' },
       vencido: { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Vencido' },
       mora: { bg: 'bg-red-100', text: 'text-red-700', label: 'En mora' },
+      sin_cuota: { bg: 'bg-gray-100', text: 'text-gray-500', label: 'Sin cuota' },
     };
-    return configs[estado as keyof typeof configs] || configs.pendiente;
+    return configs[estado as keyof typeof configs] || configs.sin_cuota;
   };
 
   const getActividadIcon = (tipo: string) => {
@@ -413,9 +415,9 @@ export default function DashboardEntrenador() {
                           {entrenado.nombre} {entrenado.apellido}
                         </p>
                         <p className="text-sm text-gray-500">
-                          {entrenado.proxima_sesion
-                            ? `Próxima sesión: ${new Date(entrenado.proxima_sesion).toLocaleDateString('es-AR')}`
-                            : 'Sin sesiones programadas'}
+                          {entrenado.plan_activo_nombre
+                            ? entrenado.plan_activo_nombre
+                            : 'Sin plan asignado'}
                         </p>
                       </div>
                     </div>

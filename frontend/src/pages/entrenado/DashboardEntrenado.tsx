@@ -79,7 +79,7 @@ export default function DashboardEntrenado() {
       sesiones_completadas: mes,
       sesiones_totales: total,
       racha_actual: estadisticasCompletas.racha?.actual ?? 0,
-      tonelaje_ultimo_mes: (estadisticasCompletas as Record<string, unknown>).tonelaje_mes as number ?? 0,
+      tonelaje_ultimo_mes: (estadisticasCompletas as unknown as { tonelaje_mes?: number }).tonelaje_mes ?? 0,
     };
   })() : null;
 

@@ -43,6 +43,17 @@ class EntrenadoController extends Controller
         $perPage = $request->get('per_page', $request->get('limit', 15));
         $entrenados = $query->paginate($perPage);
 
+        // Agregar info de plan activo y cuota actual a cada entrenado
+        $entrenados->getCollection()->transform(function ($entrenado) {
+            $planActivo = $entrenado->macrociclos()->where('activo', true)->first();
+            $cuotaActual = $entrenado->cuotas()->orderByDesc('fecha_vencimiento')->first();
+
+            $entrenado->plan_activo_nombre = $planActivo?->nombre;
+            $entrenado->estado_cuota = $cuotaActual?->estado ?? 'sin_cuota';
+
+            return $entrenado;
+        });
+
         return response()->json($entrenados);
     }
 
