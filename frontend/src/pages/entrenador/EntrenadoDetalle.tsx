@@ -1816,15 +1816,15 @@ export default function EntrenadoDetalle() {
               <div className="space-y-4">
                 {cuotas.map((cuota) => (
                   <div key={cuota.id} className="border rounded-xl p-4">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <h4 className="font-medium">{cuota.plan?.nombre}</h4>
+                    <div className="flex justify-between items-start mb-3 gap-2">
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-medium truncate">{cuota.plan?.nombre}</h4>
                         <p className="text-sm text-gray-500">
                           {new Date(cuota.fecha_inicio).toLocaleDateString('es-AR')} - {new Date(cuota.fecha_vencimiento).toLocaleDateString('es-AR')}
                         </p>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xl font-semibold">${cuota.monto.toLocaleString()}</p>
+                      <div className="text-right shrink-0">
+                        <p className="text-lg font-semibold">${cuota.monto.toLocaleString()}</p>
                         {getCuotaEstadoBadge(cuota.estado)}
                       </div>
                     </div>

@@ -102,9 +102,9 @@ export default function MisCuotas() {
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Plan</p>
                 <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">{cuotaActual.plan.nombre}</p>
               </div>
-              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-xl min-w-0">
+              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-xl min-w-0 overflow-hidden">
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Monto</p>
-                <p className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                <p className="text-base font-bold text-gray-900 dark:text-white truncate">
                   ${cuotaActual.monto.toLocaleString()}
                 </p>
               </div>
@@ -127,9 +127,9 @@ export default function MisCuotas() {
                   </p>
                 )}
               </div>
-              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-xl min-w-0">
+              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-xl min-w-0 overflow-hidden">
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Pagado</p>
-                <p className={`text-lg font-bold truncate ${
+                <p className={`text-base font-bold truncate ${
                   cuotaActual.total_pagado >= cuotaActual.monto ? 'text-green-600' : 'text-gray-900 dark:text-white'
                 }`}>
                   ${(cuotaActual.total_pagado || 0).toLocaleString()}
