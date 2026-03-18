@@ -12,6 +12,7 @@ use App\Models\RegistroEjercicio;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 
 class SesionController extends Controller
@@ -639,48 +640,77 @@ class SesionController extends Controller
             ], 400);
         }
 
-        return DB::transaction(function () use ($request, $sesion, $user) {
-            // Crear o actualizar registro de sesión
-            $registroSesion = RegistroSesion::updateOrCreate(
-                [
-                    'sesion_id' => $sesion->id,
-                    'entrenado_id' => $user->id,
-                    'fecha' => Carbon::today(),
-                ],
-                [
+        try {
+            return DB::transaction(function () use ($request, $sesion, $user) {
+                // Campos base del registro de sesión
+                $registroData = [
                     'estado' => 'completado',
                     'feedback_general' => $request->feedback_general,
-                    'hora_inicio' => Carbon::now(),
-                    'hora_fin' => Carbon::now(),
-                    'completada' => true,
-                ]
-            );
+                ];
 
-            // Registrar cada ejercicio
-            foreach ($request->ejercicios as $ejercicioData) {
-                RegistroEjercicio::updateOrCreate(
+                // Agregar campos opcionales solo si la columna existe
+                if (Schema::hasColumn('registros_sesion', 'hora_inicio')) {
+                    $registroData['hora_inicio'] = Carbon::now();
+                    $registroData['hora_fin'] = Carbon::now();
+                }
+                if (Schema::hasColumn('registros_sesion', 'completada')) {
+                    $registroData['completada'] = true;
+                }
+
+                $registroSesion = RegistroSesion::updateOrCreate(
                     [
-                        'registro_sesion_id' => $registroSesion->id,
-                        'sesion_ejercicio_id' => $ejercicioData['sesion_ejercicio_id'],
+                        'sesion_id' => $sesion->id,
+                        'entrenado_id' => $user->id,
+                        'fecha' => Carbon::today(),
                     ],
-                    [
+                    $registroData
+                );
+
+                // Verificar qué columnas existen en registros_ejercicio
+                $hasPercepcion = Schema::hasColumn('registros_ejercicio', 'percepcion_carga');
+                $hasSensacion = Schema::hasColumn('registros_ejercicio', 'sensacion_general');
+
+                foreach ($request->ejercicios as $ejercicioData) {
+                    $ejData = [
                         'peso' => $ejercicioData['peso'] ?? null,
                         'repeticiones' => $ejercicioData['repeticiones'] ?? null,
                         'series_completadas' => $ejercicioData['series_completadas'],
                         'intensidad_percibida' => $ejercicioData['intensidad_percibida'] ?? null,
-                        'percepcion_carga' => $ejercicioData['percepcion_carga'] ?? null,
-                        'sensacion_general' => $ejercicioData['sensacion_general'] ?? null,
                         'completado' => $ejercicioData['completado'],
                         'observaciones' => $ejercicioData['observaciones'] ?? null,
-                    ]
-                );
-            }
+                    ];
 
+                    if ($hasPercepcion) {
+                        $ejData['percepcion_carga'] = $ejercicioData['percepcion_carga'] ?? null;
+                    }
+                    if ($hasSensacion) {
+                        $ejData['sensacion_general'] = $ejercicioData['sensacion_general'] ?? null;
+                    }
+
+                    RegistroEjercicio::updateOrCreate(
+                        [
+                            'registro_sesion_id' => $registroSesion->id,
+                            'sesion_ejercicio_id' => $ejercicioData['sesion_ejercicio_id'],
+                        ],
+                        $ejData
+                    );
+                }
+
+                return response()->json([
+                    'data' => $registroSesion->load('registrosEjercicio'),
+                    'message' => 'Sesión registrada correctamente.',
+                ], 201);
+            });
+        } catch (\Exception $e) {
+            \Log::error('Error al registrar sesión: ' . $e->getMessage(), [
+                'sesion_id' => $sesion->id,
+                'user_id' => $user->id,
+                'trace' => $e->getTraceAsString(),
+            ]);
             return response()->json([
-                'data' => $registroSesion->load('registrosEjercicio'),
-                'message' => 'Sesión registrada correctamente.',
-            ], 201);
-        });
+                'message' => 'Error al registrar la sesión: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
