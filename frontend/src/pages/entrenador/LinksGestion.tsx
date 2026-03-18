@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 interface Entrenado {
@@ -107,6 +108,7 @@ export default function LinksGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['links'] });
       closeModal();
+      toast.success('Link creado correctamente');
     },
   });
 
@@ -118,6 +120,7 @@ export default function LinksGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['links'] });
       closeModal();
+      toast.success('Link actualizado correctamente');
     },
   });
 
@@ -127,6 +130,7 @@ export default function LinksGestion() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['links'] });
+      toast.success('Link eliminado correctamente');
     },
   });
 

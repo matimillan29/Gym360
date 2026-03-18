@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 interface Clase {
@@ -74,7 +75,7 @@ export default function MisClases() {
       queryClient.invalidateQueries({ queryKey: ['mis-reservas'] });
     },
     onError: (error: any) => {
-      alert(error.response?.data?.message || 'Error al reservar');
+      toast.error(error.response?.data?.message || 'Error al reservar');
     },
   });
 
@@ -88,7 +89,7 @@ export default function MisClases() {
       queryClient.invalidateQueries({ queryKey: ['mis-reservas'] });
     },
     onError: (error: any) => {
-      alert(error.response?.data?.message || 'Error al cancelar');
+      toast.error(error.response?.data?.message || 'Error al cancelar');
     },
   });
 

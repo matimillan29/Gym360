@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
@@ -329,7 +330,7 @@ export default function EntrenadoDetalle() {
       setIsEditingAnamnesis(false);
     },
     onError: (error: any) => {
-      alert(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
+      toast.error(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
     },
   });
 
@@ -343,7 +344,7 @@ export default function EntrenadoDetalle() {
       setCuotaForm({ plan_id: '', monto: '', fecha_inicio: '' });
     },
     onError: (error: any) => {
-      alert(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
+      toast.error(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
     },
   });
 
@@ -358,7 +359,7 @@ export default function EntrenadoDetalle() {
       setPagoForm({ monto: '', metodo: 'efectivo', comprobante: '', notas: '' });
     },
     onError: (error: any) => {
-      alert(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
+      toast.error(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
     },
   });
 
@@ -379,7 +380,7 @@ export default function EntrenadoDetalle() {
       });
     },
     onError: (error: any) => {
-      alert(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
+      toast.error(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
     },
   });
 
@@ -393,7 +394,7 @@ export default function EntrenadoDetalle() {
       setLinkForm({ titulo: '', url: '', descripcion: '', categoria: 'video_tecnica' });
     },
     onError: (error: any) => {
-      alert(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
+      toast.error(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
     },
   });
 
@@ -416,7 +417,7 @@ export default function EntrenadoDetalle() {
       setFeedbackForm({ tipo: 'progreso', contenido: '', privado: false });
     },
     onError: (error: any) => {
-      alert(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
+      toast.error(error?.response?.data?.message || 'Error al guardar. Intentá nuevamente.');
     },
   });
 
@@ -448,7 +449,7 @@ export default function EntrenadoDetalle() {
     },
     onError: (error) => {
       console.error('Error al asignar entrenador:', error);
-      alert('Error al asignar entrenador. Por favor, intenta nuevamente.');
+      toast.error('Error al asignar entrenador. Por favor, intenta nuevamente.');
     },
   });
 
@@ -461,7 +462,7 @@ export default function EntrenadoDetalle() {
       queryClient.invalidateQueries({ queryKey: ['entrenado', id] });
     },
     onError: (error: any) => {
-      alert(error?.response?.data?.message || 'Error al cambiar tipo de plan.');
+      toast.error(error?.response?.data?.message || 'Error al cambiar tipo de plan.');
     },
   });
 

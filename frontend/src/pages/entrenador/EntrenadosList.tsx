@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 import type { User } from '../../types';
 import DateInput from '../../components/DateInput';
@@ -72,6 +73,7 @@ export default function EntrenadosList() {
       queryClient.invalidateQueries({ queryKey: ['entrenados'] });
       setShowModal(false);
       resetForm();
+      toast.success('Entrenado creado correctamente');
     },
   });
 
@@ -85,6 +87,7 @@ export default function EntrenadosList() {
       setShowModal(false);
       setEditingEntrenado(null);
       resetForm();
+      toast.success('Entrenado actualizado correctamente');
     },
   });
 
@@ -94,6 +97,7 @@ export default function EntrenadosList() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entrenados'] });
+      toast.success('Entrenado eliminado correctamente');
     },
   });
 
@@ -103,6 +107,7 @@ export default function EntrenadosList() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entrenados'] });
+      toast.success('Entrenado dado de baja correctamente');
     },
   });
 
@@ -112,6 +117,7 @@ export default function EntrenadosList() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entrenados'] });
+      toast.success('Entrenado reactivado correctamente');
     },
   });
 

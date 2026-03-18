@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 interface Entrenado {
@@ -93,6 +94,7 @@ export default function EvaluacionesList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['evaluaciones'] });
       closeModal();
+      toast.success(editingId ? 'Evaluación actualizada correctamente' : 'Evaluación creada correctamente');
     },
   });
 
@@ -103,6 +105,7 @@ export default function EvaluacionesList() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['evaluaciones'] });
+      toast.success('Evaluación eliminada correctamente');
     },
   });
 

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import api from '../services/api';
 import type { AxiosError } from 'axios';
 
@@ -48,6 +49,16 @@ export default function CheckinPublico() {
   const [warning, setWarning] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Load gym config for branding
+  const { data: gymConfig } = useQuery<{ nombre: string; logo?: string }>({
+    queryKey: ['gym-config-public'],
+    queryFn: async () => {
+      const res = await api.get('/config');
+      return res.data.data || res.data;
+    },
+    staleTime: Infinity,
+  });
 
   // Auto-focus on input
   useEffect(() => {
@@ -124,10 +135,13 @@ export default function CheckinPublico() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-900 to-teal-800 flex flex-col">
-      {/* Header */}
+      {/* Header with gym branding */}
       <div className="p-4 text-center">
-        <h1 className="text-3xl font-bold text-white">CHECK-IN</h1>
-        <p className="text-emerald-200 text-sm">Ingresa tu DNI para registrar tu entrada</p>
+        {gymConfig?.logo && (
+          <img src={gymConfig.logo} alt={gymConfig.nombre} className="h-16 w-16 object-contain mx-auto mb-2 rounded-xl" />
+        )}
+        <h1 className="text-3xl font-bold text-white">{gymConfig?.nombre || 'CHECK-IN'}</h1>
+        <p className="text-emerald-200 text-sm">Ingresá tu DNI para registrar tu entrada</p>
       </div>
 
       {/* Main content */}

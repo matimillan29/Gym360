@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 interface Entrenado {
@@ -74,6 +75,7 @@ export default function FeedbackGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feedback'] });
       closeModal();
+      toast.success('Feedback creado correctamente');
     },
   });
 
@@ -85,6 +87,7 @@ export default function FeedbackGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feedback'] });
       closeModal();
+      toast.success('Feedback actualizado correctamente');
     },
   });
 
@@ -94,6 +97,7 @@ export default function FeedbackGestion() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feedback'] });
+      toast.success('Feedback eliminado correctamente');
     },
   });
 

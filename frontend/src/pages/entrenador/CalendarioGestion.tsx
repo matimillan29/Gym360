@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 import type { AxiosError } from 'axios';
 
@@ -87,7 +88,7 @@ export default function CalendarioGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['horarios-gym'] });
       setError(null);
-      alert('Horarios guardados correctamente');
+      toast.success('Horarios guardados correctamente');
     },
     onError: (err: AxiosError<ApiError>) => {
       const message = err.response?.data?.message

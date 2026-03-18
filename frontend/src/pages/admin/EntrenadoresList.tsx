@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 interface Entrenador {
@@ -59,6 +60,7 @@ export default function EntrenadoresList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entrenadores'] });
       closeModal();
+      toast.success('Entrenador creado correctamente');
     },
     onError: (error: { response?: { data?: { errors?: Record<string, string[]> } } }) => {
       if (error.response?.data?.errors) {
@@ -79,6 +81,7 @@ export default function EntrenadoresList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entrenadores'] });
       closeModal();
+      toast.success('Entrenador actualizado correctamente');
     },
     onError: (error: { response?: { data?: { errors?: Record<string, string[]> } } }) => {
       if (error.response?.data?.errors) {
@@ -98,6 +101,7 @@ export default function EntrenadoresList() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entrenadores'] });
+      toast.success('Entrenador eliminado correctamente');
     },
   });
 

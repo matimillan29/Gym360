@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 interface Medidas {
@@ -83,12 +84,12 @@ export default function MiPerfil() {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Por favor selecciona una imagen válida');
+      toast.error('Por favor selecciona una imagen válida');
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      alert('La imagen no puede superar los 2MB');
+      toast.error('La imagen no puede superar los 2MB');
       return;
     }
 
@@ -96,7 +97,7 @@ export default function MiPerfil() {
     try {
       await uploadPhotoMutation.mutateAsync(file);
     } catch {
-      alert('Error al subir la foto');
+      toast.error('Error al subir la foto');
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {

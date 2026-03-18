@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 interface PlanCuota {
@@ -65,6 +66,7 @@ export default function PlanesCuota() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['planes-cuota'] });
       closeModal();
+      toast.success(editingPlan ? 'Plan actualizado correctamente' : 'Plan creado correctamente');
     },
   });
 
@@ -74,6 +76,7 @@ export default function PlanesCuota() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['planes-cuota'] });
+      toast.success('Estado del plan actualizado');
     },
   });
 
@@ -83,6 +86,7 @@ export default function PlanesCuota() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['planes-cuota'] });
+      toast.success('Plan eliminado correctamente');
     },
   });
 

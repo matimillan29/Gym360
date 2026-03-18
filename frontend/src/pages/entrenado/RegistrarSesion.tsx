@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { verificarLogros } from '../../services/estadisticas';
 import RestTimer from '../../components/RestTimer';
@@ -93,8 +94,10 @@ export default function RegistrarSesion() {
       });
       return response.data;
     },
-    onError: (error: any) => {
-      setSaveError(error?.response?.data?.message || 'Error al guardar la sesión. Intentá nuevamente.');
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al guardar la sesión. Intentá nuevamente.';
+      setSaveError(msg);
+      toast.error(msg);
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['sesion'] });
@@ -133,14 +136,32 @@ export default function RegistrarSesion() {
   };
 
   const toggleCompletado = (id: number) => {
-    setRegistros((prev) => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        completado: !prev[id].completado,
-      },
-    }));
+    setRegistros((prev) => {
+      const newState = {
+        ...prev,
+        [id]: { ...prev[id], completado: !prev[id].completado },
+      };
+      // Auto-advance to next exercise when marking as completed
+      if (!prev[id].completado && sesion) {
+        const currentIndex = sesion.ejercicios.findIndex(e => e.sesion_ejercicio_id === id);
+        const nextExercise = sesion.ejercicios[currentIndex + 1];
+        if (nextExercise) {
+          setTimeout(() => setEjercicioActivo(nextExercise.sesion_ejercicio_id), 300);
+        }
+      }
+      return newState;
+    });
   };
+
+  const navigateExercise = (direction: 'prev' | 'next') => {
+    if (!sesion || !ejercicioActivo) return;
+    const currentIndex = sesion.ejercicios.findIndex(e => e.sesion_ejercicio_id === ejercicioActivo);
+    const newIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1;
+    if (newIndex >= 0 && newIndex < sesion.ejercicios.length) {
+      setEjercicioActivo(sesion.ejercicios[newIndex].sesion_ejercicio_id);
+    }
+  };
+
 
   const ejerciciosCompletados = Object.values(registros).filter((r) => r.completado).length;
   const totalEjercicios = sesion?.ejercicios.length || 0;
@@ -456,6 +477,33 @@ export default function RegistrarSesion() {
                       </>
                     )}
                   </button>
+
+                  {/* Navegación prev/next */}
+                  <div className="flex justify-between items-center pt-2">
+                    <button
+                      onClick={() => navigateExercise('prev')}
+                      disabled={index === 0}
+                      className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                      Anterior
+                    </button>
+                    <span className="text-xs text-gray-400 dark:text-gray-500">
+                      {index + 1} de {totalEjercicios}
+                    </span>
+                    <button
+                      onClick={() => navigateExercise('next')}
+                      disabled={index === totalEjercicios - 1}
+                      className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      Siguiente
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

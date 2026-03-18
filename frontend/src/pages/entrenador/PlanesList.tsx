@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 interface Macrociclo {
@@ -111,7 +112,7 @@ export default function PlanesList() {
     },
     onError: (error: { response?: { data?: { message?: string } } }) => {
       const message = error.response?.data?.message || 'Error al aplicar la plantilla';
-      alert(message);
+      toast.error(message);
       setIsApplying(false);
     },
   });

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 import type { Ejercicio } from '../../types';
 
@@ -86,6 +87,7 @@ export default function EjerciciosList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ejercicios'] });
       closeModal();
+      toast.success(editingEjercicio ? 'Ejercicio actualizado correctamente' : 'Ejercicio creado correctamente');
     },
   });
 
@@ -95,6 +97,7 @@ export default function EjerciciosList() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ejercicios'] });
+      toast.success('Ejercicio eliminado correctamente');
     },
   });
 

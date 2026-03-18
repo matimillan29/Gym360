@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
@@ -102,7 +103,7 @@ export default function ConfiguracionGym() {
       refreshConfig(); // Actualizar el contexto global para reflejar cambios en header/sidebar
     },
     onError: (error: any) => {
-      alert(error?.response?.data?.message || 'Error al guardar la configuración');
+      toast.error(error?.response?.data?.message || 'Error al guardar la configuración');
     },
   });
 

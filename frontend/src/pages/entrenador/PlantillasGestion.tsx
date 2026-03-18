@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 
@@ -93,7 +94,7 @@ export default function PlantillasGestion() {
       setShowCrearModal(false);
       setNuevaPlantilla({ nombre: '', descripcion: '' });
       // La plantilla se crea vacía, mostrar mensaje informativo
-      alert('Plantilla creada. Para agregar contenido, primero creá un plan de entrenamiento y luego guardalo como plantilla usando el botón "Guardar como Plantilla" en el editor de planes.');
+      toast('Plantilla creada. Para agregar contenido, primero creá un plan de entrenamiento y luego guardalo como plantilla usando el botón "Guardar como Plantilla" en el editor de planes.', { icon: 'ℹ️' });
     },
   });
 
@@ -115,7 +116,7 @@ export default function PlantillasGestion() {
     },
     onError: (error: { response?: { data?: { message?: string } } }) => {
       const message = error.response?.data?.message || 'Error al aplicar la plantilla';
-      alert(message);
+      toast.error(message);
     },
   });
 
@@ -128,7 +129,7 @@ export default function PlantillasGestion() {
   const openAplicarModal = (plantilla: Plantilla) => {
     // Verificar que la plantilla tenga contenido
     if (!plantilla.estructura.mesociclos || plantilla.estructura.mesociclos.length === 0) {
-      alert('Esta plantilla está vacía (no tiene mesociclos). Para agregar contenido, primero creá un plan de entrenamiento y luego guardalo como plantilla usando el botón "Guardar como Plantilla" en el editor de planes.');
+      toast('Esta plantilla está vacía (no tiene mesociclos). Para agregar contenido, primero creá un plan de entrenamiento y luego guardalo como plantilla usando el botón "Guardar como Plantilla" en el editor de planes.', { icon: 'ℹ️' });
       return;
     }
     setSelectedPlantilla(plantilla);

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 interface Sucursal {
@@ -49,6 +50,7 @@ export default function SucursalesGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sucursales'] });
       closeModal();
+      toast.success('Sucursal creada correctamente');
     },
   });
 
@@ -58,6 +60,7 @@ export default function SucursalesGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sucursales'] });
       closeModal();
+      toast.success('Sucursal actualizada correctamente');
     },
   });
 
@@ -66,6 +69,7 @@ export default function SucursalesGestion() {
       api.put(`/sucursales/${sucursal.id}`, { activa: !sucursal.activa }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sucursales'] });
+      toast.success('Estado de sucursal actualizado');
     },
   });
 
@@ -73,9 +77,10 @@ export default function SucursalesGestion() {
     mutationFn: (id: number) => api.delete(`/sucursales/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sucursales'] });
+      toast.success('Sucursal eliminada correctamente');
     },
     onError: (error: any) => {
-      alert(error.response?.data?.message || 'Error al eliminar');
+      toast.error(error.response?.data?.message || 'Error al eliminar');
     },
   });
 

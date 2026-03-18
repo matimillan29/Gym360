@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 interface Negocio {
@@ -159,7 +160,7 @@ export default function CuponesGestion() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['cupones'] });
-      alert(data.message);
+      toast.success(data.message);
     },
   });
 

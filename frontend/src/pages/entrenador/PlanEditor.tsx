@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 import type { AxiosError } from 'axios';
 import type { Ejercicio } from '../../types';
@@ -229,17 +230,17 @@ export default function PlanEditor() {
       queryClient.invalidateQueries({ queryKey: ['plantillas'] });
       setShowPlantillaModal(false);
       setPlantillaForm({ nombre: '', descripcion: '' });
-      alert('Plantilla creada correctamente');
+      toast.success('Plantilla creada correctamente');
     },
     onError: (err: AxiosError<ApiError>) => {
       const message = err.response?.data?.message || 'Error al crear la plantilla';
-      alert(message);
+      toast.error(message);
     },
   });
 
   const handleCreatePlantilla = () => {
     if (!plan.id) {
-      alert('Primero debes guardar el plan antes de crear una plantilla');
+      toast.error('Primero debes guardar el plan antes de crear una plantilla');
       return;
     }
     createPlantillaMutation.mutate({
