@@ -503,11 +503,23 @@ class MacrocicloController extends Controller
             'gym' => $gymConfig,
         ])->render();
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)
-            ->setPaper('a4', 'landscape');
+        $filename = "plan-{$user->nombre}-{$user->apellido}";
 
-        $filename = "plan-{$user->nombre}-{$user->apellido}.pdf";
-        return $pdf->download($filename);
+        // Intentar generar PDF con DomPDF
+        try {
+            if (class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
+                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)
+                    ->setPaper('a4', 'landscape');
+                return $pdf->download("{$filename}.pdf");
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('DomPDF no disponible, usando HTML: ' . $e->getMessage());
+        }
+
+        // Fallback: devolver HTML que el browser puede imprimir como PDF
+        return response($html, 200, [
+            'Content-Type' => 'text/html; charset=UTF-8',
+        ]);
     }
 
     /**

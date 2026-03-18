@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 import type { PlanActivo, SesionEjercicioDisplay, DiaSimple, DiaEjercicio } from '../../types';
 
@@ -41,16 +42,32 @@ export default function MiPlan() {
       const response = await api.get('/mi/plan/pdf', {
         responseType: 'blob'
       });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `plan-entrenamiento.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error downloading PDF:', error);
+
+      const contentType = response.headers['content-type'] || '';
+
+      if (contentType.includes('pdf')) {
+        // DomPDF generó un PDF real - descargar
+        const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'plan-entrenamiento.pdf');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      } else {
+        // Fallback HTML - abrir como blob en nueva pestaña para imprimir
+        const htmlBlob = new Blob([response.data], { type: 'text/html; charset=UTF-8' });
+        const url = window.URL.createObjectURL(htmlBlob);
+        const win = window.open(url, '_blank');
+        if (win) {
+          setTimeout(() => { win.print(); window.URL.revokeObjectURL(url); }, 800);
+        } else {
+          window.URL.revokeObjectURL(url);
+        }
+      }
+    } catch {
+      toast.error('Error al generar el plan. Intentá nuevamente.');
     } finally {
       setDownloading(false);
     }
