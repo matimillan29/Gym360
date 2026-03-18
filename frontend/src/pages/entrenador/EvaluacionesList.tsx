@@ -287,8 +287,8 @@ export default function EvaluacionesList() {
                   <div key={evaluacion.id} className="p-4 hover:bg-gray-50">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center">
-                          <span className="text-lg font-bold text-teal-600">{evaluacion.valor}</span>
+                        <div className="w-14 h-14 rounded-xl bg-teal-50 flex items-center justify-center overflow-hidden px-1">
+                          <span className="text-xs font-bold text-teal-600 truncate">{evaluacion.valor}{evaluacion.unidad ? ` ${evaluacion.unidad}` : ''}</span>
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
