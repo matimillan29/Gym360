@@ -39,13 +39,34 @@ class DashboardController extends Controller
             'sesiones_hoy' => RegistroSesion::whereDate('fecha', today())->count(),
             'cuotas_pendientes' => Cuota::whereIn('entrenado_id', $entrenadoIds)->where('estado', 'pendiente')->count(),
             'cuotas_vencidas' => Cuota::whereIn('entrenado_id', $entrenadoIds)->whereIn('estado', ['vencido', 'mora'])->count(),
-            'asistencia_promedio' => 0, // TODO: calculate from registros
+            'asistencia_promedio' => $this->calcularAsistenciaPromedio($entrenadoIds),
             'evaluaciones_mes' => Evaluacion::whereIn('entrenado_id', $entrenadoIds)->whereMonth('created_at', now()->month)->count(),
         ];
 
         return response()->json([
             'data' => $stats,
         ]);
+    }
+
+    /**
+     * Calcula el porcentaje promedio de asistencia de los entrenados
+     */
+    private function calcularAsistenciaPromedio($entrenadoIds): int
+    {
+        if ($entrenadoIds->isEmpty()) {
+            return 0;
+        }
+
+        $totalRegistros = RegistroSesion::whereIn('entrenado_id', $entrenadoIds)
+            ->where('fecha', '>=', Carbon::now()->subDays(30))
+            ->count();
+
+        $completados = RegistroSesion::whereIn('entrenado_id', $entrenadoIds)
+            ->where('fecha', '>=', Carbon::now()->subDays(30))
+            ->where('estado', 'completado')
+            ->count();
+
+        return $totalRegistros > 0 ? (int) round(($completados / $totalRegistros) * 100) : 0;
     }
 
     /**
