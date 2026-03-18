@@ -128,6 +128,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/checkin/hoy', [EntrenadoController::class, 'ingresosHoy']);
         Route::get('/checkin/historial', [EntrenadoController::class, 'ingresosHistorial']);
 
+        // Asistencia por entrenado
+        Route::get('/entrenados/{entrenado}/asistencia', [EntrenadoController::class, 'asistencia']);
+
         // Dashboard del entrenador
         Route::get('/dashboard/entrenador', [DashboardController::class, 'entrenador']);
         Route::get('/dashboard/actividad-reciente', [DashboardController::class, 'actividadReciente']);

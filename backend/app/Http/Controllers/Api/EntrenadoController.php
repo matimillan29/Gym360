@@ -764,10 +764,31 @@ class EntrenadoController extends Controller
     }
 
     /**
+     * Cerrar automáticamente ingresos abiertos hace más de 3 horas
+     */
+    private function autoCheckout(): void
+    {
+        $limite = now()->subHours(3);
+        \App\Models\Ingreso::whereNull('fecha_salida')
+            ->where('fecha_entrada', '<', $limite)
+            ->each(function ($ingreso) {
+                $salida = $ingreso->fecha_entrada->copy()->addHours(3);
+                $ingreso->update([
+                    'fecha_salida' => $salida,
+                    'duracion_minutos' => 180,
+                    'observaciones' => 'Checkout automático (3hs)',
+                ]);
+            });
+    }
+
+    /**
      * Listar ingresos de hoy (para CheckinGestion)
      */
     public function ingresosHoy(Request $request)
     {
+        // Auto-cerrar ingresos viejos
+        $this->autoCheckout();
+
         $ingresos = \App\Models\Ingreso::with('entrenado:id,nombre,apellido,foto,dni')
             ->whereDate('fecha_entrada', today())
             ->orderByDesc('fecha_entrada')
@@ -811,5 +832,68 @@ class EntrenadoController extends Controller
             ->paginate($request->get('per_page', 20));
 
         return response()->json($ingresos);
+    }
+
+    /**
+     * Resumen de asistencia de un entrenado (para EntrenadoDetalle)
+     */
+    public function asistencia(Request $request, User $entrenado)
+    {
+        if (!$entrenado->isEntrenado()) {
+            return response()->json(['message' => 'Usuario no es entrenado.'], 404);
+        }
+
+        $mes = $request->get('mes', now()->format('Y-m'));
+        $inicioMes = \Carbon\Carbon::parse($mes . '-01')->startOfMonth();
+        $finMes = $inicioMes->copy()->endOfMonth();
+
+        // Ingresos del mes
+        $ingresosMes = \App\Models\Ingreso::where('entrenado_id', $entrenado->id)
+            ->whereBetween('fecha_entrada', [$inicioMes, $finMes])
+            ->orderByDesc('fecha_entrada')
+            ->get();
+
+        // Calcular accesos según plan
+        $cuotaActual = $entrenado->cuotas()
+            ->with('plan')
+            ->orderByDesc('fecha_vencimiento')
+            ->first();
+
+        $accesosPermitidos = null;
+        $tipoAcceso = null;
+        if ($cuotaActual && $cuotaActual->plan) {
+            $plan = $cuotaActual->plan;
+            $tipoAcceso = $plan->tipo;
+            if ($plan->tipo === 'pack_clases' && $plan->cantidad_accesos) {
+                $accesosPermitidos = $plan->cantidad_accesos;
+            } elseif (in_array($plan->tipo, ['semanal_2x', 'semanal_3x'])) {
+                $porSemana = $plan->tipo === 'semanal_2x' ? 2 : 3;
+                // Semanas en el mes ≈ 4.3
+                $accesosPermitidos = (int) round($porSemana * 4.3);
+            }
+        }
+
+        $totalMes = $ingresosMes->count();
+        $duracionPromedio = $ingresosMes->whereNotNull('duracion_minutos')->avg('duracion_minutos');
+
+        return response()->json([
+            'data' => [
+                'mes' => $mes,
+                'total_asistencias' => $totalMes,
+                'accesos_permitidos' => $accesosPermitidos,
+                'tipo_plan' => $tipoAcceso,
+                'accesos_restantes' => $accesosPermitidos ? max(0, $accesosPermitidos - $totalMes) : null,
+                'duracion_promedio_min' => $duracionPromedio ? (int) round($duracionPromedio) : null,
+                'cuota_estado' => $cuotaActual?->estado,
+                'ingresos' => $ingresosMes->map(fn($i) => [
+                    'id' => $i->id,
+                    'fecha' => $i->fecha_entrada->format('Y-m-d'),
+                    'hora_entrada' => $i->fecha_entrada->format('H:i'),
+                    'hora_salida' => $i->fecha_salida?->format('H:i'),
+                    'duracion_minutos' => $i->duracion_minutos,
+                    'auto_checkout' => str_contains($i->observaciones ?? '', 'automático'),
+                ]),
+            ],
+        ]);
     }
 }

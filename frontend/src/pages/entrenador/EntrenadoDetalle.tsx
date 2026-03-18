@@ -167,6 +167,7 @@ const tabs = [
   { id: 'info', label: 'Información' },
   { id: 'anamnesis', label: 'Anamnesis' },
   { id: 'planes', label: 'Planes' },
+  { id: 'asistencia', label: 'Asistencia' },
   { id: 'estadisticas', label: 'Estadísticas' },
   { id: 'evaluaciones', label: 'Evaluaciones' },
   { id: 'cuotas', label: 'Cuotas' },
@@ -1619,6 +1620,11 @@ export default function EntrenadoDetalle() {
           </div>
         )}
 
+        {/* Asistencia Tab */}
+        {activeTab === 'asistencia' && (
+          <AsistenciaTab entrenadoId={Number(id)} />
+        )}
+
         {/* Estadísticas Tab */}
         {activeTab === 'estadisticas' && (
           <div className="space-y-6">
@@ -2541,6 +2547,118 @@ export default function EntrenadoDetalle() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ================================
+// Componente AsistenciaTab
+// ================================
+interface AsistenciaData {
+  mes: string;
+  total_asistencias: number;
+  accesos_permitidos: number | null;
+  tipo_plan: string | null;
+  accesos_restantes: number | null;
+  duracion_promedio_min: number | null;
+  cuota_estado: string | null;
+  ingresos: {
+    id: number;
+    fecha: string;
+    hora_entrada: string;
+    hora_salida: string | null;
+    duracion_minutos: number | null;
+    auto_checkout: boolean;
+  }[];
+}
+
+function AsistenciaTab({ entrenadoId }: { entrenadoId: number }) {
+  const [mes, setMes] = useState(new Date().toISOString().slice(0, 7));
+
+  const { data, isLoading } = useQuery<AsistenciaData>({
+    queryKey: ['asistencia', entrenadoId, mes],
+    queryFn: async () => {
+      const response = await api.get(`/entrenados/${entrenadoId}/asistencia?mes=${mes}`);
+      return response.data.data;
+    },
+  });
+
+  if (isLoading) {
+    return <p className="text-gray-500 py-8 text-center">Cargando asistencia...</p>;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900">Asistencia</h3>
+        <input
+          type="month"
+          value={mes}
+          onChange={(e) => setMes(e.target.value)}
+          className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      {/* Stats cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-blue-50 rounded-xl p-4 text-center">
+          <p className="text-3xl font-bold text-blue-600">{data?.total_asistencias ?? 0}</p>
+          <p className="text-xs text-gray-600 mt-1">Asistencias</p>
+        </div>
+        <div className="bg-green-50 rounded-xl p-4 text-center">
+          <p className="text-3xl font-bold text-green-600">
+            {data?.accesos_permitidos ? `${data.accesos_restantes ?? 0}` : '∞'}
+          </p>
+          <p className="text-xs text-gray-600 mt-1">
+            {data?.accesos_permitidos ? `Restantes de ${data.accesos_permitidos}` : 'Acceso ilimitado'}
+          </p>
+        </div>
+        <div className="bg-purple-50 rounded-xl p-4 text-center">
+          <p className="text-3xl font-bold text-purple-600">
+            {data?.duracion_promedio_min ?? '-'}
+          </p>
+          <p className="text-xs text-gray-600 mt-1">Min promedio</p>
+        </div>
+        <div className="bg-orange-50 rounded-xl p-4 text-center">
+          <p className="text-3xl font-bold text-orange-600">{data?.tipo_plan ?? '-'}</p>
+          <p className="text-xs text-gray-600 mt-1">Tipo de plan</p>
+        </div>
+      </div>
+
+      {/* Historial */}
+      {data?.ingresos && data.ingresos.length > 0 ? (
+        <div className="bg-white border rounded-xl overflow-hidden">
+          <div className="px-4 py-3 bg-gray-50 border-b">
+            <h4 className="font-medium text-gray-900 text-sm">Historial de ingresos</h4>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {data.ingresos.map((ingreso) => (
+              <div key={ingreso.id} className="px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {new Date(ingreso.fecha + 'T00:00:00').toLocaleDateString('es-AR', {
+                        weekday: 'short', day: 'numeric', month: 'short'
+                      })}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {ingreso.hora_entrada}
+                      {ingreso.hora_salida && ` — ${ingreso.hora_salida}`}
+                      {ingreso.duracion_minutos !== null && ` (${ingreso.duracion_minutos} min)`}
+                      {ingreso.auto_checkout && ' ⏱️ auto'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="text-center py-8 text-gray-500">
+          <p>No hay ingresos registrados en este mes</p>
         </div>
       )}
     </div>
