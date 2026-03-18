@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 interface Entrenado {
@@ -86,6 +87,7 @@ export default function CuotasGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cuotas'] });
       closePagoModal();
+      toast.success('Pago registrado correctamente');
     },
   });
 

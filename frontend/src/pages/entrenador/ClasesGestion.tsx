@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
@@ -141,6 +142,7 @@ export default function ClasesGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clases'] });
       closeModal();
+      toast.success('Actividad creada correctamente');
     },
   });
 
@@ -150,6 +152,7 @@ export default function ClasesGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clases'] });
       closeModal();
+      toast.success('Actividad actualizada correctamente');
     },
   });
 
@@ -158,6 +161,7 @@ export default function ClasesGestion() {
       api.put(`/clases/${clase.id}`, { activa: !clase.activa }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clases'] });
+      toast.success('Estado de actividad actualizado');
     },
   });
 
@@ -171,6 +175,7 @@ export default function ClasesGestion() {
       queryClient.invalidateQueries({ queryKey: ['clase-horarios', selectedClase?.id] });
       queryClient.invalidateQueries({ queryKey: ['clases'] });
       setHorarioForm({ dia_semana: 1, hora_inicio: '09:00', hora_fin: '10:00', instructor_id: '' });
+      toast.success('Horario agregado correctamente');
     },
   });
 
@@ -179,6 +184,7 @@ export default function ClasesGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clase-horarios', selectedClase?.id] });
       queryClient.invalidateQueries({ queryKey: ['clases'] });
+      toast.success('Horario eliminado correctamente');
     },
   });
 

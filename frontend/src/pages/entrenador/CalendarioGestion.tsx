@@ -112,6 +112,7 @@ export default function CalendarioGestion() {
       queryClient.invalidateQueries({ queryKey: ['dias-especiales'] });
       setError(null);
       closeModal();
+      toast.success('Día especial creado correctamente');
     },
     onError: (err: AxiosError<ApiError>) => {
       const message = err.response?.data?.message
@@ -135,6 +136,7 @@ export default function CalendarioGestion() {
       queryClient.invalidateQueries({ queryKey: ['dias-especiales'] });
       setError(null);
       closeModal();
+      toast.success('Día especial actualizado correctamente');
     },
     onError: (err: AxiosError<ApiError>) => {
       const message = err.response?.data?.message
@@ -151,6 +153,7 @@ export default function CalendarioGestion() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dias-especiales'] });
+      toast.success('Día especial eliminado correctamente');
     },
   });
 
