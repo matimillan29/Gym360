@@ -36,7 +36,7 @@ export default function DashboardEntrenado() {
     queryFn: async () => {
       try {
         const response = await api.get('/mi/plan/sesion-hoy');
-        return response.data.data || response.data;
+        return response.data.data ?? null;
       } catch {
         return null;
       }

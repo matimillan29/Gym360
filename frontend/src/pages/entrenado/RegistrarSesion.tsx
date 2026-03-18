@@ -51,9 +51,7 @@ export default function RegistrarSesion() {
         // Si hay un ID específico, cargar esa sesión; si no, cargar la del día
         const endpoint = id ? `/mi/sesiones/${id}` : '/mi/plan/sesion-hoy';
         const response = await api.get(endpoint);
-        const data = response.data.data || response.data;
-
-        return data;
+        return response.data.data ?? null;
       } catch {
         return null;
       }

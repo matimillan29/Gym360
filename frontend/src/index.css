@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Override dark: variant to use .dark class instead of system preference */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Tailwind v4 theme configuration */
 @theme {
   --breakpoint-sm: 640px;

@@ -178,10 +178,10 @@ export default function Evaluaciones() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {ultimaEvaluacion.valor} <span className="text-sm font-normal text-gray-500 dark:text-gray-400">{grupo.unidad}</span>
+                  <div className="flex items-center gap-3 min-w-0 shrink-0">
+                    <div className="text-right min-w-0">
+                      <p className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white truncate">
+                        {ultimaEvaluacion.valor} <span className="text-xs md:text-sm font-normal text-gray-500 dark:text-gray-400">{grupo.unidad}</span>
                       </p>
                       {grupo.mejora_porcentaje !== undefined && (
                         <p className={`text-sm font-medium ${
