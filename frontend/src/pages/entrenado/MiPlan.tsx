@@ -182,9 +182,9 @@ export default function MiPlan() {
       <div className="space-y-6 fade-in">
         {/* Header */}
         <div className="bg-green-600 rounded-2xl p-6 text-white shadow-sm">
-          <div className="flex justify-between items-start">
+          <div className="space-y-3">
             <div>
-              <h1 className="text-3xl font-bold mb-1">
+              <h1 className="text-2xl md:text-3xl font-bold mb-1">
                 {plan.nombre || 'Mi Plan de Entrenamiento'}
               </h1>
               <p className="text-green-100">
@@ -196,7 +196,7 @@ export default function MiPlan() {
                 </p>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={handleSendEmail}
                 disabled={sendingEmail || emailSent}
@@ -287,15 +287,15 @@ export default function MiPlan() {
     <div className="space-y-6 fade-in">
       {/* Header */}
       <div className="bg-green-600 rounded-2xl p-6 text-white shadow-sm">
-        <div className="flex justify-between items-start">
+        <div className="space-y-3">
           <div>
-            <h1 className="text-3xl font-bold mb-1">Mi Plan de Entrenamiento</h1>
+            <h1 className="text-2xl md:text-3xl font-bold mb-1">Mi Plan de Entrenamiento</h1>
             <p className="text-green-100">
               {plan?.objetivo_general || 'Tu plan de entrenamiento actual'}
             </p>
           </div>
           {plan && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={handleSendEmail}
                 disabled={sendingEmail || emailSent}
