@@ -16,6 +16,7 @@ class Macrociclo extends Model
         'objetivo_general',
         'activo',
         'tipo_plan',
+        'duracion_semanas',
     ];
 
     protected function casts(): array

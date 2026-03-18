@@ -46,6 +46,8 @@ export default function PlanSimpleEditor() {
   // Plan state
   const [nombre, setNombre] = useState('');
   const [objetivoGeneral, setObjetivoGeneral] = useState('');
+  const [duracionSemanas, setDuracionSemanas] = useState<number | ''>('');
+  const [fechaInicio, setFechaInicio] = useState(new Date().toISOString().split('T')[0]);
   const [dias, setDias] = useState<DiaForm[]>([]);
   const [entrenadoId, setEntrenadoId] = useState<number>(entrenadoIdFromUrl ? parseInt(entrenadoIdFromUrl) : 0);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -94,6 +96,8 @@ export default function PlanSimpleEditor() {
     if (planData) {
       setNombre(planData.nombre || '');
       setObjetivoGeneral(planData.objetivo_general || '');
+      setDuracionSemanas(planData.duracion_semanas || '');
+      if (planData.fecha_inicio) setFechaInicio(planData.fecha_inicio.split('T')[0]);
       setEntrenadoId(planData.entrenado_id);
 
       const loadedDias: DiaForm[] = (planData.dias || []).map((dia: {
@@ -144,6 +148,8 @@ export default function PlanSimpleEditor() {
       const payload = {
         nombre,
         objetivo_general: objetivoGeneral || undefined,
+        duracion_semanas: duracionSemanas || undefined,
+        fecha_inicio: fechaInicio || undefined,
         dias: dias.map((dia) => ({
           id: dia.id,
           numero: dia.numero,
@@ -415,6 +421,28 @@ export default function PlanSimpleEditor() {
               placeholder="Describe el objetivo principal del plan..."
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de inicio</label>
+            <input
+              type="date"
+              value={fechaInicio}
+              onChange={(e) => setFechaInicio(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Duración (semanas)</label>
+            <input
+              type="number"
+              min="1"
+              max="52"
+              value={duracionSemanas}
+              onChange={(e) => setDuracionSemanas(e.target.value ? parseInt(e.target.value) : '')}
+              placeholder="Ej: 12"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+            <p className="text-xs text-gray-500 mt-1">Los días se repiten cada semana durante esta duración</p>
           </div>
         </div>
       </div>

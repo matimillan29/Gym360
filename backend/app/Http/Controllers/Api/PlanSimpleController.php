@@ -26,6 +26,8 @@ class PlanSimpleController extends Controller
         $request->validate([
             'nombre' => 'required|string|max:255',
             'objetivo_general' => 'nullable|string',
+            'duracion_semanas' => 'nullable|integer|min:1|max:52',
+            'fecha_inicio' => 'nullable|date',
             'dias' => 'required|array|min:1|max:14',
             'dias.*.numero' => 'required|integer|min:1',
             'dias.*.nombre' => 'nullable|string|max:255',
@@ -51,11 +53,17 @@ class PlanSimpleController extends Controller
             ->update(['activo' => false]);
 
         $plan = DB::transaction(function () use ($request, $entrenado) {
+            $fechaInicio = $request->fecha_inicio ? \Carbon\Carbon::parse($request->fecha_inicio) : now();
+            $duracionSemanas = $request->duracion_semanas;
+            $fechaFin = $duracionSemanas ? $fechaInicio->copy()->addWeeks($duracionSemanas) : null;
+
             $macrociclo = Macrociclo::create([
                 'entrenado_id' => $entrenado->id,
                 'nombre' => $request->nombre,
                 'objetivo_general' => $request->objetivo_general,
-                'fecha_inicio' => now()->toDateString(),
+                'fecha_inicio' => $fechaInicio->toDateString(),
+                'fecha_fin_estimada' => $fechaFin?->toDateString(),
+                'duracion_semanas' => $duracionSemanas,
                 'activo' => true,
                 'tipo_plan' => 'simple',
             ]);
@@ -132,6 +140,7 @@ class PlanSimpleController extends Controller
         $request->validate([
             'nombre' => 'sometimes|string|max:255',
             'objetivo_general' => 'nullable|string',
+            'duracion_semanas' => 'nullable|integer|min:1|max:52',
             'dias' => 'sometimes|array|min:1|max:14',
             'dias.*.numero' => 'required|integer|min:1',
             'dias.*.nombre' => 'nullable|string|max:255',
@@ -152,10 +161,18 @@ class PlanSimpleController extends Controller
 
         try {
         DB::transaction(function () use ($request, $plan) {
-            $plan->update([
+            $updateData = [
                 'nombre' => $request->nombre ?? $plan->nombre,
                 'objetivo_general' => $request->objetivo_general ?? $plan->objetivo_general,
-            ]);
+            ];
+            if ($request->has('duracion_semanas')) {
+                $updateData['duracion_semanas'] = $request->duracion_semanas;
+                if ($request->duracion_semanas && $plan->fecha_inicio) {
+                    $updateData['fecha_fin_estimada'] = \Carbon\Carbon::parse($plan->fecha_inicio)
+                        ->addWeeks($request->duracion_semanas)->toDateString();
+                }
+            }
+            $plan->update($updateData);
 
             if ($request->has('dias')) {
                 $microciclo = $plan->mesociclos->first()?->microciclos->first();
@@ -253,18 +270,47 @@ class PlanSimpleController extends Controller
             ?->microciclos->first()
             ?->sesiones ?? collect();
 
+        // Calcular semana actual
+        $semanaActual = 1;
+        $totalSemanas = $plan->duracion_semanas;
+        if ($plan->fecha_inicio && $totalSemanas) {
+            $inicio = \Carbon\Carbon::parse($plan->fecha_inicio)->startOfWeek();
+            $ahora = now()->startOfWeek();
+            $semanaActual = max(1, min($totalSemanas, (int) $inicio->diffInWeeks($ahora) + 1));
+        }
+
+        // Contar registros totales por día (cuántas semanas se completó cada día)
+        $registrosPorDia = [];
+        foreach ($sesiones as $sesion) {
+            $registrosPorDia[$sesion->id] = $sesion->registros
+                ? $sesion->registros->where('entrenado_id', $plan->entrenado_id)->count()
+                : 0;
+        }
+
         return [
             'id' => $plan->id,
             'tipo_plan' => 'simple',
             'nombre' => $plan->nombre,
             'objetivo_general' => $plan->objetivo_general,
             'fecha_inicio' => $plan->fecha_inicio,
+            'fecha_fin_estimada' => $plan->fecha_fin_estimada,
+            'duracion_semanas' => $totalSemanas,
+            'semana_actual' => $semanaActual,
             'activo' => $plan->activo,
             'entrenado_id' => $plan->entrenado_id,
             'created_at' => $plan->created_at,
-            'dias' => $sesiones->sortBy('numero')->values()->map(function ($sesion) use ($plan) {
-                $registro = $sesion->registros
-                    ? $sesion->registros->where('entrenado_id', $plan->entrenado_id)->first()
+            'dias' => $sesiones->sortBy('numero')->values()->map(function ($sesion) use ($plan, $registrosPorDia, $semanaActual) {
+                // Buscar si ya registró esta semana (por fecha)
+                $inicioSemanaActual = $plan->fecha_inicio
+                    ? \Carbon\Carbon::parse($plan->fecha_inicio)->startOfWeek()->addWeeks($semanaActual - 1)
+                    : now()->startOfWeek();
+                $finSemanaActual = $inicioSemanaActual->copy()->endOfWeek();
+
+                $registroEstaSemana = $sesion->registros
+                    ? $sesion->registros
+                        ->where('entrenado_id', $plan->entrenado_id)
+                        ->filter(fn($r) => $r->fecha >= $inicioSemanaActual && $r->fecha <= $finSemanaActual)
+                        ->first()
                     : null;
 
                 return [
@@ -273,7 +319,8 @@ class PlanSimpleController extends Controller
                     'nombre' => $sesion->nombre,
                     'logica_entrenamiento' => $sesion->logica_entrenamiento,
                     'observaciones' => $sesion->observaciones,
-                    'completada' => $registro ? $registro->estado === 'completado' : false,
+                    'completada' => $registroEstaSemana !== null,
+                    'veces_completada' => $registrosPorDia[$sesion->id] ?? 0,
                     'ejercicios' => $sesion->ejercicios->sortBy('orden')->values()->map(function ($ej) {
                         return [
                             'id' => $ej->id,

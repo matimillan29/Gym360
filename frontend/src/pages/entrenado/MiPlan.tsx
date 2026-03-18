@@ -279,6 +279,31 @@ export default function MiPlan() {
           )}
         </div>
 
+        {/* Semana actual */}
+        {plan.duracion_semanas && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Semana actual</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {plan.semana_actual ?? 1} <span className="text-base font-normal text-gray-500">de {plan.duracion_semanas}</span>
+                </p>
+              </div>
+              <div className="w-16 h-16 rounded-full border-4 border-green-500 flex items-center justify-center">
+                <span className="text-lg font-bold text-green-600">
+                  {Math.round(((plan.semana_actual ?? 1) / plan.duracion_semanas) * 100)}%
+                </span>
+              </div>
+            </div>
+            <div className="mt-3 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-green-500 rounded-full transition-all"
+                style={{ width: `${((plan.semana_actual ?? 1) / plan.duracion_semanas) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
         {/* Dias list */}
         <div className="space-y-3">
           {plan.dias.map((dia: DiaSimple) => (

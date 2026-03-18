@@ -336,6 +336,9 @@ export interface PlanActivo {
   nombre?: string;
   objetivo_general?: string;
   fecha_inicio: string;
+  fecha_fin_estimada?: string;
+  duracion_semanas?: number;
+  semana_actual?: number;
   mesociclo_actual?: MesocicloDisplay;
   total_mesociclos: number;
   mesociclos_desbloqueados: number;

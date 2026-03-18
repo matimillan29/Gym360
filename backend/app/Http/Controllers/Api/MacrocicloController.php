@@ -379,6 +379,21 @@ class MacrocicloController extends Controller
                 ?->microciclos->first()
                 ?->sesiones ?? collect();
 
+            // Calcular semana actual
+            $semanaActual = 1;
+            $duracionSemanas = $macrociclo->duracion_semanas;
+            if ($macrociclo->fecha_inicio && $duracionSemanas) {
+                $inicio = \Carbon\Carbon::parse($macrociclo->fecha_inicio)->startOfWeek();
+                $ahora = now()->startOfWeek();
+                $semanaActual = max(1, min($duracionSemanas, (int) $inicio->diffInWeeks($ahora) + 1));
+            }
+
+            // Calcular inicio/fin de semana actual para saber qué días se completaron esta semana
+            $inicioSemanaActual = $macrociclo->fecha_inicio
+                ? \Carbon\Carbon::parse($macrociclo->fecha_inicio)->startOfWeek()->addWeeks($semanaActual - 1)
+                : now()->startOfWeek();
+            $finSemanaActual = $inicioSemanaActual->copy()->endOfWeek();
+
             return response()->json([
                 'data' => [
                     'tipo_plan' => 'simple',
@@ -386,15 +401,25 @@ class MacrocicloController extends Controller
                     'nombre' => $macrociclo->nombre,
                     'objetivo_general' => $macrociclo->objetivo_general,
                     'fecha_inicio' => $macrociclo->fecha_inicio,
-                    'dias' => $sesiones->sortBy('numero')->values()->map(function ($sesion) use ($user) {
-                        $registro = $sesion->registros->where('entrenado_id', $user->id)->first();
+                    'fecha_fin_estimada' => $macrociclo->fecha_fin_estimada,
+                    'duracion_semanas' => $duracionSemanas,
+                    'semana_actual' => $semanaActual,
+                    'dias' => $sesiones->sortBy('numero')->values()->map(function ($sesion) use ($user, $inicioSemanaActual, $finSemanaActual) {
+                        // Buscar si completó este día EN LA SEMANA ACTUAL
+                        $registroEstaSemana = $sesion->registros
+                            ->where('entrenado_id', $user->id)
+                            ->filter(fn($r) => $r->fecha >= $inicioSemanaActual && $r->fecha <= $finSemanaActual)
+                            ->first();
+                        // Total de veces completado (todas las semanas)
+                        $vecesCompletada = $sesion->registros->where('entrenado_id', $user->id)->count();
                         return [
                             'id' => $sesion->id,
                             'numero' => $sesion->numero,
                             'nombre' => $sesion->nombre,
                             'logica_entrenamiento' => $sesion->logica_entrenamiento,
                             'observaciones' => $sesion->observaciones,
-                            'completada' => $registro ? $registro->estado === 'completado' : false,
+                            'completada' => $registroEstaSemana !== null,
+                            'veces_completada' => $vecesCompletada,
                             'ejercicios' => $sesion->ejercicios->sortBy('orden')->values()->map(function ($ej) {
                                 return [
                                     'id' => $ej->id,
