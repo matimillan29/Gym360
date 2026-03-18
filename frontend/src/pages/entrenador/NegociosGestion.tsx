@@ -67,6 +67,7 @@ export default function NegociosGestion() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['negocios'] });
+      toast.success('Negocio eliminado correctamente');
     },
   });
 
@@ -81,6 +82,7 @@ export default function NegociosGestion() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['negocios'] });
+      toast.success('Logo actualizado correctamente');
     },
   });
 

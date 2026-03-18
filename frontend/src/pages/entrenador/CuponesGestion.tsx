@@ -106,6 +106,7 @@ export default function CuponesGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cupones'] });
       closeModal();
+      toast.success('Cupón creado correctamente');
     },
   });
 
@@ -124,6 +125,7 @@ export default function CuponesGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cupones'] });
       closeModal();
+      toast.success('Cupón actualizado correctamente');
     },
   });
 
@@ -133,6 +135,7 @@ export default function CuponesGestion() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cupones'] });
+      toast.success('Cupón eliminado correctamente');
     },
   });
 
@@ -148,6 +151,7 @@ export default function CuponesGestion() {
       queryClient.invalidateQueries({ queryKey: ['cupones'] });
       setShowAsignarModal(false);
       setCuponAsignar(null);
+      toast.success('Cupón asignado correctamente');
     },
   });
 
@@ -171,6 +175,7 @@ export default function CuponesGestion() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cupones'] });
+      toast.success('Estado del cupón actualizado');
     },
   });
 
