@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import axios from 'axios';
 import type { User, GymConfig } from '../types';
 import { authService } from '../services/auth';
 import api from '../services/api';
