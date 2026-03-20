@@ -2602,12 +2602,12 @@ function AsistenciaTab({ entrenadoId }: { entrenadoId: number }) {
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-blue-50 rounded-xl p-4 text-center">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-blue-50 rounded-xl p-4 text-center overflow-hidden">
           <p className="text-3xl font-bold text-blue-600">{data?.total_asistencias ?? 0}</p>
-          <p className="text-xs text-gray-600 mt-1">Asistencias</p>
+          <p className="text-xs text-gray-600 mt-1">Asistencias del mes</p>
         </div>
-        <div className="bg-green-50 rounded-xl p-4 text-center">
+        <div className="bg-green-50 rounded-xl p-4 text-center overflow-hidden">
           <p className="text-3xl font-bold text-green-600">
             {data?.accesos_permitidos ? `${data.accesos_restantes ?? 0}` : '∞'}
           </p>
@@ -2615,14 +2615,25 @@ function AsistenciaTab({ entrenadoId }: { entrenadoId: number }) {
             {data?.accesos_permitidos ? `Restantes de ${data.accesos_permitidos}` : 'Acceso ilimitado'}
           </p>
         </div>
-        <div className="bg-purple-50 rounded-xl p-4 text-center">
+        <div className="bg-purple-50 rounded-xl p-4 text-center overflow-hidden">
           <p className="text-3xl font-bold text-purple-600">
             {data?.duracion_promedio_min ?? '-'}
           </p>
-          <p className="text-xs text-gray-600 mt-1">Min promedio</p>
+          <p className="text-xs text-gray-600 mt-1">Min. promedio</p>
         </div>
-        <div className="bg-orange-50 rounded-xl p-4 text-center">
-          <p className="text-3xl font-bold text-orange-600">{data?.tipo_plan ?? '-'}</p>
+        <div className="bg-orange-50 rounded-xl p-4 text-center overflow-hidden">
+          <p className="text-sm font-bold text-orange-600 truncate">
+            {(() => {
+              const labels: Record<string, string> = {
+                mensual_libre: 'Ilimitado',
+                semanal_2x: '2x semana',
+                semanal_3x: '3x semana',
+                pack_clases: 'Pack clases',
+                personalizado: 'Personalizado',
+              };
+              return labels[data?.tipo_plan ?? ''] ?? data?.tipo_plan ?? '-';
+            })()}
+          </p>
           <p className="text-xs text-gray-600 mt-1">Tipo de plan</p>
         </div>
       </div>
