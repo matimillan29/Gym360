@@ -665,37 +665,43 @@ class EntrenadoController extends Controller
      */
     public function registrarIngresoPublico(Request $request, User $entrenado)
     {
-        if (!$entrenado->isEntrenado()) {
-            return response()->json(['message' => 'Usuario no es entrenado.'], 404);
+        try {
+            if (!$entrenado->isEntrenado()) {
+                return response()->json(['message' => 'Usuario no es entrenado.'], 404);
+            }
+
+            if ($entrenado->estado !== 'activo') {
+                return response()->json(['message' => 'El entrenado no está activo.'], 400);
+            }
+
+            [$allowed, $warning, $cuota, $clasesRestantes] = $this->validarAcceso($entrenado);
+
+            if (!$allowed) {
+                return response()->json(['message' => $warning], 400);
+            }
+
+            $ingreso = $this->crearIngreso($entrenado, $cuota);
+
+            if ($clasesRestantes !== null) {
+                $clasesRestantes = max(0, $clasesRestantes - 1);
+            }
+
+            return response()->json([
+                'message' => 'Ingreso registrado.',
+                'warning' => $warning,
+                'data' => [
+                    'nombre' => $entrenado->nombre . ' ' . $entrenado->apellido,
+                    'hora' => now()->format('H:i'),
+                    'ingreso_id' => $ingreso?->id,
+                    'clases_restantes' => $clasesRestantes,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('registrarIngresoPublico error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error al registrar ingreso: ' . $e->getMessage(),
+            ], 500);
         }
-
-        if ($entrenado->estado !== 'activo') {
-            return response()->json(['message' => 'El entrenado no está activo.'], 400);
-        }
-
-        [$allowed, $warning, $cuota, $clasesRestantes] = $this->validarAcceso($entrenado);
-
-        if (!$allowed) {
-            return response()->json(['message' => $warning], 400);
-        }
-
-        $ingreso = $this->crearIngreso($entrenado, $cuota);
-
-        // Recalcular clases restantes post-ingreso
-        if ($clasesRestantes !== null) {
-            $clasesRestantes = max(0, $clasesRestantes - 1);
-        }
-
-        return response()->json([
-            'message' => 'Ingreso registrado.',
-            'warning' => $warning,
-            'data' => [
-                'nombre' => $entrenado->nombre . ' ' . $entrenado->apellido,
-                'hora' => now()->format('H:i'),
-                'ingreso_id' => $ingreso?->id,
-                'clases_restantes' => $clasesRestantes,
-            ],
-        ]);
     }
 
     /**
@@ -703,36 +709,46 @@ class EntrenadoController extends Controller
      */
     public function registrarIngreso(Request $request, User $entrenado)
     {
-        if (!$entrenado->isEntrenado()) {
-            return response()->json(['message' => 'Usuario no es entrenado.'], 404);
-        }
+        try {
+            if (!$entrenado->isEntrenado()) {
+                return response()->json(['message' => 'Usuario no es entrenado.'], 404);
+            }
 
-        if ($entrenado->estado !== 'activo') {
-            return response()->json(['message' => 'El entrenado no está activo.'], 400);
-        }
+            if ($entrenado->estado !== 'activo') {
+                return response()->json(['message' => 'El entrenado no está activo.'], 400);
+            }
 
-        [$allowed, $warning, $cuota, $clasesRestantes] = $this->validarAcceso($entrenado);
+            [$allowed, $warning, $cuota, $clasesRestantes] = $this->validarAcceso($entrenado);
 
-        if (!$allowed) {
-            return response()->json(['message' => $warning], 400);
-        }
+            if (!$allowed) {
+                return response()->json(['message' => $warning], 400);
+            }
 
-        $ingreso = $this->crearIngreso($entrenado, $cuota);
+            $ingreso = $this->crearIngreso($entrenado, $cuota);
 
-        if ($clasesRestantes !== null) {
-            $clasesRestantes = max(0, $clasesRestantes - 1);
-        }
+            if ($clasesRestantes !== null) {
+                $clasesRestantes = max(0, $clasesRestantes - 1);
+            }
 
-        return response()->json([
-            'message' => 'Ingreso registrado correctamente.',
-            'warning' => $warning,
-            'data' => [
-                'nombre' => $entrenado->nombre . ' ' . $entrenado->apellido,
-                'hora' => now()->format('H:i'),
-                'ingreso_id' => $ingreso?->id,
-                'clases_restantes' => $clasesRestantes,
-            ],
+            return response()->json([
+                'message' => 'Ingreso registrado correctamente.',
+                'warning' => $warning,
+                'data' => [
+                    'nombre' => $entrenado->nombre . ' ' . $entrenado->apellido,
+                    'hora' => now()->format('H:i'),
+                    'ingreso_id' => $ingreso?->id,
+                    'clases_restantes' => $clasesRestantes,
+                ],
         ]);
+        } catch (\Throwable $e) {
+            \Log::error('registrarIngreso error: ' . $e->getMessage(), [
+                'entrenado_id' => $entrenado->id,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json([
+                'message' => 'Error al registrar ingreso: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
