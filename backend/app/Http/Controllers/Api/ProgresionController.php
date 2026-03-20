@@ -68,7 +68,7 @@ class ProgresionController extends Controller
     public function tonelaje(Request $request)
     {
         $user = $request->user();
-        $agrupacion = $request->get('agrupacion', 'sesion'); // sesion, semana, mes
+        $agrupacion = $request->get('agrupacion', $request->get('periodo', 'sesion')); // sesion, semana, mes
 
         $registrosSesion = RegistroSesion::where('entrenado_id', $user->id)
             ->with('registrosEjercicio')
@@ -156,8 +156,23 @@ class ProgresionController extends Controller
             }
         }
 
+        // Calcular porcentaje y normalizar campo grupo
+        $totalSeries = array_sum(array_column($distribucion, 'series_totales'));
+        $resultado = array_values(array_map(function ($item) use ($totalSeries) {
+            return [
+                'grupo' => $item['grupo_muscular'],
+                'grupo_muscular' => $item['grupo_muscular'],
+                'volumen' => $item['series_totales'],
+                'series_totales' => $item['series_totales'],
+                'porcentaje' => $totalSeries > 0 ? round(($item['series_totales'] / $totalSeries) * 100, 1) : 0,
+            ];
+        }, $distribucion));
+
+        // Ordenar por volumen desc
+        usort($resultado, fn($a, $b) => $b['volumen'] - $a['volumen']);
+
         return response()->json([
-            'data' => array_values($distribucion),
+            'data' => $resultado,
         ]);
     }
 }

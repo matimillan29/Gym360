@@ -326,11 +326,15 @@ export default function EntrenadorLayout() {
           <div className="border-t p-4" style={{ borderColor: 'var(--border-color)' }}>
             <div className="flex items-center gap-3 p-3 rounded-xl" style={{ backgroundColor: 'var(--bg-hover)' }}>
               <div className="flex-shrink-0">
-                <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
-                  <span className="text-white font-medium text-sm">
-                    {user?.nombre?.charAt(0)}{user?.apellido?.charAt(0)}
-                  </span>
-                </div>
+                {user?.foto ? (
+                  <img src={user.foto} alt="" className="h-10 w-10 rounded-full object-cover" />
+                ) : (
+                  <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
+                    <span className="text-white font-medium text-sm">
+                      {user?.nombre?.charAt(0)}{user?.apellido?.charAt(0)}
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>

@@ -28,13 +28,17 @@ interface ProgresionEjercicio {
 }
 
 interface TonelajeSemanal {
-  semana: string;
+  semana?: string;
+  periodo?: string;
+  fecha?: string;
   tonelaje: number;
 }
 
 interface DistribucionMusculo {
   grupo: string;
+  grupo_muscular?: string;
   volumen: number;
+  series_totales?: number;
   porcentaje: number;
 }
 
@@ -251,7 +255,7 @@ export default function Progresion() {
             <div className="space-y-3">
               {tonelajeSemanal.map((item, index) => (
                 <div key={index} className="flex items-center gap-3">
-                  <span className="text-xs text-gray-500 dark:text-gray-400 w-20 flex-shrink-0">{item.semana}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 w-20 flex-shrink-0">{item.semana || item.periodo || item.fecha || '-'}</span>
                   <div className="flex-1 h-6 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-blue-500 rounded-full transition-all"

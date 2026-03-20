@@ -117,9 +117,18 @@ export default function EntrenadoLayout() {
         {/* Dropdown menu */}
         {menuOpen && (
           <div className="absolute right-4 top-14 w-56 rounded-xl shadow-lg border py-2 z-20" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-            <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border-color)' }}>
-              <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{user?.nombre} {user?.apellido}</p>
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
+            <div className="px-4 py-3 border-b flex items-center gap-3" style={{ borderColor: 'var(--border-color)' }}>
+              {user?.foto ? (
+                <img src={user.foto} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <span className="text-green-600 font-bold text-sm">{user?.nombre?.[0]}{user?.apellido?.[0]}</span>
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="font-medium truncate" style={{ color: 'var(--text-primary)' }}>{user?.nombre} {user?.apellido}</p>
+                <p className="text-sm truncate" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
+              </div>
             </div>
             <Link
               to="/entrenado/perfil"
