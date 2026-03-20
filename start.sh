@@ -153,10 +153,13 @@ MAIL_FROM_ADDRESS=${CLOUDRON_MAIL_FROM:-${MAIL_FROM_ADDRESS:-noreply@pwr360.ar}}
 MAIL_FROM_NAME="${MAIL_FROM_NAME:-Pwr360}"
 
 SANCTUM_STATEFUL_DOMAINS=${CLOUDRON_APP_DOMAIN:-localhost}
-
-SENTRY_LARAVEL_DSN=https://afee9a6ef3144d79af81f4ce04bd26e9@bugs.millan.ar/3
-SENTRY_TRACES_SAMPLE_RATE=0
 EOF
+
+    # Agregar SENTRY_DSN desde archivo del deploy (cada environment tiene su propio DSN)
+    if [ -f "$PERSISTENT_DIR/.env.sentry" ]; then
+        cat "$PERSISTENT_DIR/.env.sentry" >> $PERSISTENT_DIR/.env
+        echo "" >> $PERSISTENT_DIR/.env
+    fi
 fi
 
 # Generar APP_KEY si no existe
