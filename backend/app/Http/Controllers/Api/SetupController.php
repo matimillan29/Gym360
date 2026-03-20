@@ -16,8 +16,16 @@ class SetupController extends Controller
      */
     public function status()
     {
-        $isConfigured = GymConfig::isConfigured();
-        $hasAdmin = User::where('role', 'admin')->exists();
+        try {
+            $isConfigured = GymConfig::isConfigured();
+            $hasAdmin = User::where('role', 'admin')->exists();
+        } catch (\Throwable $e) {
+            // Tablas no existen aún
+            return response()->json([
+                'is_configured' => false,
+                'has_admin' => false,
+            ]);
+        }
 
         return response()->json([
             'is_configured' => $isConfigured && $hasAdmin,

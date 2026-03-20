@@ -16,7 +16,15 @@ class ConfigController extends Controller
      */
     public function showPublic()
     {
-        $config = GymConfig::get();
+        try {
+            $config = GymConfig::get();
+        } catch (\Throwable $e) {
+            // Tabla no existe aún (primera ejecución, migraciones no corrieron)
+            return response()->json([
+                'data' => null,
+                'is_configured' => false,
+            ]);
+        }
 
         if (!$config) {
             return response()->json([

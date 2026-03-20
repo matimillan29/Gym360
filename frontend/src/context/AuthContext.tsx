@@ -32,11 +32,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await api.get<{ data: GymConfig | null; is_configured: boolean }>('/config');
       setGymConfig(response.data.data);
       setNeedsSetup(!response.data.is_configured);
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.status === 404) {
-        setNeedsSetup(true);
-      }
-      // Other errors: don't set needsSetup
+    } catch {
+      // Cualquier error (404, 500, tabla no existe) = no está configurado
+      setNeedsSetup(true);
     }
   };
 
