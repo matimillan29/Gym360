@@ -356,7 +356,7 @@ export default function Progresion() {
                         {ejercicio.mejor_peso}kg × {ejercicio.mejor_repeticiones}
                       </span>
                       <span className="flex items-center gap-1 font-medium text-purple-600">
-                        1RM: {ejercicio.rm_estimado.toFixed(1)}kg
+                        1RM: {Number(ejercicio.rm_estimado || 0).toFixed(1)}kg
                       </span>
                     </div>
                   </div>
@@ -375,7 +375,7 @@ export default function Progresion() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                         </svg>
                       )}
-                      {Math.abs(ejercicio.progresion_porcentaje).toFixed(1)}%
+                      {Math.abs(Number(ejercicio.progresion_porcentaje || 0)).toFixed(1)}%
                     </div>
                   )}
                 </div>
