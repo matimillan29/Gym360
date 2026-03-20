@@ -108,10 +108,8 @@ class AuthController extends Controller
             \Log::info("OTP Code sent to {$user->email}");
         } catch (\Exception $e) {
             \Log::error("Error sending OTP email: " . $e->getMessage());
-            // En desarrollo mostramos el código aunque falle el email
-            if (config('app.debug')) {
-                \Log::info("OTP Code for {$user->email}: {$otp->code}");
-            }
+            // Log that OTP was generated (without revealing the code)
+            \Log::info("OTP generated for {$user->email} (email delivery failed)");
         }
 
         return response()->json([

@@ -1,59 +1,60 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 
-// Pages
-import LoginPage from './pages/auth/LoginPage';
-import SetupPage from './pages/setup/SetupPage';
-
-// Layouts
+// Layouts (static imports - always needed)
 import EntrenadorLayout from './layouts/EntrenadorLayout';
 import EntrenadoLayout from './layouts/EntrenadoLayout';
 
+// Pages (lazy loaded)
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
+const SetupPage = lazy(() => import('./pages/setup/SetupPage'));
+
 // Public pages
-import CheckinPublico from './pages/CheckinPublico';
+const CheckinPublico = lazy(() => import('./pages/CheckinPublico'));
 
 // Entrenador pages
-import DashboardEntrenador from './pages/entrenador/DashboardEntrenador';
-import EntrenadosList from './pages/entrenador/EntrenadosList';
-import EntrenadoDetalle from './pages/entrenador/EntrenadoDetalle';
-import EjerciciosList from './pages/entrenador/EjerciciosList';
-import PlanesList from './pages/entrenador/PlanesList';
-import PlanEditor from './pages/entrenador/PlanEditor';
-import PlanSimpleEditor from './pages/entrenador/PlanSimpleEditor';
-import EvaluacionesList from './pages/entrenador/EvaluacionesList';
-import CuotasGestion from './pages/entrenador/CuotasGestion';
-import FeedbackGestion from './pages/entrenador/FeedbackGestion';
-import LinksGestion from './pages/entrenador/LinksGestion';
-import PlantillasGestion from './pages/entrenador/PlantillasGestion';
-import NegociosGestion from './pages/entrenador/NegociosGestion';
-import CuponesGestion from './pages/entrenador/CuponesGestion';
-import CalendarioGestion from './pages/entrenador/CalendarioGestion';
-import CheckinGestion from './pages/entrenador/CheckinGestion';
-import ClasesGestion from './pages/entrenador/ClasesGestion';
-import CalendarioClases from './pages/entrenador/CalendarioClases';
+const DashboardEntrenador = lazy(() => import('./pages/entrenador/DashboardEntrenador'));
+const EntrenadosList = lazy(() => import('./pages/entrenador/EntrenadosList'));
+const EntrenadoDetalle = lazy(() => import('./pages/entrenador/EntrenadoDetalle'));
+const EjerciciosList = lazy(() => import('./pages/entrenador/EjerciciosList'));
+const PlanesList = lazy(() => import('./pages/entrenador/PlanesList'));
+const PlanEditor = lazy(() => import('./pages/entrenador/PlanEditor'));
+const PlanSimpleEditor = lazy(() => import('./pages/entrenador/PlanSimpleEditor'));
+const EvaluacionesList = lazy(() => import('./pages/entrenador/EvaluacionesList'));
+const CuotasGestion = lazy(() => import('./pages/entrenador/CuotasGestion'));
+const FeedbackGestion = lazy(() => import('./pages/entrenador/FeedbackGestion'));
+const LinksGestion = lazy(() => import('./pages/entrenador/LinksGestion'));
+const PlantillasGestion = lazy(() => import('./pages/entrenador/PlantillasGestion'));
+const NegociosGestion = lazy(() => import('./pages/entrenador/NegociosGestion'));
+const CuponesGestion = lazy(() => import('./pages/entrenador/CuponesGestion'));
+const CalendarioGestion = lazy(() => import('./pages/entrenador/CalendarioGestion'));
+const CheckinGestion = lazy(() => import('./pages/entrenador/CheckinGestion'));
+const ClasesGestion = lazy(() => import('./pages/entrenador/ClasesGestion'));
+const CalendarioClases = lazy(() => import('./pages/entrenador/CalendarioClases'));
 
 // Entrenado pages
-import DashboardEntrenado from './pages/entrenado/DashboardEntrenado';
-import MiPlan from './pages/entrenado/MiPlan';
-import MiPerfil from './pages/entrenado/MiPerfil';
-import RegistrarSesion from './pages/entrenado/RegistrarSesion';
-import Historial from './pages/entrenado/Historial';
-import Evaluaciones from './pages/entrenado/Evaluaciones';
-import Progresion from './pages/entrenado/Progresion';
-import MisCuotas from './pages/entrenado/MisCuotas';
-import MisCupones from './pages/entrenado/MisCupones';
-import MisLogros from './pages/entrenado/MisLogros';
-import MisClases from './pages/entrenado/MisClases';
+const DashboardEntrenado = lazy(() => import('./pages/entrenado/DashboardEntrenado'));
+const MiPlan = lazy(() => import('./pages/entrenado/MiPlan'));
+const MiPerfil = lazy(() => import('./pages/entrenado/MiPerfil'));
+const RegistrarSesion = lazy(() => import('./pages/entrenado/RegistrarSesion'));
+const Historial = lazy(() => import('./pages/entrenado/Historial'));
+const Evaluaciones = lazy(() => import('./pages/entrenado/Evaluaciones'));
+const Progresion = lazy(() => import('./pages/entrenado/Progresion'));
+const MisCuotas = lazy(() => import('./pages/entrenado/MisCuotas'));
+const MisCupones = lazy(() => import('./pages/entrenado/MisCupones'));
+const MisLogros = lazy(() => import('./pages/entrenado/MisLogros'));
+const MisClases = lazy(() => import('./pages/entrenado/MisClases'));
 
 // Admin pages
-import ConfiguracionGym from './pages/admin/ConfiguracionGym';
-import EntrenadoresList from './pages/admin/EntrenadoresList';
-import PlanesCuota from './pages/admin/PlanesCuota';
-import Auditoria from './pages/admin/Auditoria';
-import SucursalesGestion from './pages/admin/SucursalesGestion';
+const ConfiguracionGym = lazy(() => import('./pages/admin/ConfiguracionGym'));
+const EntrenadoresList = lazy(() => import('./pages/admin/EntrenadoresList'));
+const PlanesCuota = lazy(() => import('./pages/admin/PlanesCuota'));
+const Auditoria = lazy(() => import('./pages/admin/Auditoria'));
+const SucursalesGestion = lazy(() => import('./pages/admin/SucursalesGestion'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -104,14 +105,17 @@ function AppRoutes() {
   // Redirigir a setup si no está configurado
   if (needsSetup) {
     return (
-      <Routes>
-        <Route path="/setup" element={<SetupPage />} />
-        <Route path="*" element={<Navigate to="/setup" replace />} />
-      </Routes>
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p className="text-gray-500">Cargando...</p></div>}>
+        <Routes>
+          <Route path="/setup" element={<SetupPage />} />
+          <Route path="*" element={<Navigate to="/setup" replace />} />
+        </Routes>
+      </Suspense>
     );
   }
 
   return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p className="text-gray-500">Cargando...</p></div>}>
     <Routes>
       {/* Setup inicial - ya no es necesario si ya está configurado */}
       <Route path="/setup" element={<Navigate to="/login" replace />} />
@@ -203,6 +207,7 @@ function AppRoutes() {
       {/* 404 */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   );
 }
 

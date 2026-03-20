@@ -55,9 +55,11 @@ Route::get('/config', [ConfigController::class, 'showPublic']);
 Route::get('/calendario/hoy', [CalendarioController::class, 'estadoHoy']);
 Route::get('/calendario/mes', [CalendarioController::class, 'calendarioMes']);
 
-// Check-in público (solo por DNI)
-Route::post('/checkin-publico/buscar', [EntrenadoController::class, 'buscarPorDni']);
-Route::post('/checkin-publico/{entrenado}/registrar', [EntrenadoController::class, 'registrarIngresoPublico']);
+// Check-in público (solo por DNI) - rate limited
+Route::middleware('throttle:10,1')->group(function () {
+    Route::post('/checkin-publico/buscar', [EntrenadoController::class, 'buscarPorDni']);
+    Route::post('/checkin-publico/{entrenado}/registrar', [EntrenadoController::class, 'registrarIngresoPublico']);
+});
 
 // Autenticación
 Route::prefix('auth')->middleware('throttle:10,1')->group(function () {

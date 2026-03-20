@@ -50,7 +50,7 @@ class OtpCode extends Model
         return self::create([
             'user_id' => $user->id,
             'code' => $code,
-            'expires_at' => now()->addMinutes(10),
+            'expires_at' => now()->addMinutes(5),
             'used' => false,
         ]);
     }
