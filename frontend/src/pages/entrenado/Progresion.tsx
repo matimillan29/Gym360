@@ -87,7 +87,9 @@ export default function Progresion() {
         return raw.map((ej: { ejercicio_id: number; ejercicio_nombre: string; datos?: { fecha: string; peso: number; repeticiones: number }[] }) => {
           const datos = ej.datos || [];
           const pesos = datos.filter(d => d.peso > 0);
-          const mejorRegistro = pesos.reduce((best, d) => (d.peso > (best?.peso || 0) ? d : best), pesos[0] || null);
+          const mejorRegistro = pesos.length > 0
+            ? pesos.reduce((best, d) => (d.peso > (best?.peso || 0) ? d : best), pesos[0])
+            : null;
           const primerRegistro = pesos[0];
           const ultimoRegistro = pesos[pesos.length - 1];
           const rmEstimado = mejorRegistro ? (mejorRegistro.peso * mejorRegistro.repeticiones * 0.03) + mejorRegistro.peso : 0;
@@ -137,7 +139,7 @@ export default function Progresion() {
   });
 
   // Calcular máximo de tonelaje para escala del gráfico
-  const maxTonelaje = Math.max(...tonelajeSemanal.map(t => t.tonelaje), 1);
+  const maxTonelaje = tonelajeSemanal.length > 0 ? Math.max(...tonelajeSemanal.map(t => t.tonelaje), 1) : 1;
 
   // Colores para grupos musculares
   const coloresMusculares: Record<string, string> = {

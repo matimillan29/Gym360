@@ -80,8 +80,8 @@ export default function MiPlan() {
       await api.post('/mi/plan/enviar-email');
       setEmailSent(true);
       setTimeout(() => setEmailSent(false), 3000);
-    } catch (error) {
-      console.error('Error sending email:', error);
+    } catch {
+      toast.error('Error al enviar el email. Intentá nuevamente.');
     } finally {
       setSendingEmail(false);
     }
