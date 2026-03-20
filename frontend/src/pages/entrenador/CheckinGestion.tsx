@@ -158,7 +158,9 @@ export default function CheckinGestion() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString + 'T00:00:00').toLocaleDateString('es-AR', {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return dateString;
+    return d.toLocaleDateString('es-AR', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
