@@ -602,9 +602,13 @@ class EntrenadoController extends Controller
                 $inicioSemana = now()->startOfWeek(\Carbon\Carbon::MONDAY);
                 $finSemana = now()->endOfWeek(\Carbon\Carbon::SUNDAY);
 
-                $ingresosEstaSemana = \App\Models\Ingreso::where('entrenado_id', $entrenado->id)
-                    ->whereBetween('fecha_entrada', [$inicioSemana, $finSemana])
-                    ->count();
+                try {
+                    $ingresosEstaSemana = \App\Models\Ingreso::where('entrenado_id', $entrenado->id)
+                        ->whereBetween('fecha_entrada', [$inicioSemana, $finSemana])
+                        ->count();
+                } catch (\Throwable $e) {
+                    $ingresosEstaSemana = 0;
+                }
 
                 if ($ingresosEstaSemana >= $limiteHoy) {
                     return [false, "Ya usaste tus {$limiteHoy} accesos de esta semana.", $cuotaActual, 0];
@@ -630,14 +634,20 @@ class EntrenadoController extends Controller
     /**
      * Registrar un ingreso y actualizar contadores
      */
-    private function crearIngreso(User $entrenado, ?Cuota $cuota): \App\Models\Ingreso
+    private function crearIngreso(User $entrenado, ?Cuota $cuota): ?\App\Models\Ingreso
     {
-        $ingreso = \App\Models\Ingreso::create([
-            'entrenado_id' => $entrenado->id,
-            'cuota_id' => $cuota?->id,
-            'fecha_entrada' => now(),
-            'tipo' => 'musculacion',
-        ]);
+        try {
+            $ingreso = \App\Models\Ingreso::create([
+                'entrenado_id' => $entrenado->id,
+                'cuota_id' => $cuota?->id,
+                'fecha_entrada' => now(),
+                'tipo' => 'musculacion',
+            ]);
+        } catch (\Throwable $e) {
+            // Tabla ingresos puede no existir - continuar sin registrar
+            \Log::warning('crearIngreso: tabla no existe - ' . $e->getMessage());
+            $ingreso = null;
+        }
 
         // Incrementar clases_usadas para planes con accesos limitados
         if ($cuota && $cuota->plan) {
@@ -682,7 +692,7 @@ class EntrenadoController extends Controller
             'data' => [
                 'nombre' => $entrenado->nombre . ' ' . $entrenado->apellido,
                 'hora' => now()->format('H:i'),
-                'ingreso_id' => $ingreso->id,
+                'ingreso_id' => $ingreso?->id,
                 'clases_restantes' => $clasesRestantes,
             ],
         ]);
@@ -719,7 +729,7 @@ class EntrenadoController extends Controller
             'data' => [
                 'nombre' => $entrenado->nombre . ' ' . $entrenado->apellido,
                 'hora' => now()->format('H:i'),
-                'ingreso_id' => $ingreso->id,
+                'ingreso_id' => $ingreso?->id,
                 'clases_restantes' => $clasesRestantes,
             ],
         ]);
@@ -735,10 +745,14 @@ class EntrenadoController extends Controller
         }
 
         // Buscar el ingreso abierto más reciente (sin fecha_salida)
-        $ingreso = \App\Models\Ingreso::where('entrenado_id', $entrenado->id)
-            ->whereNull('fecha_salida')
-            ->orderByDesc('fecha_entrada')
-            ->first();
+        try {
+            $ingreso = \App\Models\Ingreso::where('entrenado_id', $entrenado->id)
+                ->whereNull('fecha_salida')
+                ->orderByDesc('fecha_entrada')
+                ->first();
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Sistema de ingresos no disponible.'], 400);
+        }
 
         if (!$ingreso) {
             return response()->json(['message' => 'No se encontró un ingreso activo.'], 404);
@@ -768,17 +782,22 @@ class EntrenadoController extends Controller
      */
     private function autoCheckout(): void
     {
-        $limite = now()->subHours(3);
-        \App\Models\Ingreso::whereNull('fecha_salida')
-            ->where('fecha_entrada', '<', $limite)
-            ->each(function ($ingreso) {
-                $salida = $ingreso->fecha_entrada->copy()->addHours(3);
-                $ingreso->update([
-                    'fecha_salida' => $salida,
-                    'duracion_minutos' => 180,
-                    'observaciones' => 'Checkout automático (3hs)',
-                ]);
-            });
+        try {
+            $limite = now()->subHours(3);
+            \App\Models\Ingreso::whereNull('fecha_salida')
+                ->where('fecha_entrada', '<', $limite)
+                ->each(function ($ingreso) {
+                    $salida = $ingreso->fecha_entrada->copy()->addHours(3);
+                    $ingreso->update([
+                        'fecha_salida' => $salida,
+                        'duracion_minutos' => 180,
+                        'observaciones' => 'Checkout automático (3hs)',
+                    ]);
+                });
+        } catch (\Throwable $e) {
+            // Tabla ingresos puede no existir aún
+            \Log::warning('autoCheckout: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -789,6 +808,7 @@ class EntrenadoController extends Controller
         // Auto-cerrar ingresos viejos
         $this->autoCheckout();
 
+        try {
         $ingresos = \App\Models\Ingreso::with('entrenado:id,nombre,apellido,foto,dni')
             ->whereDate('fecha_entrada', today())
             ->orderByDesc('fecha_entrada')
@@ -809,6 +829,10 @@ class EntrenadoController extends Controller
             ]);
 
         return response()->json(['data' => $ingresos]);
+        } catch (\Throwable $e) {
+            // Tabla ingresos puede no existir
+            return response()->json(['data' => []]);
+        }
     }
 
     /**
@@ -816,6 +840,7 @@ class EntrenadoController extends Controller
      */
     public function ingresosHistorial(Request $request)
     {
+        try {
         $query = \App\Models\Ingreso::with('entrenado:id,nombre,apellido,dni');
 
         if ($request->filled('entrenado_id')) {
@@ -832,6 +857,9 @@ class EntrenadoController extends Controller
             ->paginate($request->get('per_page', 20));
 
         return response()->json($ingresos);
+        } catch (\Throwable $e) {
+            return response()->json(['data' => [], 'meta' => ['total' => 0]]);
+        }
     }
 
     /**
@@ -848,10 +876,14 @@ class EntrenadoController extends Controller
         $finMes = $inicioMes->copy()->endOfMonth();
 
         // Ingresos del mes
-        $ingresosMes = \App\Models\Ingreso::where('entrenado_id', $entrenado->id)
-            ->whereBetween('fecha_entrada', [$inicioMes, $finMes])
-            ->orderByDesc('fecha_entrada')
-            ->get();
+        try {
+            $ingresosMes = \App\Models\Ingreso::where('entrenado_id', $entrenado->id)
+                ->whereBetween('fecha_entrada', [$inicioMes, $finMes])
+                ->orderByDesc('fecha_entrada')
+                ->get();
+        } catch (\Throwable $e) {
+            $ingresosMes = collect();
+        }
 
         // Calcular accesos según plan
         $cuotaActual = $entrenado->cuotas()
