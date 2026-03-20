@@ -30,6 +30,8 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        Sentry\Laravel\Integration::handles($exceptions);
+
         // Manejar autenticación fallida en API
         $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
