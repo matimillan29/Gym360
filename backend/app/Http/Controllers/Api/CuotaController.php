@@ -227,6 +227,10 @@ class CuotaController extends Controller
      */
     public function pagos(Cuota $cuota)
     {
+        if (!$this->authorizeCuota($cuota)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $pagos = $cuota->pagos()->orderByDesc('fecha')->get();
 
         return response()->json([
