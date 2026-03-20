@@ -110,6 +110,10 @@ export default function LinksGestion() {
       closeModal();
       toast.success('Link creado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al crear el link';
+      toast.error(msg);
+    },
   });
 
   const updateMutation = useMutation({
@@ -122,6 +126,10 @@ export default function LinksGestion() {
       closeModal();
       toast.success('Link actualizado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al actualizar el link';
+      toast.error(msg);
+    },
   });
 
   const deleteMutation = useMutation({
@@ -131,6 +139,10 @@ export default function LinksGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['links'] });
       toast.success('Link eliminado correctamente');
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al eliminar el link';
+      toast.error(msg);
     },
   });
 

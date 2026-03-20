@@ -77,6 +77,10 @@ export default function FeedbackGestion() {
       closeModal();
       toast.success('Feedback creado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al crear el feedback';
+      toast.error(msg);
+    },
   });
 
   const updateMutation = useMutation({
@@ -89,6 +93,10 @@ export default function FeedbackGestion() {
       closeModal();
       toast.success('Feedback actualizado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al actualizar el feedback';
+      toast.error(msg);
+    },
   });
 
   const deleteMutation = useMutation({
@@ -98,6 +106,10 @@ export default function FeedbackGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feedback'] });
       toast.success('Feedback eliminado correctamente');
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al eliminar el feedback';
+      toast.error(msg);
     },
   });
 

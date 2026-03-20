@@ -82,6 +82,10 @@ export default function PlantillasGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['plantillas'] });
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al eliminar la plantilla';
+      toast.error(msg);
+    },
   });
 
   const crearMutation = useMutation({
@@ -95,6 +99,10 @@ export default function PlantillasGestion() {
       setNuevaPlantilla({ nombre: '', descripcion: '' });
       // La plantilla se crea vacía, mostrar mensaje informativo
       toast('Plantilla creada. Para agregar contenido, primero creá un plan de entrenamiento y luego guardalo como plantilla usando el botón "Guardar como Plantilla" en el editor de planes.', { icon: 'ℹ️' });
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al crear la plantilla';
+      toast.error(msg);
     },
   });
 

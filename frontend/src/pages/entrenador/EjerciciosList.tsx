@@ -89,6 +89,10 @@ export default function EjerciciosList() {
       closeModal();
       toast.success(editingEjercicio ? 'Ejercicio actualizado correctamente' : 'Ejercicio creado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || (editingEjercicio ? 'Error al actualizar el ejercicio' : 'Error al crear el ejercicio');
+      toast.error(msg);
+    },
   });
 
   const deleteMutation = useMutation({
@@ -98,6 +102,10 @@ export default function EjerciciosList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ejercicios'] });
       toast.success('Ejercicio eliminado correctamente');
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al eliminar el ejercicio';
+      toast.error(msg);
     },
   });
 

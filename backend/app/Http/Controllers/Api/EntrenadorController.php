@@ -34,7 +34,8 @@ class EntrenadorController extends Controller
             });
         }
 
-        $entrenadores = $query->paginate($request->get('per_page', 15));
+        $perPage = min($request->get('per_page', 15), 100);
+        $entrenadores = $query->paginate($perPage);
 
         return response()->json($entrenadores);
     }

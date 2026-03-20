@@ -59,7 +59,7 @@ class EjercicioController extends Controller
 
         // Si se solicita paginación
         if ($request->has('per_page')) {
-            $ejercicios = $query->paginate($request->get('per_page', 50));
+            $ejercicios = $query->paginate(min($request->get('per_page', 50), 100));
         } else {
             // Para selects y búsquedas rápidas, devolver todos
             $ejercicios = $query->get();

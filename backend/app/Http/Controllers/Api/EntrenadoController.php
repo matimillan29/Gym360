@@ -18,7 +18,12 @@ class EntrenadoController extends Controller
     public function index(Request $request)
     {
         $query = User::entrenados()
-            ->with(['entrenadorAsignado:id,nombre,apellido', 'anamnesis'])
+            ->with([
+                'entrenadorAsignado:id,nombre,apellido',
+                'anamnesis',
+                'macrociclos' => fn($q) => $q->where('activo', true)->select('id', 'entrenado_id', 'nombre'),
+                'cuotas' => fn($q) => $q->orderByDesc('fecha_vencimiento')->limit(1)->select('id', 'entrenado_id', 'estado', 'fecha_vencimiento'),
+            ])
             ->orderBy('apellido')
             ->orderBy('nombre');
 
@@ -41,17 +46,14 @@ class EntrenadoController extends Controller
             $query->where('entrenador_asignado_id', $request->entrenador_id);
         }
 
-        $perPage = $request->get('per_page', $request->get('limit', 15));
+        $perPage = min($request->get('per_page', $request->get('limit', 15)), 100);
         $entrenados = $query->paginate($perPage);
 
-        // Agregar info de plan activo y cuota actual a cada entrenado
+        // Derivar campos de las relaciones ya cargadas (sin queries extra)
         $entrenados->getCollection()->transform(function ($entrenado) {
-            $planActivo = $entrenado->macrociclos()->where('activo', true)->first();
-            $cuotaActual = $entrenado->cuotas()->orderByDesc('fecha_vencimiento')->first();
-
-            $entrenado->plan_activo_nombre = $planActivo?->nombre;
-            $entrenado->estado_cuota = $cuotaActual?->estado ?? 'sin_cuota';
-
+            $entrenado->plan_activo_nombre = $entrenado->macrociclos->first()?->nombre;
+            $entrenado->estado_cuota = $entrenado->cuotas->first()?->estado ?? 'sin_cuota';
+            unset($entrenado->macrociclos, $entrenado->cuotas);
             return $entrenado;
         });
 
@@ -212,6 +214,11 @@ class EntrenadoController extends Controller
             ], 404);
         }
 
+        $user = auth()->user();
+        if (!$user->isAdmin() && $entrenado->entrenador_asignado_id !== $user->id) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $entrenado->update(['estado' => 'baja_temporal']);
 
         return response()->json([
@@ -229,6 +236,11 @@ class EntrenadoController extends Controller
             return response()->json([
                 'message' => 'Usuario no es entrenado.',
             ], 404);
+        }
+
+        $user = auth()->user();
+        if (!$user->isAdmin() && $entrenado->entrenador_asignado_id !== $user->id) {
+            return response()->json(['message' => 'No autorizado.'], 403);
         }
 
         $entrenado->update(['estado' => 'activo']);
@@ -870,8 +882,9 @@ class EntrenadoController extends Controller
             $query->whereDate('fecha_entrada', '<=', $request->fecha_hasta);
         }
 
+        $perPage = min($request->get('per_page', 20), 100);
         $ingresos = $query->orderByDesc('fecha_entrada')
-            ->paginate($request->get('per_page', 20));
+            ->paginate($perPage);
 
         return response()->json($ingresos);
         } catch (\Throwable $e) {

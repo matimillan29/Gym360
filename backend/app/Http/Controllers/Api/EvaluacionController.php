@@ -24,7 +24,8 @@ class EvaluacionController extends Controller
             $query->where('tipo', $request->tipo);
         }
 
-        $evaluaciones = $query->orderByDesc('fecha')->paginate($request->get('per_page', 15));
+        $perPage = min($request->get('per_page', 15), 100);
+        $evaluaciones = $query->orderByDesc('fecha')->paginate($perPage);
 
         return response()->json($evaluaciones);
     }
@@ -43,7 +44,7 @@ class EvaluacionController extends Controller
         $evaluaciones = $entrenado->evaluaciones()
             ->with('entrenador:id,nombre,apellido')
             ->orderByDesc('fecha')
-            ->paginate($request->get('per_page', 15));
+            ->paginate(min($request->get('per_page', 15), 100));
 
         return response()->json($evaluaciones);
     }
@@ -102,6 +103,10 @@ class EvaluacionController extends Controller
      */
     public function update(Request $request, Evaluacion $evaluacion)
     {
+        if ($evaluacion->entrenador_id !== auth()->id() && !auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $request->validate([
             'tipo' => 'sometimes|required|in:vo2max,fuerza,amplitud_movimiento,flexibilidad,potencia_aerobica,potencia_anaerobica,fuerza_maxima,resistencia,aerobico,composicion,personalizado,otro',
             'nombre' => 'sometimes|required|string|max:255',
@@ -131,6 +136,10 @@ class EvaluacionController extends Controller
      */
     public function destroy(Evaluacion $evaluacion)
     {
+        if ($evaluacion->entrenador_id !== auth()->id() && !auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $evaluacion->delete();
 
         return response()->json([

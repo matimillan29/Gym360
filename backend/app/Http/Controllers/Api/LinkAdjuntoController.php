@@ -76,6 +76,10 @@ class LinkAdjuntoController extends Controller
      */
     public function update(Request $request, LinkAdjunto $link)
     {
+        if ($link->entrenador_id !== auth()->id() && !auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $request->validate([
             'titulo' => 'sometimes|required|string|max:255',
             'url' => 'sometimes|required|url',
@@ -101,6 +105,10 @@ class LinkAdjuntoController extends Controller
      */
     public function destroy(LinkAdjunto $link)
     {
+        if ($link->entrenador_id !== auth()->id() && !auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $link->delete();
 
         return response()->json([
@@ -141,7 +149,7 @@ class LinkAdjuntoController extends Controller
         $query->orderByDesc('created_at');
 
         if ($request->has('per_page') || $request->has('page')) {
-            $links = $query->paginate($request->get('per_page', 50));
+            $links = $query->paginate(min($request->get('per_page', 50), 100));
             return response()->json($links);
         }
 

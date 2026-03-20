@@ -52,6 +52,10 @@ export default function SucursalesGestion() {
       closeModal();
       toast.success('Sucursal creada correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al crear la sucursal';
+      toast.error(msg);
+    },
   });
 
   const updateMutation = useMutation({
@@ -62,6 +66,10 @@ export default function SucursalesGestion() {
       closeModal();
       toast.success('Sucursal actualizada correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al actualizar la sucursal';
+      toast.error(msg);
+    },
   });
 
   const toggleActivaMutation = useMutation({
@@ -70,6 +78,10 @@ export default function SucursalesGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sucursales'] });
       toast.success('Estado de sucursal actualizado');
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al cambiar estado de la sucursal';
+      toast.error(msg);
     },
   });
 

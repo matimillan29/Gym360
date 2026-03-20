@@ -84,6 +84,10 @@ export default function PlanesList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['planes'] });
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al eliminar el plan';
+      toast.error(msg);
+    },
   });
 
   // Mutation para eliminar plantilla
@@ -93,6 +97,10 @@ export default function PlanesList() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['plantillas'] });
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al eliminar la plantilla';
+      toast.error(msg);
     },
   });
 

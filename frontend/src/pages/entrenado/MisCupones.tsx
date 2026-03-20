@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 interface Negocio {
@@ -57,6 +58,10 @@ export default function MisCupones() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['mis-cupones'] });
       setSelectedCupon(null);
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al canjear el cupón';
+      toast.error(msg);
     },
   });
 

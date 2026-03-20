@@ -144,6 +144,10 @@ export default function ClasesGestion() {
       closeModal();
       toast.success('Actividad creada correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al crear la actividad';
+      toast.error(msg);
+    },
   });
 
   const updateClaseMutation = useMutation({
@@ -154,6 +158,10 @@ export default function ClasesGestion() {
       closeModal();
       toast.success('Actividad actualizada correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al actualizar la actividad';
+      toast.error(msg);
+    },
   });
 
   const toggleActivaMutation = useMutation({
@@ -162,6 +170,10 @@ export default function ClasesGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clases'] });
       toast.success('Estado de actividad actualizado');
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al cambiar estado de la actividad';
+      toast.error(msg);
     },
   });
 
@@ -177,6 +189,10 @@ export default function ClasesGestion() {
       setHorarioForm({ dia_semana: 1, hora_inicio: '09:00', hora_fin: '10:00', instructor_id: '' });
       toast.success('Horario agregado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al crear el horario';
+      toast.error(msg);
+    },
   });
 
   const deleteHorarioMutation = useMutation({
@@ -186,6 +202,10 @@ export default function ClasesGestion() {
       queryClient.invalidateQueries({ queryKey: ['clases'] });
       toast.success('Horario eliminado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al eliminar el horario';
+      toast.error(msg);
+    },
   });
 
   const updateAsistenciaMutation = useMutation({
@@ -193,6 +213,10 @@ export default function ClasesGestion() {
       api.post(`/asistencias-clase/${asistenciaId}/checkin`, { estado }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['horario-asistencias', selectedHorario?.id, asistenciasFecha] });
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al actualizar la asistencia';
+      toast.error(msg);
     },
   });
 

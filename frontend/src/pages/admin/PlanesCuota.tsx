@@ -68,6 +68,10 @@ export default function PlanesCuota() {
       closeModal();
       toast.success(editingPlan ? 'Plan actualizado correctamente' : 'Plan creado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || (editingPlan ? 'Error al actualizar el plan' : 'Error al crear el plan');
+      toast.error(msg);
+    },
   });
 
   const toggleActivoMutation = useMutation({
@@ -78,6 +82,10 @@ export default function PlanesCuota() {
       queryClient.invalidateQueries({ queryKey: ['planes-cuota'] });
       toast.success('Estado del plan actualizado');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al cambiar estado del plan';
+      toast.error(msg);
+    },
   });
 
   const deleteMutation = useMutation({
@@ -87,6 +95,10 @@ export default function PlanesCuota() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['planes-cuota'] });
       toast.success('Plan eliminado correctamente');
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al eliminar el plan';
+      toast.error(msg);
     },
   });
 

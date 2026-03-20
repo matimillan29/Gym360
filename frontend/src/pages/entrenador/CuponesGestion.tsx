@@ -108,6 +108,10 @@ export default function CuponesGestion() {
       closeModal();
       toast.success('Cupón creado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al crear el cupón';
+      toast.error(msg);
+    },
   });
 
   const updateMutation = useMutation({
@@ -127,6 +131,10 @@ export default function CuponesGestion() {
       closeModal();
       toast.success('Cupón actualizado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al actualizar el cupón';
+      toast.error(msg);
+    },
   });
 
   const deleteMutation = useMutation({
@@ -136,6 +144,10 @@ export default function CuponesGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cupones'] });
       toast.success('Cupón eliminado correctamente');
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al eliminar el cupón';
+      toast.error(msg);
     },
   });
 
@@ -153,6 +165,10 @@ export default function CuponesGestion() {
       setCuponAsignar(null);
       toast.success('Cupón asignado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al asignar el cupón';
+      toast.error(msg);
+    },
   });
 
   const asignarTodosMutation = useMutation({
@@ -166,6 +182,10 @@ export default function CuponesGestion() {
       queryClient.invalidateQueries({ queryKey: ['cupones'] });
       toast.success(data.message);
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al asignar cupones';
+      toast.error(msg);
+    },
   });
 
   const toggleActivoMutation = useMutation({
@@ -176,6 +196,10 @@ export default function CuponesGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cupones'] });
       toast.success('Estado del cupón actualizado');
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al cambiar estado del cupón';
+      toast.error(msg);
     },
   });
 

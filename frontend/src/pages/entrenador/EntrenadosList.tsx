@@ -75,6 +75,10 @@ export default function EntrenadosList() {
       resetForm();
       toast.success('Entrenado creado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al crear el entrenado';
+      toast.error(msg);
+    },
   });
 
   const updateMutation = useMutation({
@@ -89,6 +93,10 @@ export default function EntrenadosList() {
       resetForm();
       toast.success('Entrenado actualizado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al actualizar el entrenado';
+      toast.error(msg);
+    },
   });
 
   const deleteMutation = useMutation({
@@ -98,6 +106,10 @@ export default function EntrenadosList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entrenados'] });
       toast.success('Entrenado eliminado correctamente');
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al eliminar el entrenado';
+      toast.error(msg);
     },
   });
 
@@ -109,6 +121,10 @@ export default function EntrenadosList() {
       queryClient.invalidateQueries({ queryKey: ['entrenados'] });
       toast.success('Entrenado dado de baja correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al cambiar estado del entrenado';
+      toast.error(msg);
+    },
   });
 
   const reactivarMutation = useMutation({
@@ -118,6 +134,10 @@ export default function EntrenadosList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entrenados'] });
       toast.success('Entrenado reactivado correctamente');
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al cambiar estado del entrenado';
+      toast.error(msg);
     },
   });
 

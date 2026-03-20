@@ -33,7 +33,8 @@ class FeedbackController extends Controller
             $query->where('privado', $privado);
         }
 
-        $feedbacks = $query->paginate($request->get('per_page', 50));
+        $perPage = min($request->get('per_page', 50), 100);
+        $feedbacks = $query->paginate($perPage);
 
         // Mapear para compatibilidad con frontend
         $feedbacks->getCollection()->transform(function ($feedback) {
@@ -79,7 +80,8 @@ class FeedbackController extends Controller
             $query->where('privado', false);
         }
 
-        $feedbacks = $query->paginate($request->get('per_page', 15));
+        $perPage = min($request->get('per_page', 15), 100);
+        $feedbacks = $query->paginate($perPage);
 
         return response()->json($feedbacks);
     }
@@ -120,10 +122,10 @@ class FeedbackController extends Controller
      */
     public function update(Request $request, Feedback $feedback)
     {
-        // Solo el autor puede editar
-        if ($feedback->entrenador_id !== auth()->id()) {
+        // Solo el autor o admin puede editar
+        if ($feedback->entrenador_id !== auth()->id() && !auth()->user()->isAdmin()) {
             return response()->json([
-                'message' => 'Solo el autor puede editar este feedback.',
+                'message' => 'No autorizado.',
             ], 403);
         }
 
@@ -146,10 +148,10 @@ class FeedbackController extends Controller
      */
     public function destroy(Feedback $feedback)
     {
-        // Solo el autor puede eliminar
-        if ($feedback->entrenador_id !== auth()->id()) {
+        // Solo el autor o admin puede eliminar
+        if ($feedback->entrenador_id !== auth()->id() && !auth()->user()->isAdmin()) {
             return response()->json([
-                'message' => 'Solo el autor puede eliminar este feedback.',
+                'message' => 'No autorizado.',
             ], 403);
         }
 

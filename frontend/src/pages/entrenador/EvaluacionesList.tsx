@@ -96,6 +96,10 @@ export default function EvaluacionesList() {
       closeModal();
       toast.success(editingId ? 'Evaluación actualizada correctamente' : 'Evaluación creada correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || (editingId ? 'Error al actualizar la evaluación' : 'Error al crear la evaluación');
+      toast.error(msg);
+    },
   });
 
   // Mutation para eliminar
@@ -106,6 +110,10 @@ export default function EvaluacionesList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['evaluaciones'] });
       toast.success('Evaluación eliminada correctamente');
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al eliminar la evaluación';
+      toast.error(msg);
     },
   });
 

@@ -8,10 +8,24 @@ use App\Models\Cuota;
 use App\Models\Pago;
 use App\Models\PlanCuota;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class CuotaController extends Controller
 {
+    /**
+     * Verificar que el usuario tiene acceso a la cuota.
+     * Admins siempre tienen acceso. Entrenadores solo si el entrenado está asignado a ellos.
+     */
+    private function authorizeCuota(Cuota $cuota): bool
+    {
+        $user = auth()->user();
+        if ($user->isAdmin()) {
+            return true;
+        }
+        return $cuota->entrenado && $cuota->entrenado->entrenador_asignado_id === $user->id;
+    }
+
     /**
      * Listar cuotas de un entrenado
      */
@@ -31,7 +45,8 @@ class CuotaController extends Controller
             $query->where('estado', $request->estado);
         }
 
-        $cuotas = $query->paginate($request->get('per_page', 12));
+        $perPage = min($request->get('per_page', 12), 100);
+        $cuotas = $query->paginate($perPage);
 
         return response()->json($cuotas);
     }
@@ -80,6 +95,10 @@ class CuotaController extends Controller
      */
     public function show(Cuota $cuota)
     {
+        if (!$this->authorizeCuota($cuota)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $cuota->load('pagos', 'plan', 'entrenado:id,nombre,apellido');
 
         return response()->json([
@@ -92,6 +111,10 @@ class CuotaController extends Controller
      */
     public function update(Request $request, Cuota $cuota)
     {
+        if (!$this->authorizeCuota($cuota)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $request->validate([
             'monto' => 'sometimes|required|numeric|min:0',
             'fecha_vencimiento' => 'sometimes|required|date',
@@ -115,6 +138,10 @@ class CuotaController extends Controller
      */
     public function destroy(Cuota $cuota)
     {
+        if (!$this->authorizeCuota($cuota)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         if ($cuota->pagos()->exists()) {
             return response()->json([
                 'message' => 'No se puede eliminar una cuota con pagos registrados.',
@@ -133,6 +160,10 @@ class CuotaController extends Controller
      */
     public function registrarPago(Request $request, Cuota $cuota)
     {
+        if (!$this->authorizeCuota($cuota)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $request->validate([
             'monto' => 'required|numeric|min:0.01',
             'metodo' => 'required|in:efectivo,transferencia,debito,credito,otro',
@@ -140,31 +171,33 @@ class CuotaController extends Controller
             'notas' => 'nullable|string',
         ]);
 
-        $pago = Pago::create([
-            'cuota_id' => $cuota->id,
-            'monto' => $request->monto,
-            'fecha' => $request->fecha ? Carbon::parse($request->fecha) : Carbon::now(),
-            'metodo' => $request->metodo,
-            'notas' => $request->notas,
-        ]);
+        return DB::transaction(function () use ($request, $cuota) {
+            $cuota = Cuota::lockForUpdate()->find($cuota->id);
 
-        // Calcular total pagado desde la tabla de pagos
-        $totalPagado = $cuota->pagos()->sum('monto');
+            $pago = Pago::create([
+                'cuota_id' => $cuota->id,
+                'monto' => $request->monto,
+                'fecha' => $request->fecha ? Carbon::parse($request->fecha) : Carbon::now(),
+                'metodo' => $request->metodo,
+                'notas' => $request->notas,
+            ]);
 
-        // Actualizar estado
-        if ($totalPagado >= $cuota->monto) {
-            $cuota->estado = 'pagado';
-        }
+            // Calcular total pagado desde la tabla de pagos
+            $totalPagado = $cuota->pagos()->sum('monto');
 
-        $cuota->save();
+            // Actualizar estado
+            if ($totalPagado >= $cuota->monto) {
+                $cuota->update(['estado' => 'pagado']);
+            }
 
-        return response()->json([
-            'data' => [
-                'pago' => $pago,
-                'cuota' => $cuota,
-            ],
-            'message' => 'Pago registrado correctamente.',
-        ], 201);
+            return response()->json([
+                'data' => [
+                    'pago' => $pago,
+                    'cuota' => $cuota->fresh(),
+                ],
+                'message' => 'Pago registrado correctamente.',
+            ], 201);
+        });
     }
 
     /**
@@ -183,7 +216,8 @@ class CuotaController extends Controller
             $query->where('entrenado_id', $request->entrenado_id);
         }
 
-        $cuotas = $query->paginate($request->get('per_page', 20));
+        $perPage = min($request->get('per_page', 20), 100);
+        $cuotas = $query->paginate($perPage);
 
         return response()->json($cuotas);
     }

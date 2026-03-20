@@ -155,6 +155,10 @@ export default function CalendarioGestion() {
       queryClient.invalidateQueries({ queryKey: ['dias-especiales'] });
       toast.success('Día especial eliminado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al eliminar el día especial';
+      toast.error(msg);
+    },
   });
 
   const closeModal = () => {

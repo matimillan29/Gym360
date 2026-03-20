@@ -89,6 +89,10 @@ export default function CuotasGestion() {
       closePagoModal();
       toast.success('Pago registrado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al registrar pago';
+      toast.error(msg);
+    },
   });
 
   const openPagoModal = (cuota: Cuota) => {

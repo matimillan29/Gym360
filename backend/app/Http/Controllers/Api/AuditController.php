@@ -36,7 +36,8 @@ class AuditController extends Controller
             $query->where('created_at', '<=', $request->hasta);
         }
 
-        $logs = $query->paginate($request->get('per_page', 50));
+        $perPage = min($request->get('per_page', 50), 100);
+        $logs = $query->paginate($perPage);
 
         return response()->json($logs);
     }
@@ -46,10 +47,11 @@ class AuditController extends Controller
      */
     public function byUser(Request $request, $userId)
     {
+        $perPage = min($request->get('per_page', 50), 100);
         $logs = AuditLog::with('user:id,nombre,apellido,role')
             ->where('user_id', $userId)
             ->orderByDesc('created_at')
-            ->paginate($request->get('per_page', 50));
+            ->paginate($perPage);
 
         return response()->json($logs);
     }
@@ -59,11 +61,12 @@ class AuditController extends Controller
      */
     public function byEntity(Request $request, $type, $id)
     {
+        $perPage = min($request->get('per_page', 50), 100);
         $logs = AuditLog::with('user:id,nombre,apellido,role')
             ->where('entity', $type)
             ->where('entity_id', $id)
             ->orderByDesc('created_at')
-            ->paginate($request->get('per_page', 50));
+            ->paginate($perPage);
 
         return response()->json($logs);
     }

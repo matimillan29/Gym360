@@ -205,75 +205,13 @@ class AuthController extends Controller
     }
 
     /**
-     * Login para entrenados (email + password)
-     * ADVERTENCIA: Este método usa una fórmula predecible (primeras 2 letras nombre + 2 letras apellido + DNI).
-     * Es una conveniencia temporal; se recomienda migrar a OTP o contraseñas reales.
+     * Login para entrenados (deshabilitado - usar OTP)
      */
     public function loginEntrenado(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string|min:5',
-        ]);
-
-        // Rate limiting: max 10 intentos por IP por minuto
-        $ip = $request->ip();
-        $rateLimitKey = "login_entrenado_attempts:{$ip}";
-        $loginAttempts = Cache::get($rateLimitKey, 0);
-
-        if ($loginAttempts >= 10) {
-            throw ValidationException::withMessages([
-                'email' => ['Demasiados intentos. Esperá un momento antes de reintentar.'],
-            ]);
-        }
-
-        // Buscar entrenado por email
-        $user = User::where('email', $request->email)
-            ->where('role', 'entrenado')
-            ->first();
-
-        if (!$user) {
-            Cache::put($rateLimitKey, $loginAttempts + 1, now()->addMinute());
-            throw ValidationException::withMessages([
-                'email' => ['Credenciales incorrectas.'],
-            ]);
-        }
-
-        // Generar la contraseña esperada: MaMi + DNI
-        $expectedPassword = $this->generateUsername($user->nombre, $user->apellido) . $user->dni;
-
-        // Comparar contraseña (case insensitive para el usuario, exacto para DNI)
-        $inputPassword = $request->password;
-        $inputUsuario = mb_substr($inputPassword, 0, 4);
-        $inputDni = mb_substr($inputPassword, 4);
-
-        $expectedUsuario = $this->generateUsername($user->nombre, $user->apellido);
-
-        if (strtolower($inputUsuario) !== strtolower($expectedUsuario) || $inputDni !== $user->dni) {
-            Cache::put($rateLimitKey, $loginAttempts + 1, now()->addMinute());
-            throw ValidationException::withMessages([
-                'password' => ['Credenciales incorrectas.'],
-            ]);
-        }
-
-        if ($user->estado !== 'activo') {
-            throw ValidationException::withMessages([
-                'email' => ['Tu cuenta está desactivada.'],
-            ]);
-        }
-
-        // Éxito: limpiar contador de intentos
-        Cache::forget($rateLimitKey);
-
-        // Revocar tokens anteriores
-        $user->tokens()->delete();
-
-        $token = $user->createToken('auth-token')->plainTextToken;
-
         return response()->json([
-            'user' => $this->formatUser($user),
-            'token' => $token,
-        ]);
+            'message' => 'Usá el login con código OTP para ingresar como entrenado.',
+        ], 400);
     }
 
     /**

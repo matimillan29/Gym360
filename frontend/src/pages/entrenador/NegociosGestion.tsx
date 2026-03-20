@@ -47,6 +47,10 @@ export default function NegociosGestion() {
       closeModal();
       toast.success('Negocio creado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al crear el negocio';
+      toast.error(msg);
+    },
   });
 
   const updateMutation = useMutation({
@@ -59,6 +63,10 @@ export default function NegociosGestion() {
       closeModal();
       toast.success('Negocio actualizado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al actualizar el negocio';
+      toast.error(msg);
+    },
   });
 
   const deleteMutation = useMutation({
@@ -68,6 +76,10 @@ export default function NegociosGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['negocios'] });
       toast.success('Negocio eliminado correctamente');
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al eliminar el negocio';
+      toast.error(msg);
     },
   });
 
@@ -83,6 +95,10 @@ export default function NegociosGestion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['negocios'] });
       toast.success('Logo actualizado correctamente');
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al actualizar el logo';
+      toast.error(msg);
     },
   });
 

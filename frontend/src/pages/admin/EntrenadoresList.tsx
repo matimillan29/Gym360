@@ -103,6 +103,10 @@ export default function EntrenadoresList() {
       queryClient.invalidateQueries({ queryKey: ['entrenadores'] });
       toast.success('Entrenador eliminado correctamente');
     },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al eliminar el entrenador';
+      toast.error(msg);
+    },
   });
 
   const closeModal = () => {
