@@ -82,7 +82,28 @@ export default function Progresion() {
     queryFn: async () => {
       try {
         const response = await api.get(`/mi/progresion/ejercicios?periodo=${periodoSeleccionado}`);
-        return response.data.data || response.data || [];
+        const raw = response.data.data || response.data || [];
+        // Calcular campos derivados desde datos raw del backend
+        return raw.map((ej: { ejercicio_id: number; ejercicio_nombre: string; datos?: { fecha: string; peso: number; repeticiones: number }[] }) => {
+          const datos = ej.datos || [];
+          const pesos = datos.filter(d => d.peso > 0);
+          const mejorRegistro = pesos.reduce((best, d) => (d.peso > (best?.peso || 0) ? d : best), pesos[0] || null);
+          const primerRegistro = pesos[0];
+          const ultimoRegistro = pesos[pesos.length - 1];
+          const rmEstimado = mejorRegistro ? (mejorRegistro.peso * mejorRegistro.repeticiones * 0.03) + mejorRegistro.peso : 0;
+          const progresion = primerRegistro && ultimoRegistro && primerRegistro.peso > 0
+            ? ((ultimoRegistro.peso - primerRegistro.peso) / primerRegistro.peso) * 100
+            : 0;
+          return {
+            ejercicio_id: ej.ejercicio_id,
+            ejercicio_nombre: ej.ejercicio_nombre,
+            mejor_peso: mejorRegistro?.peso || 0,
+            mejor_repeticiones: mejorRegistro?.repeticiones || 0,
+            rm_estimado: rmEstimado,
+            progresion_porcentaje: progresion,
+            historial: datos.map(d => ({ fecha: d.fecha, peso: d.peso, repeticiones: d.repeticiones })),
+          };
+        });
       } catch {
         return [];
       }
