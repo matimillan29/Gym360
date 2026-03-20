@@ -194,14 +194,34 @@ TABLES_EXIST=$(php -r "
 
 if [ "$TABLES_EXIST" = "no" ]; then
     echo "=== Primera ejecución - Inicializando base de datos ==="
-    php artisan migrate --force 2>&1 || echo "ERROR en migraciones"
-    php artisan db:seed --force 2>&1 || echo "ERROR en seeders"
+    php artisan migrate --force 2>&1
+    echo "Exit code migraciones: $?"
+    php artisan db:seed --force 2>&1
+    echo "Exit code seeders: $?"
     echo "Base de datos inicializada."
 else
     echo "=== Ejecutando migraciones pendientes ==="
-    php artisan migrate --force 2>&1 || echo "Migraciones fallaron (puede ser OK)"
-    echo "Migraciones aplicadas."
+    php artisan migrate --force 2>&1
+    echo "Exit code migraciones: $?"
+    echo "Migraciones procesadas."
 fi
+
+# Verificar que las tablas críticas existan
+echo "Verificando tablas críticas..."
+for TABLE in users gym_config ejercicios macrociclos cuotas ingresos; do
+    EXISTS=$(php -r "
+        try {
+            \$pdo = new PDO(
+                'mysql:host=${CLOUDRON_MYSQL_HOST:-localhost};dbname=${CLOUDRON_MYSQL_DATABASE:-pwr360}',
+                '${CLOUDRON_MYSQL_USERNAME:-root}',
+                '${CLOUDRON_MYSQL_PASSWORD:-}'
+            );
+            \$result = \$pdo->query(\"SHOW TABLES LIKE '$TABLE'\");
+            echo \$result->rowCount() > 0 ? 'yes' : 'no';
+        } catch (Exception \$e) { echo 'error'; }
+    " 2>/dev/null)
+    echo "  Tabla $TABLE: $EXISTS"
+done
 
 # ============================================================
 # Optimizar para producción
