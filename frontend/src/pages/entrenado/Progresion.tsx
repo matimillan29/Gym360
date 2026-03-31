@@ -386,7 +386,7 @@ export default function Progresion() {
                 {ejercicio.historial && ejercicio.historial.length > 1 && (
                   <div className="mt-3 flex items-end gap-1 h-8">
                     {ejercicio.historial.slice(-8).map((punto, idx) => {
-                      const maxPeso = Math.max(...ejercicio.historial.map(h => h.peso));
+                      const maxPeso = Math.max(...ejercicio.historial.map(h => h.peso), 1);
                       const altura = (punto.peso / maxPeso) * 100;
                       return (
                         <div

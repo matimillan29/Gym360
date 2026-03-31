@@ -42,7 +42,9 @@ export default function EntrenadorLayout() {
     if (href === '/entrenador') {
       return location.pathname === '/entrenador';
     }
-    return location.pathname.startsWith(href);
+    // Exact match or prefix match followed by / to avoid
+    // /entrenador/calendario matching /entrenador/calendario-clases
+    return location.pathname === href || location.pathname.startsWith(href + '/');
   };
 
   const handleLogout = async () => {

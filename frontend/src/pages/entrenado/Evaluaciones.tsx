@@ -245,7 +245,7 @@ export default function Evaluaciones() {
                         <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Evolución</h5>
                         <div className="flex items-end gap-1 h-16">
                           {grupo.evaluaciones.map((ev, idx) => {
-                            const max = Math.max(...grupo.evaluaciones.map((e) => e.valor), 1);
+                            const max = Math.max(...grupo.evaluaciones.map((e) => Number(e.valor || 0)), 1);
                             const height = (ev.valor / max) * 100;
                             return (
                               <div

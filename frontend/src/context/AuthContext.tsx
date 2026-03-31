@@ -46,8 +46,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const currentUser = await authService.getCurrentUser();
       setUser(currentUser);
-    } catch {
-      localStorage.removeItem('auth_token');
+    } catch (err) {
+      // Only clear token on auth errors (401), not network failures
+      if ((err as any)?.response?.status === 401) {
+        localStorage.removeItem('auth_token');
+      }
     } finally {
       setIsLoading(false);
     }

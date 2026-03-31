@@ -406,6 +406,9 @@ export default function EntrenadoDetalle() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['links', id] });
     },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Error al eliminar el link.');
+    },
   });
 
   const saveFeedbackMutation = useMutation({
@@ -436,6 +439,9 @@ export default function EntrenadoDetalle() {
       queryClient.invalidateQueries({ queryKey: ['entrenado', id] });
       queryClient.invalidateQueries({ queryKey: ['entrenados'] });
       setShowEstadoModal(false);
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Error al cambiar el estado del entrenado.');
     },
   });
 
@@ -1649,14 +1655,14 @@ export default function EntrenadoDetalle() {
                   <div className="bg-white rounded-xl p-4 border">
                     <p className="text-xs text-gray-500">Tonelaje total</p>
                     <p className="text-2xl font-bold text-blue-600">
-                      {(estadisticas.tonelaje_total / 1000).toFixed(1)}t
+                      {(Number(estadisticas.tonelaje_total || 0) / 1000).toFixed(1)}t
                     </p>
                     <p className="text-xs text-gray-400">kg levantados</p>
                   </div>
                   <div className="bg-white rounded-xl p-4 border">
                     <p className="text-xs text-gray-500">Este mes</p>
                     <p className="text-2xl font-bold text-green-600">
-                      {(estadisticas.tonelaje_ultimo_mes / 1000).toFixed(1)}t
+                      {(Number(estadisticas.tonelaje_ultimo_mes || 0) / 1000).toFixed(1)}t
                     </p>
                     <p className="text-xs text-gray-400">tonelaje mensual</p>
                   </div>
@@ -1694,7 +1700,7 @@ export default function EntrenadoDetalle() {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-blue-600">1RM: {marca.rm_estimado.toFixed(1)}kg</p>
+                            <p className="font-bold text-blue-600">1RM: {Number(marca.rm_estimado || 0).toFixed(1)}kg</p>
                             <p className="text-xs text-gray-400">
                               {new Date(marca.fecha).toLocaleDateString('es-AR')}
                             </p>

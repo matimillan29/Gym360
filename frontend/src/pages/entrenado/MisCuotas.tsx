@@ -105,7 +105,7 @@ export default function MisCuotas() {
               <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-xl min-w-0 overflow-hidden">
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Monto</p>
                 <p className="text-base font-bold text-gray-900 dark:text-white truncate">
-                  ${cuotaActual.monto.toLocaleString()}
+                  ${(cuotaActual.monto || 0).toLocaleString()}
                 </p>
               </div>
               <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-xl min-w-0">
@@ -159,7 +159,7 @@ export default function MisCuotas() {
                           </svg>
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900 dark:text-white">${pago.monto.toLocaleString()}</p>
+                          <p className="font-medium text-gray-900 dark:text-white">${(pago.monto || 0).toLocaleString()}</p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             {formatDate(pago.fecha)} • {metodoLabels[pago.metodo] || pago.metodo}
                           </p>
@@ -243,7 +243,7 @@ export default function MisCuotas() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-900 dark:text-white">${cuota.monto.toLocaleString()}</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">${(cuota.monto || 0).toLocaleString()}</p>
                     <span className={`text-xs ${estadoConfig[cuota.estado].text}`}>
                       {estadoConfig[cuota.estado].label}
                     </span>
