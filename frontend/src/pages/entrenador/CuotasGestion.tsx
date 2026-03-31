@@ -131,10 +131,10 @@ export default function CuotasGestion() {
 
   const getEstadoBadge = (estado: string) => {
     const config: Record<string, { bg: string; text: string; label: string }> = {
-      pagado: { bg: 'bg-green-100', text: 'text-green-700', label: 'Pagado' },
-      pendiente: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Pendiente' },
-      vencido: { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Vencido' },
-      mora: { bg: 'bg-red-100', text: 'text-red-700', label: 'En mora' },
+      pagado: { bg: 'bg-green-100 dark:bg-green-900/50', text: 'text-green-700 dark:text-green-400', label: 'Pagado' },
+      pendiente: { bg: 'bg-yellow-100 dark:bg-yellow-900/50', text: 'text-yellow-700 dark:text-yellow-400', label: 'Pendiente' },
+      vencido: { bg: 'bg-orange-100 dark:bg-orange-900/50', text: 'text-orange-700 dark:text-orange-400', label: 'Vencido' },
+      mora: { bg: 'bg-red-100 dark:bg-red-900/50', text: 'text-red-700 dark:text-red-400', label: 'En mora' },
     };
     const c = config[estado] || config.pendiente;
     return (
@@ -186,102 +186,102 @@ export default function CuotasGestion() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <button
           onClick={() => setFilterEstado('')}
-          className={`bg-white rounded-xl p-4 shadow-sm text-left transition-colors ${
+          className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm text-left transition-colors ${
             filterEstado === '' ? 'ring-2 ring-emerald-500' : ''
           }`}
         >
-          <p className="text-2xl font-bold text-gray-900">{resumen.total}</p>
-          <p className="text-sm text-gray-500">Total cuotas</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">{resumen.total}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Total cuotas</p>
         </button>
         <button
           onClick={() => setFilterEstado('pendiente')}
-          className={`bg-white rounded-xl p-4 shadow-sm text-left transition-colors ${
+          className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm text-left transition-colors ${
             filterEstado === 'pendiente' ? 'ring-2 ring-yellow-500' : ''
           }`}
         >
           <p className="text-2xl font-bold text-yellow-600">{resumen.pendiente}</p>
-          <p className="text-sm text-gray-500">Pendientes</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Pendientes</p>
         </button>
         <button
           onClick={() => setFilterEstado('vencido')}
-          className={`bg-white rounded-xl p-4 shadow-sm text-left transition-colors ${
+          className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm text-left transition-colors ${
             filterEstado === 'vencido' ? 'ring-2 ring-orange-500' : ''
           }`}
         >
           <p className="text-2xl font-bold text-orange-600">{resumen.vencido}</p>
-          <p className="text-sm text-gray-500">Vencidas</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Vencidas</p>
         </button>
         <button
           onClick={() => setFilterEstado('mora')}
-          className={`bg-white rounded-xl p-4 shadow-sm text-left transition-colors ${
+          className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm text-left transition-colors ${
             filterEstado === 'mora' ? 'ring-2 ring-red-500' : ''
           }`}
         >
           <p className="text-2xl font-bold text-red-600">{resumen.mora}</p>
-          <p className="text-sm text-gray-500">En mora</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">En mora</p>
         </button>
       </div>
 
       {/* Lista de cuotas */}
       {isLoading ? (
         <div className="flex justify-center py-12">
-          <p className="text-gray-500">Cargando cuotas...</p>
+          <p className="text-gray-500 dark:text-gray-400">Cargando cuotas...</p>
         </div>
       ) : cuotas.length > 0 ? (
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Entrenado
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Plan
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Vencimiento
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Monto
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Estado
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Acciones
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {cuotas.map((cuota) => {
                   const montoPendiente = cuota.monto - (cuota.total_pagado || 0);
                   return (
-                    <tr key={cuota.id} className="hover:bg-gray-50">
+                    <tr key={cuota.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Link
                           to={`/entrenador/entrenados/${cuota.entrenado.id}`}
                           className="flex items-center gap-3 hover:text-emerald-600"
                         >
-                          <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-medium text-sm">
+                          <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-600 font-medium text-sm">
                             {cuota.entrenado.nombre[0]}{cuota.entrenado.apellido[0]}
                           </div>
-                          <span className="font-medium text-gray-900">
+                          <span className="font-medium text-gray-900 dark:text-white">
                             {cuota.entrenado.nombre} {cuota.entrenado.apellido}
                           </span>
                         </Link>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {cuota.plan.nombre}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {new Date(cuota.fecha_vencimiento).toLocaleDateString('es-AR')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <p className="font-medium text-gray-900">{formatMoney(cuota.monto)}</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{formatMoney(cuota.monto)}</p>
                           {cuota.total_pagado > 0 && cuota.total_pagado < cuota.monto && (
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
                               Pagado: {formatMoney(cuota.total_pagado)} | Resta: {formatMoney(montoPendiente)}
                             </p>
                           )}
@@ -300,7 +300,7 @@ export default function CuotasGestion() {
                           </button>
                         )}
                         {cuota.pagos && cuota.pagos.length > 0 && (
-                          <span className="ml-2 text-xs text-gray-400">
+                          <span className="ml-2 text-xs text-gray-400 dark:text-gray-500">
                             {cuota.pagos.length} pago{cuota.pagos.length > 1 ? 's' : ''}
                           </span>
                         )}
@@ -313,44 +313,44 @@ export default function CuotasGestion() {
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-          <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 text-center">
+          <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
-          <h3 className="text-lg font-medium text-gray-900 mb-1">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">
             {filterEstado ? 'No hay cuotas con este estado' : 'No hay cuotas registradas'}
           </h3>
-          <p className="text-gray-500">Las cuotas se crean desde el perfil de cada entrenado</p>
+          <p className="text-gray-500 dark:text-gray-400">Las cuotas se crean desde el perfil de cada entrenado</p>
         </div>
       )}
 
       {/* Modal registrar pago */}
       {showPagoModal && selectedCuota && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md">
             <form onSubmit={handleRegistrarPago}>
-              <div className="p-6 border-b">
-                <h2 className="text-xl font-semibold text-gray-900">Registrar Pago</h2>
-                <p className="text-sm text-gray-500 mt-1">
+              <div className="p-6 border-b dark:border-gray-700">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Registrar Pago</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   {selectedCuota.entrenado.nombre} {selectedCuota.entrenado.apellido} - {selectedCuota.plan.nombre}
                 </p>
               </div>
 
               <div className="p-6 space-y-4">
                 {/* Info de la cuota */}
-                <div className="p-4 bg-gray-50 rounded-xl">
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Monto total:</span>
-                    <span className="font-medium">{formatMoney(selectedCuota.monto)}</span>
+                    <span className="text-gray-500 dark:text-gray-400">Monto total:</span>
+                    <span className="font-medium dark:text-white">{formatMoney(selectedCuota.monto)}</span>
                   </div>
                   {selectedCuota.total_pagado > 0 && (
                     <>
                       <div className="flex justify-between text-sm mt-1">
-                        <span className="text-gray-500">Ya pagado:</span>
+                        <span className="text-gray-500 dark:text-gray-400">Ya pagado:</span>
                         <span className="font-medium text-green-600">{formatMoney(selectedCuota.total_pagado)}</span>
                       </div>
-                      <div className="flex justify-between text-sm mt-1 pt-1 border-t">
-                        <span className="text-gray-500">Pendiente:</span>
+                      <div className="flex justify-between text-sm mt-1 pt-1 border-t dark:border-gray-600">
+                        <span className="text-gray-500 dark:text-gray-400">Pendiente:</span>
                         <span className="font-medium text-orange-600">
                           {formatMoney(selectedCuota.monto - selectedCuota.total_pagado)}
                         </span>
@@ -361,7 +361,7 @@ export default function CuotasGestion() {
 
                 {/* Monto */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Monto a pagar *
                   </label>
                   <input
@@ -369,20 +369,20 @@ export default function CuotasGestion() {
                     step="0.01"
                     value={pagoForm.monto}
                     onChange={(e) => setPagoForm({ ...pagoForm, monto: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     required
                   />
                 </div>
 
                 {/* Método */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Método de pago
                   </label>
                   <select
                     value={pagoForm.metodo}
                     onChange={(e) => setPagoForm({ ...pagoForm, metodo: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   >
                     {METODOS_PAGO.map((m) => (
                       <option key={m.value} value={m.value}>
@@ -394,20 +394,20 @@ export default function CuotasGestion() {
 
                 {/* Fecha */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Fecha del pago
                   </label>
                   <input
                     type="date"
                     value={pagoForm.fecha}
                     onChange={(e) => setPagoForm({ ...pagoForm, fecha: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   />
                 </div>
 
                 {/* Comprobante */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Comprobante (opcional)
                   </label>
                   <input
@@ -415,29 +415,29 @@ export default function CuotasGestion() {
                     value={pagoForm.comprobante}
                     onChange={(e) => setPagoForm({ ...pagoForm, comprobante: e.target.value })}
                     placeholder="Número de comprobante o referencia"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   />
                 </div>
 
                 {/* Notas */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Notas (opcional)
                   </label>
                   <textarea
                     value={pagoForm.notas}
                     onChange={(e) => setPagoForm({ ...pagoForm, notas: e.target.value })}
                     rows={2}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
                   />
                 </div>
               </div>
 
-              <div className="p-6 border-t bg-gray-50 rounded-b-2xl flex justify-end gap-3">
+              <div className="p-6 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 rounded-b-2xl flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={closePagoModal}
-                  className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
                 >
                   Cancelar
                 </button>

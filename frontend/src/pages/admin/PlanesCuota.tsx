@@ -176,7 +176,7 @@ export default function PlanesCuota() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Cargando planes...</p>
+        <p className="text-gray-500 dark:text-gray-400">Cargando planes...</p>
       </div>
     );
   }
@@ -207,101 +207,101 @@ export default function PlanesCuota() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl shadow-sm p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
               <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{planesActivos.length}</p>
-              <p className="text-xs text-gray-500">Planes activos</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{planesActivos.length}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Planes activos</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+              <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
               </svg>
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{planesInactivos.length}</p>
-              <p className="text-xs text-gray-500">Inactivos</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{planesInactivos.length}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Inactivos</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
               <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {planes?.reduce((acc, p) => acc + (p.entrenados_count || 0), 0) || 0}
               </p>
-              <p className="text-xs text-gray-500">Entrenados activos</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Entrenados activos</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Lista de planes */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b bg-gray-50">
-          <h2 className="font-semibold text-gray-900">Planes configurados</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+        <div className="p-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+          <h2 className="font-semibold text-gray-900 dark:text-white">Planes configurados</h2>
         </div>
 
         {planes && planes.length > 0 ? (
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 dark:divide-gray-700">
             {planes.map((plan) => (
               <div
                 key={plan.id}
                 className={`p-4 flex items-center justify-between ${
-                  !plan.activo ? 'bg-gray-50 opacity-60' : ''
+                  !plan.activo ? 'bg-gray-50 dark:bg-gray-800/50 opacity-60' : ''
                 }`}
               >
                 <div className="flex items-center gap-4">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                    plan.activo ? 'bg-emerald-100' : 'bg-gray-200'
+                    plan.activo ? 'bg-emerald-100 dark:bg-emerald-900/50' : 'bg-gray-200 dark:bg-gray-700'
                   }`}>
-                    <svg className={`w-6 h-6 ${plan.activo ? 'text-emerald-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-6 h-6 ${plan.activo ? 'text-emerald-600' : 'text-gray-400 dark:text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                     </svg>
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-gray-900">{plan.nombre}</h3>
+                      <h3 className="font-medium text-gray-900 dark:text-white">{plan.nombre}</h3>
                       {!plan.activo && (
-                        <span className="px-2 py-0.5 text-xs font-medium bg-gray-200 text-gray-600 rounded-full">
+                        <span className="px-2 py-0.5 text-xs font-medium bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-full">
                           Inactivo
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       {getTipoLabel(plan.tipo)} •{' '}
                       {plan.cantidad_accesos ? `${plan.cantidad_accesos} accesos` : 'Ilimitado'} •{' '}
                       {plan.duracion_dias} días
                     </p>
                     {plan.descripcion && (
-                      <p className="text-xs text-gray-400 mt-1">{plan.descripcion}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{plan.descripcion}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
                       ${plan.precio.toLocaleString()}
                     </p>
                     {plan.entrenados_count !== undefined && plan.entrenados_count > 0 && (
-                      <p className="text-xs text-gray-500">{plan.entrenados_count} entrenados</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{plan.entrenados_count} entrenados</p>
                     )}
                   </div>
 
@@ -310,8 +310,8 @@ export default function PlanesCuota() {
                       onClick={() => toggleActivoMutation.mutate({ id: plan.id, activo: !plan.activo })}
                       className={`p-2 rounded-lg transition-colors ${
                         plan.activo
-                          ? 'text-yellow-600 hover:bg-yellow-50'
-                          : 'text-green-600 hover:bg-green-50'
+                          ? 'text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/30'
+                          : 'text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30'
                       }`}
                       title={plan.activo ? 'Desactivar' : 'Activar'}
                     >
@@ -327,7 +327,7 @@ export default function PlanesCuota() {
                     </button>
                     <button
                       onClick={() => openModal(plan)}
-                      className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+                      className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
                       title="Editar"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -341,7 +341,7 @@ export default function PlanesCuota() {
                             deleteMutation.mutate(plan.id);
                           }
                         }}
-                        className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                        className="p-2 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                         title="Eliminar"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -356,11 +356,11 @@ export default function PlanesCuota() {
           </div>
         ) : (
           <div className="p-12 text-center">
-            <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
             </svg>
-            <h3 className="text-lg font-medium text-gray-900 mb-1">No hay planes configurados</h3>
-            <p className="text-gray-500 mb-4">Creá tu primer plan de membresía</p>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">No hay planes configurados</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-4">Creá tu primer plan de membresía</p>
             <button
               onClick={() => openModal()}
               className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
@@ -377,36 +377,36 @@ export default function PlanesCuota() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b">
-              <h2 className="text-xl font-semibold text-gray-900">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b dark:border-gray-700">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                 {editingPlan ? 'Editar Plan' : 'Nuevo Plan de Cuota'}
               </h2>
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Nombre del plan *
                 </label>
                 <input
                   type="text"
                   value={formData.nombre}
                   onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   placeholder="Ej: Plan Mensual Premium"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Tipo de plan
                 </label>
                 <select
                   value={formData.tipo}
                   onChange={(e) => handleTipoChange(e.target.value as PlanCuota['tipo'])}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 >
                   {tiposPlan.map((tipo) => (
                     <option key={tipo.value} value={tipo.value}>
@@ -418,7 +418,7 @@ export default function PlanesCuota() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Cantidad de accesos
                   </label>
                   <input
@@ -430,15 +430,15 @@ export default function PlanesCuota() {
                         cantidad_accesos: e.target.value ? parseInt(e.target.value) : null,
                       })
                     }
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     placeholder="Ilimitado"
                     min="1"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Dejar vacío para ilimitado</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Dejar vacío para ilimitado</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Duración (días)
                   </label>
                   <input
@@ -447,7 +447,7 @@ export default function PlanesCuota() {
                     onChange={(e) =>
                       setFormData({ ...formData, duracion_dias: parseInt(e.target.value) || 30 })
                     }
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     min="1"
                     required
                   />
@@ -455,13 +455,13 @@ export default function PlanesCuota() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Tipo de acceso
                 </label>
                 <select
                   value={formData.tipo_acceso}
                   onChange={(e) => setFormData({ ...formData, tipo_acceso: e.target.value as PlanCuota['tipo_acceso'] })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 >
                   {tiposAcceso.map((tipo) => (
                     <option key={tipo.value} value={tipo.value}>
@@ -473,7 +473,7 @@ export default function PlanesCuota() {
 
               {(formData.tipo_acceso === 'mixto' || formData.tipo_acceso === 'solo_clases') && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Actividades por semana
                   </label>
                   <input
@@ -485,22 +485,22 @@ export default function PlanesCuota() {
                         clases_semanales: e.target.value ? parseInt(e.target.value) : null,
                       })
                     }
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     placeholder={formData.tipo_acceso === 'solo_clases' ? 'Cantidad de actividades' : 'Actividades adicionales'}
                     min="1"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     Cantidad máxima de actividades por semana
                   </p>
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Precio *
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
                   <input
                     type="text"
                     inputMode="numeric"
@@ -509,7 +509,7 @@ export default function PlanesCuota() {
                       const value = e.target.value.replace(/[^0-9]/g, '');
                       setFormData({ ...formData, precio: parseInt(value) || 0 });
                     }}
-                    className="w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full pl-8 pr-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     placeholder="0"
                     required
                   />
@@ -517,14 +517,14 @@ export default function PlanesCuota() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Descripción
                 </label>
                 <textarea
                   value={formData.descripcion}
                   onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
                   rows={2}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   placeholder="Descripción opcional del plan..."
                 />
               </div>
@@ -535,9 +535,9 @@ export default function PlanesCuota() {
                   id="activo"
                   checked={formData.activo}
                   onChange={(e) => setFormData({ ...formData, activo: e.target.checked })}
-                  className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                  className="w-4 h-4 text-emerald-600 border-gray-300 dark:border-gray-600 rounded focus:ring-emerald-500"
                 />
-                <label htmlFor="activo" className="text-sm text-gray-700">
+                <label htmlFor="activo" className="text-sm text-gray-700 dark:text-gray-300">
                   Plan activo (visible para asignar a entrenados)
                 </label>
               </div>
@@ -546,7 +546,7 @@ export default function PlanesCuota() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
                   Cancelar
                 </button>
