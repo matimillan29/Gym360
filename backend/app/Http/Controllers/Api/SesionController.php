@@ -22,6 +22,10 @@ class SesionController extends Controller
      */
     public function index(Microciclo $microciclo)
     {
+        if (!$this->verificarOwnershipMicrociclo($microciclo)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $sesiones = $microciclo->sesiones()
             ->withCount('ejercicios')
             ->orderBy('numero')
@@ -76,6 +80,10 @@ class SesionController extends Controller
      */
     public function show(Sesion $sesion)
     {
+        if (!$this->verificarOwnershipEntrenador($sesion)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $sesion->load([
             'ejercicios' => function ($q) {
                 $q->orderBy('orden');
@@ -771,5 +779,23 @@ class SesionController extends Controller
         }
 
         return $entrenado->entrenador_asignado_id === $user->id;
+    }
+
+    /**
+     * Verificar ownership a nivel de microciclo (para index)
+     */
+    private function verificarOwnershipMicrociclo(Microciclo $microciclo): bool
+    {
+        $user = auth()->user();
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        $microciclo->loadMissing('mesociclo.macrociclo.entrenado');
+
+        return $microciclo->mesociclo
+            && $microciclo->mesociclo->macrociclo
+            && $microciclo->mesociclo->macrociclo->entrenado
+            && $microciclo->mesociclo->macrociclo->entrenado->entrenador_asignado_id === $user->id;
     }
 }

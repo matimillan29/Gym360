@@ -10,6 +10,16 @@ use Illuminate\Http\Request;
 class AnamnesisController extends Controller
 {
     /**
+     * Verificar que el entrenador autenticado es dueño del entrenado
+     */
+    private function authorizeEntrenado(User $entrenado): bool
+    {
+        $user = auth()->user();
+        if ($user->isAdmin()) return true;
+        return $entrenado->entrenador_asignado_id === $user->id;
+    }
+
+    /**
      * Ver anamnesis de un entrenado
      */
     public function show(User $entrenado)
@@ -18,6 +28,10 @@ class AnamnesisController extends Controller
             return response()->json([
                 'message' => 'Usuario no es entrenado.',
             ], 404);
+        }
+
+        if (!$this->authorizeEntrenado($entrenado)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
         }
 
         $anamnesis = $entrenado->anamnesis;
@@ -43,6 +57,10 @@ class AnamnesisController extends Controller
             return response()->json([
                 'message' => 'Usuario no es entrenado.',
             ], 404);
+        }
+
+        if (!$this->authorizeEntrenado($entrenado)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
         }
 
         if ($entrenado->anamnesis) {
@@ -71,6 +89,10 @@ class AnamnesisController extends Controller
             return response()->json([
                 'message' => 'Usuario no es entrenado.',
             ], 404);
+        }
+
+        if (!$this->authorizeEntrenado($entrenado)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
         }
 
         $anamnesis = $entrenado->anamnesis;

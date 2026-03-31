@@ -262,6 +262,12 @@ class EntrenadoController extends Controller
             ], 404);
         }
 
+        // Solo admin o el entrenador actualmente asignado puede reasignar
+        $user = auth()->user();
+        if (!$user->isAdmin() && $entrenado->entrenador_asignado_id !== $user->id) {
+            return response()->json(['message' => 'No autorizado para reasignar este entrenado.'], 403);
+        }
+
         $request->validate([
             'entrenador_id' => 'required|exists:users,id',
         ]);
@@ -650,6 +656,16 @@ class EntrenadoController extends Controller
     private function crearIngreso(User $entrenado, ?Cuota $cuota): ?\App\Models\Ingreso
     {
         try {
+            // Prevenir double check-in (mismo entrenado en los ultimos 5 min sin checkout)
+            $ingresoExistente = \App\Models\Ingreso::where('entrenado_id', $entrenado->id)
+                ->where('fecha_entrada', '>=', now()->subMinutes(5))
+                ->whereNull('fecha_salida')
+                ->first();
+
+            if ($ingresoExistente) {
+                return $ingresoExistente;
+            }
+
             $ingreso = \App\Models\Ingreso::create([
                 'entrenado_id' => $entrenado->id,
                 'cuota_id' => $cuota?->id,
@@ -657,16 +673,15 @@ class EntrenadoController extends Controller
                 'tipo' => 'musculacion',
             ]);
         } catch (\Throwable $e) {
-            // Tabla ingresos puede no existir - continuar sin registrar
-            \Log::warning('crearIngreso: tabla no existe - ' . $e->getMessage());
+            \Log::warning('crearIngreso: ' . $e->getMessage());
             $ingreso = null;
         }
 
-        // Incrementar clases_usadas para planes con accesos limitados
-        if ($cuota && $cuota->plan) {
+        // Incrementar clases_usadas con query directa (atomico)
+        if ($ingreso && $cuota && $cuota->plan) {
             $tipo = $cuota->plan->tipo;
             if (in_array($tipo, ['pack_clases', 'personalizado']) && $cuota->plan->cantidad_accesos) {
-                $cuota->increment('clases_usadas');
+                Cuota::where('id', $cuota->id)->increment('clases_usadas');
             }
         }
 
@@ -712,7 +727,7 @@ class EntrenadoController extends Controller
         } catch (\Throwable $e) {
             \Log::error('registrarIngresoPublico error: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Error al registrar ingreso: ' . $e->getMessage(),
+                'message' => 'Error al registrar ingreso.',
             ], 500);
         }
     }
@@ -759,7 +774,7 @@ class EntrenadoController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
             return response()->json([
-                'message' => 'Error al registrar ingreso: ' . $e->getMessage(),
+                'message' => 'Error al registrar ingreso.',
             ], 500);
         }
     }
@@ -813,18 +828,15 @@ class EntrenadoController extends Controller
     {
         try {
             $limite = now()->subHours(3);
+            // Single UPDATE instead of N queries
             \App\Models\Ingreso::whereNull('fecha_salida')
                 ->where('fecha_entrada', '<', $limite)
-                ->each(function ($ingreso) {
-                    $salida = $ingreso->fecha_entrada->copy()->addHours(3);
-                    $ingreso->update([
-                        'fecha_salida' => $salida,
-                        'duracion_minutos' => 180,
-                        'observaciones' => 'Checkout automático (3hs)',
-                    ]);
-                });
+                ->update([
+                    'fecha_salida' => \DB::raw('DATE_ADD(fecha_entrada, INTERVAL 3 HOUR)'),
+                    'duracion_minutos' => 180,
+                    'observaciones' => 'Checkout automático (3hs)',
+                ]);
         } catch (\Throwable $e) {
-            // Tabla ingresos puede no existir aún
             \Log::warning('autoCheckout: ' . $e->getMessage());
         }
     }

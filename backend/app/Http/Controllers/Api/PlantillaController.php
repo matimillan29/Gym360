@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Plantilla;
 use App\Models\Macrociclo;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class PlantillaController extends Controller
@@ -34,6 +35,15 @@ class PlantillaController extends Controller
             'macrociclo_id' => 'nullable|exists:macrociclos,id',
             'estructura' => 'nullable|array',
         ]);
+
+        // Si viene macrociclo_id, verificar que el entrenador tenga acceso
+        if ($request->macrociclo_id) {
+            $macrociclo = Macrociclo::with('entrenado')->findOrFail($request->macrociclo_id);
+            $user = auth()->user();
+            if (!$user->isAdmin() && $macrociclo->entrenado && $macrociclo->entrenado->entrenador_asignado_id !== $user->id) {
+                return response()->json(['message' => 'No autorizado.'], 403);
+            }
+        }
 
         // Si no hay macrociclo_id ni estructura, crear plantilla vacía
         if (!$request->macrociclo_id && !$request->estructura) {
@@ -68,10 +78,14 @@ class PlantillaController extends Controller
             ], 201);
         }
 
-        // Obtener el macrociclo con toda su estructura
-        $macrociclo = Macrociclo::with([
-            'mesociclos.microciclos.sesiones.ejercicios.ejercicio',
-        ])->findOrFail($request->macrociclo_id);
+        // Obtener el macrociclo con toda su estructura (ya validado arriba)
+        if (!isset($macrociclo)) {
+            $macrociclo = Macrociclo::with([
+                'mesociclos.microciclos.sesiones.ejercicios.ejercicio',
+            ])->findOrFail($request->macrociclo_id);
+        } else {
+            $macrociclo->load('mesociclos.microciclos.sesiones.ejercicios.ejercicio');
+        }
 
         // Crear la estructura de la plantilla (sin IDs ni entrenado)
         $estructura = [
@@ -141,6 +155,11 @@ class PlantillaController extends Controller
      */
     public function update(Request $request, Plantilla $plantilla)
     {
+        $user = auth()->user();
+        if (!$user->isAdmin() && $plantilla->created_by !== $user->id) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $request->validate([
             'nombre' => 'sometimes|required|string|max:255',
             'descripcion' => 'nullable|string',
@@ -160,6 +179,11 @@ class PlantillaController extends Controller
      */
     public function destroy(Plantilla $plantilla)
     {
+        $user = auth()->user();
+        if (!$user->isAdmin() && $plantilla->created_by !== $user->id) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $plantilla->delete();
 
         return response()->json([
@@ -172,6 +196,13 @@ class PlantillaController extends Controller
      */
     public function aplicar(Plantilla $plantilla, $entrenadoId)
     {
+        // Verificar que el entrenado pertenece al entrenador
+        $entrenado = User::findOrFail($entrenadoId);
+        $user = auth()->user();
+        if (!$user->isAdmin() && $entrenado->entrenador_asignado_id !== $user->id) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $estructura = $plantilla->estructura;
 
         // Validar que la plantilla tenga contenido

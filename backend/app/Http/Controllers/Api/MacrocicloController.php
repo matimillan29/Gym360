@@ -12,6 +12,17 @@ use Illuminate\Support\Facades\DB;
 class MacrocicloController extends Controller
 {
     /**
+     * Verificar que el entrenador autenticado es dueño del entrenado vinculado al macrociclo
+     */
+    private function authorizeMacrociclo(Macrociclo $macrociclo): bool
+    {
+        $user = auth()->user();
+        if ($user->isAdmin()) return true;
+        $macrociclo->loadMissing('entrenado');
+        return $macrociclo->entrenado && $macrociclo->entrenado->entrenador_asignado_id === $user->id;
+    }
+
+    /**
      * Listar todos los macrociclos (para entrenador/admin)
      */
     public function indexAll(Request $request)
@@ -155,6 +166,10 @@ class MacrocicloController extends Controller
      */
     public function show(Macrociclo $macrociclo)
     {
+        if (!$this->authorizeMacrociclo($macrociclo)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $macrociclo->load([
             'entrenado:id,nombre,apellido',
             'mesociclos' => function ($q) {
@@ -182,6 +197,10 @@ class MacrocicloController extends Controller
      */
     public function update(Request $request, Macrociclo $macrociclo)
     {
+        if (!$this->authorizeMacrociclo($macrociclo)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $request->validate([
             'nombre' => 'sometimes|string|max:255',
             'objetivo_general' => 'nullable|string',
@@ -244,6 +263,10 @@ class MacrocicloController extends Controller
      */
     public function destroy(Macrociclo $macrociclo)
     {
+        if (!$this->authorizeMacrociclo($macrociclo)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         if ($macrociclo->activo) {
             return response()->json([
                 'message' => 'No se puede eliminar un macrociclo activo. Desactivalo primero.',
@@ -262,6 +285,10 @@ class MacrocicloController extends Controller
      */
     public function activar(Macrociclo $macrociclo)
     {
+        if (!$this->authorizeMacrociclo($macrociclo)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         DB::transaction(function () use ($macrociclo) {
             // Desactivar todos los macrociclos del entrenado
             Macrociclo::where('entrenado_id', $macrociclo->entrenado_id)
@@ -283,6 +310,10 @@ class MacrocicloController extends Controller
      */
     public function duplicar(Request $request, Macrociclo $macrociclo)
     {
+        if (!$this->authorizeMacrociclo($macrociclo)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $request->validate([
             'nombre' => 'required|string|max:255',
             'entrenado_id' => 'nullable|exists:users,id',
@@ -296,6 +327,12 @@ class MacrocicloController extends Controller
             return response()->json([
                 'message' => 'El usuario destino debe ser un entrenado.',
             ], 400);
+        }
+
+        // Verificar que el entrenador tenga acceso al entrenado destino
+        $user = auth()->user();
+        if (!$user->isAdmin() && $targetUser->entrenador_asignado_id !== $user->id) {
+            return response()->json(['message' => 'No autorizado para asignar plan a este entrenado.'], 403);
         }
 
         $macrociclo->load('mesociclos.microciclos.sesiones.ejercicios');

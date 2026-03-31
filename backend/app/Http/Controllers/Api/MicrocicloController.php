@@ -10,6 +10,20 @@ use Illuminate\Http\Request;
 class MicrocicloController extends Controller
 {
     /**
+     * Verificar que el entrenador autenticado es dueño del entrenado vinculado al microciclo
+     */
+    private function authorizeMicrociclo(Microciclo $microciclo): bool
+    {
+        $user = auth()->user();
+        if ($user->isAdmin()) return true;
+        $microciclo->loadMissing('mesociclo.macrociclo.entrenado');
+        return $microciclo->mesociclo
+            && $microciclo->mesociclo->macrociclo
+            && $microciclo->mesociclo->macrociclo->entrenado
+            && $microciclo->mesociclo->macrociclo->entrenado->entrenador_asignado_id === $user->id;
+    }
+
+    /**
      * Listar microciclos de un mesociclo
      */
     public function index(Mesociclo $mesociclo)
@@ -55,6 +69,10 @@ class MicrocicloController extends Controller
      */
     public function show(Microciclo $microciclo)
     {
+        if (!$this->authorizeMicrociclo($microciclo)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $microciclo->load([
             'sesiones' => function ($q) {
                 $q->orderBy('numero');
@@ -75,6 +93,10 @@ class MicrocicloController extends Controller
      */
     public function update(Request $request, Microciclo $microciclo)
     {
+        if (!$this->authorizeMicrociclo($microciclo)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $request->validate([
             'tipo' => 'sometimes|required|in:introductorio,desarrollo,estabilizacion,descarga',
             'numero' => 'sometimes|integer|min:1',
@@ -98,6 +120,10 @@ class MicrocicloController extends Controller
      */
     public function destroy(Microciclo $microciclo)
     {
+        if (!$this->authorizeMicrociclo($microciclo)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $mesocicloId = $microciclo->mesociclo_id;
         $numero = $microciclo->numero;
 

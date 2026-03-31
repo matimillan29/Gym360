@@ -10,6 +10,19 @@ use Illuminate\Http\Request;
 class MesocicloController extends Controller
 {
     /**
+     * Verificar que el entrenador autenticado es dueño del entrenado vinculado al mesociclo
+     */
+    private function authorizeMesociclo(Mesociclo $mesociclo): bool
+    {
+        $user = auth()->user();
+        if ($user->isAdmin()) return true;
+        $mesociclo->loadMissing('macrociclo.entrenado');
+        return $mesociclo->macrociclo
+            && $mesociclo->macrociclo->entrenado
+            && $mesociclo->macrociclo->entrenado->entrenador_asignado_id === $user->id;
+    }
+
+    /**
      * Listar mesociclos de un macrociclo
      */
     public function index(Macrociclo $macrociclo)
@@ -58,6 +71,10 @@ class MesocicloController extends Controller
      */
     public function show(Mesociclo $mesociclo)
     {
+        if (!$this->authorizeMesociclo($mesociclo)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $mesociclo->load([
             'microciclos' => function ($q) {
                 $q->orderBy('numero');
@@ -77,6 +94,10 @@ class MesocicloController extends Controller
      */
     public function update(Request $request, Mesociclo $mesociclo)
     {
+        if (!$this->authorizeMesociclo($mesociclo)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $request->validate([
             'nombre' => 'sometimes|required|string|max:255',
             'tipo' => 'sometimes|required|in:introductorio,desarrollador,estabilizador,recuperacion',
@@ -102,6 +123,10 @@ class MesocicloController extends Controller
      */
     public function destroy(Mesociclo $mesociclo)
     {
+        if (!$this->authorizeMesociclo($mesociclo)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $mesociclo->delete();
 
         // Reordenar los restantes
@@ -119,6 +144,10 @@ class MesocicloController extends Controller
      */
     public function desbloquear(Mesociclo $mesociclo)
     {
+        if (!$this->authorizeMesociclo($mesociclo)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $mesociclo->update(['desbloqueado' => true]);
 
         return response()->json([

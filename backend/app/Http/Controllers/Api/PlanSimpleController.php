@@ -10,8 +10,33 @@ use Illuminate\Support\Facades\DB;
 
 class PlanSimpleController extends Controller
 {
+    /**
+     * Verificar que el entrenador autenticado es dueño del entrenado
+     */
+    private function authorizeEntrenado(User $entrenado): bool
+    {
+        $user = auth()->user();
+        if ($user->isAdmin()) return true;
+        return $entrenado->entrenador_asignado_id === $user->id;
+    }
+
+    /**
+     * Verificar que el entrenador autenticado es dueño del entrenado vinculado al plan
+     */
+    private function authorizePlan(Macrociclo $plan): bool
+    {
+        $user = auth()->user();
+        if ($user->isAdmin()) return true;
+        $plan->loadMissing('entrenado');
+        return $plan->entrenado && $plan->entrenado->entrenador_asignado_id === $user->id;
+    }
+
     public function index(User $entrenado)
     {
+        if (!$this->authorizeEntrenado($entrenado)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $planes = Macrociclo::where('entrenado_id', $entrenado->id)
             ->where('tipo_plan', 'simple')
             ->orderByDesc('created_at')
@@ -23,6 +48,10 @@ class PlanSimpleController extends Controller
 
     public function store(Request $request, User $entrenado)
     {
+        if (!$this->authorizeEntrenado($entrenado)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         $request->validate([
             'nombre' => 'required|string|max:255',
             'objetivo_general' => 'nullable|string',
@@ -117,6 +146,10 @@ class PlanSimpleController extends Controller
 
     public function show(Macrociclo $plan)
     {
+        if (!$this->authorizePlan($plan)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         if ($plan->tipo_plan !== 'simple') {
             return response()->json(['message' => 'Este plan no es simple.'], 400);
         }
@@ -133,6 +166,10 @@ class PlanSimpleController extends Controller
 
     public function update(Request $request, Macrociclo $plan)
     {
+        if (!$this->authorizePlan($plan)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         if ($plan->tipo_plan !== 'simple') {
             return response()->json(['message' => 'Este plan no es simple.'], 400);
         }
@@ -239,6 +276,10 @@ class PlanSimpleController extends Controller
 
     public function destroy(Macrociclo $plan)
     {
+        if (!$this->authorizePlan($plan)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         if ($plan->tipo_plan !== 'simple') {
             return response()->json(['message' => 'Este plan no es simple.'], 400);
         }
@@ -250,6 +291,10 @@ class PlanSimpleController extends Controller
 
     public function activar(Macrociclo $plan)
     {
+        if (!$this->authorizePlan($plan)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+
         // Desactivar otros planes del mismo entrenado
         Macrociclo::where('entrenado_id', $plan->entrenado_id)
             ->where('id', '!=', $plan->id)

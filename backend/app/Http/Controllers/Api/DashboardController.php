@@ -36,7 +36,7 @@ class DashboardController extends Controller
             'entrenados_baja_temporal' => (clone $entrenados)->where('estado', 'baja_temporal')->count(),
             'planes_activos' => Macrociclo::whereIn('entrenado_id', $entrenadoIds)->where('activo', true)->count(),
             'total_ejercicios' => Ejercicio::count(),
-            'sesiones_hoy' => RegistroSesion::whereDate('fecha', today())->count(),
+            'sesiones_hoy' => RegistroSesion::whereIn('entrenado_id', $entrenadoIds)->whereDate('fecha', today())->count(),
             'cuotas_pendientes' => Cuota::whereIn('entrenado_id', $entrenadoIds)->where('estado', 'pendiente')->count(),
             'cuotas_vencidas' => Cuota::whereIn('entrenado_id', $entrenadoIds)->whereIn('estado', ['vencido', 'mora'])->count(),
             'asistencia_promedio' => $this->calcularAsistenciaPromedio($entrenadoIds),
@@ -91,8 +91,8 @@ class DashboardController extends Controller
                 return [
                     'id' => $registro->id,
                     'tipo' => 'sesion',
-                    'descripcion' => 'Completó sesión ' . ($registro->sesion->numero ?? ''),
-                    'entrenado_nombre' => $registro->entrenado->nombre . ' ' . $registro->entrenado->apellido,
+                    'descripcion' => 'Completó sesión ' . ($registro->sesion?->numero ?? ''),
+                    'entrenado_nombre' => ($registro->entrenado?->nombre ?? '') . ' ' . ($registro->entrenado?->apellido ?? ''),
                     'fecha' => $registro->created_at->toISOString(),
                 ];
             });
@@ -134,14 +134,22 @@ class DashboardController extends Controller
             }
         }
 
-        // Entrenados con baja asistencia (menos de 2 sesiones en las últimas 2 semanas)
-        foreach ($entrenadoIds as $entrenadoId) {
-            $sesionesRecientes = RegistroSesion::where('entrenado_id', $entrenadoId)
-                ->where('fecha', '>=', Carbon::now()->subWeeks(2))
-                ->count();
+        // Entrenados con baja asistencia (1 query en vez de N)
+        $sesionesRecientesPorEntrenado = RegistroSesion::selectRaw('entrenado_id, COUNT(*) as total')
+            ->whereIn('entrenado_id', $entrenadoIds)
+            ->where('fecha', '>=', Carbon::now()->subWeeks(2))
+            ->groupBy('entrenado_id')
+            ->pluck('total', 'entrenado_id');
 
+        $entrenadosMap = User::select('id', 'nombre', 'apellido')
+            ->whereIn('id', $entrenadoIds)
+            ->get()
+            ->keyBy('id');
+
+        foreach ($entrenadoIds as $entrenadoId) {
+            $sesionesRecientes = $sesionesRecientesPorEntrenado->get($entrenadoId, 0);
             if ($sesionesRecientes < 2) {
-                $entrenado = User::select('id', 'nombre', 'apellido')->find($entrenadoId);
+                $entrenado = $entrenadosMap->get($entrenadoId);
                 if ($entrenado) {
                     $alertas[] = [
                         'id' => $entrenado->id,

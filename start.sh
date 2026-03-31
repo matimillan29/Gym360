@@ -115,12 +115,18 @@ chmod -R 775 $PERSISTENT_DIR 2>/dev/null || true
 # ============================================================
 # Crear .env desde variables de Cloudron
 # ============================================================
+# Preservar APP_KEY existente antes de regenerar .env
+EXISTING_APP_KEY=""
+if [ -f $PERSISTENT_DIR/.env ]; then
+    EXISTING_APP_KEY=$(grep "^APP_KEY=" $PERSISTENT_DIR/.env | head -1 | cut -d= -f2-)
+fi
+
 if [ ! -s $PERSISTENT_DIR/.env ] || [ "$CLOUDRON_MYSQL_HOST" != "" ]; then
     echo "Configurando entorno desde variables Cloudron..."
     cat > $PERSISTENT_DIR/.env << EOF
 APP_NAME=Pwr360
 APP_ENV=production
-APP_KEY=
+APP_KEY=${EXISTING_APP_KEY:-}
 APP_DEBUG=false
 APP_URL=${CLOUDRON_APP_ORIGIN:-http://localhost}
 
